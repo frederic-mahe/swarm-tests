@@ -1,8 +1,13 @@
 #!/bin/bash -
 
+## Print a header
+SCRIPT_NAME="Test options"
+line=$(printf "%076s\n" | tr " " "-")
+printf "# %s %s\n" "${line:${#SCRIPT_NAME}}" "${SCRIPT_NAME}"
+
 ## Declare a color code for test results
-RED="\033[0;31m"
-GREEN="\033[0;32m"
+RED="\033[1;31m"
+GREEN="\033[1;32m"
 NO_COLOR="\033[0m"
 
 failure () {
@@ -11,7 +16,7 @@ failure () {
 }
 
 success () {
-    printf "${GREEN}SUCCESS${NO_COLOR}: ${1}\n"
+    printf "${GREEN}PASS${NO_COLOR}: ${1}\n"
 }
 
 ## Create a test file with 100 identical sequences (different headers)
@@ -25,6 +30,24 @@ SWARM=$(which swarm)
 DESCRIPTION="check if swarm is in the PATH"
 [[ "${SWARM}" ]] && success "${DESCRIPTION}" || failure "${DESCRIPTION}"
 
+
+#*****************************************************************************#
+#                                                                             #
+#                        Options --version and --help                         #
+#                                                                             #
+#*****************************************************************************#
+
+## Return status should be 0 after -h (GNU standards)
+DESCRIPTION="return status should be 0 after -h"
+[[ $("${SWARM}" -v 2> /dev/null ; echo $?) == 0 ]] && \
+    success  "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## Return status should be 0 after -v (GNU standards)
+DESCRIPTION="return status should be 0 after -v"
+[[ $("${SWARM}" -v 2> /dev/null ; echo $?) == 0 ]] && \
+    success  "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 #*****************************************************************************#
 #                                                                             #
