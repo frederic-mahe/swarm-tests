@@ -34,7 +34,7 @@ DESCRIPTION="check if swarm is in the PATH"
 
 ## Number of threads should not impact clustering results (WIP)
 for ((t=1 ; t<=30 ; t++)) ; do
-    swarm -d 3 -t ${t} < test.fas 2> /dev/null | wc -l
+    swarm -d 3 -t ${t} < ${ALL_IDENTICAL} 2> /dev/null | wc -l
 done | sort -nu > /dev/null
 
 exit 0
