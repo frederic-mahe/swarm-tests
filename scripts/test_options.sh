@@ -2,8 +2,8 @@
 
 ## Print a header
 SCRIPT_NAME="Test options"
-line=$(printf "%076s\n" | tr " " "-")
-printf "# %s %s\n" "${line:${#SCRIPT_NAME}}" "${SCRIPT_NAME}"
+LINE=$(printf "%076s\n" | tr " " "-")
+printf "# %s %s\n" "${LINE:${#SCRIPT_NAME}}" "${SCRIPT_NAME}"
 
 ## Declare a color code for test results
 RED="\033[1;31m"
@@ -39,15 +39,16 @@ DESCRIPTION="check if swarm is in the PATH"
 
 ## Return status should be 0 after -h (GNU standards)
 DESCRIPTION="return status should be 0 after -h"
-[[ $("${SWARM}" -v 2> /dev/null ; echo $?) == 0 ]] && \
+"${SWARM}" -v 2> /dev/null && \
     success  "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
 ## Return status should be 0 after -v (GNU standards)
 DESCRIPTION="return status should be 0 after -v"
-[[ $("${SWARM}" -v 2> /dev/null ; echo $?) == 0 ]] && \
+"${SWARM}" -v 2> /dev/null && \
     success  "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
+
 
 #*****************************************************************************#
 #                                                                             #
@@ -57,7 +58,7 @@ DESCRIPTION="return status should be 0 after -v"
 
 ## Number of threads (--threads is not specified)
 DESCRIPTION="swarm runs normally when --threads is not specified"
-[[ $("${SWARM}" < "${ALL_IDENTICAL}" 2> /dev/null ) ]] && \
+"${SWARM}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
     success  "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -66,37 +67,37 @@ MIN=1
 MAX=256
 for ((t=$MIN ; t<=$MAX ; t++)) ; do
     DESCRIPTION="swarm runs normally when --threads goes from ${MIN} to ${MAX}"
-    [[ $("${SWARM}" -t ${t} < "${ALL_IDENTICAL}" 2> /dev/null ) ]] || \
+    "${SWARM}" -t ${t} < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null || \
         failure "swarm aborts when --threads equals ${t}"
 done && success  "${DESCRIPTION}"
 
 ## Number of threads (--threads is empty)
 DESCRIPTION="swarm aborts when --threads is empty"
-[[ $("${SWARM}" -t < "${ALL_IDENTICAL}" 2> /dev/null ) ]] && \
+"${SWARM}" -t < "${ALL_IDENTICAL}" 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success  "${DESCRIPTION}"
 
 ## Number of threads (--threads is zero)
 DESCRIPTION="swarm aborts when --threads is zero"
-[[ $("${SWARM}" -t 0 < "${ALL_IDENTICAL}" 2> /dev/null ) ]] && \
+"${SWARM}" -t 0 < "${ALL_IDENTICAL}" 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success  "${DESCRIPTION}"
 
 ## Number of threads (--threads is 257)
 DESCRIPTION="swarm aborts when --threads is 257"
-[[ $("${SWARM}" -t 257 < "${ALL_IDENTICAL}" 2> /dev/null ) ]] && \
+"${SWARM}" -t 257 < "${ALL_IDENTICAL}" 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success  "${DESCRIPTION}"
 
-## Number of threads (--threads is way too large)
+## Number of threads (number of threads is way too large)
 DESCRIPTION="swarm aborts when --threads is 8 billions"
-[[ $("${SWARM}" -t 8000000000 < "${ALL_IDENTICAL}" 2> /dev/null ) ]] && \
+"${SWARM}" -t 8000000000 < "${ALL_IDENTICAL}" 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success  "${DESCRIPTION}"
 
 ## Number of threads (--threads is non-numerical)
 DESCRIPTION="swarm aborts when --threads is not numerical"
-[[ $("${SWARM}" -t "a" < "${ALL_IDENTICAL}" 2> /dev/null ) ]] && \
+"${SWARM}" -t "a" < "${ALL_IDENTICAL}" 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success  "${DESCRIPTION}"
 
