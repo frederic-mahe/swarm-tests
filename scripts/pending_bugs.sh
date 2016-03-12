@@ -1,8 +1,13 @@
 #!/bin/bash -
 
+## Print a header
+SCRIPT_NAME="Pending bugs"
+LINE=$(printf "%076s\n" | tr " " "-")
+printf "# %s %s\n" "${LINE:${#SCRIPT_NAME}}" "${SCRIPT_NAME}"
+
 ## Declare a color code for test results
-RED="\033[0;31m"
-GREEN="\033[0;32m"
+RED="\033[1;31m"
+GREEN="\033[1;32m"
 NO_COLOR="\033[0m"
 
 failure () {
@@ -11,10 +16,10 @@ failure () {
 }
 
 success () {
-    printf "${GREEN}SUCCESS${NO_COLOR}: ${1}\n"
+    printf "${GREEN}PASS${NO_COLOR}: ${1}\n"
 }
 
-## Create a test file with 100 identical sequences (different headers)
+## Create a test file with 10 identical sequences (different headers)
 ALL_IDENTICAL=$(mktemp)
 for ((i=1 ; i<=10 ; i++)) ; do
     printf ">%s%d_1\nACGT\n" "seq" ${i}
@@ -32,9 +37,20 @@ DESCRIPTION="check if swarm is in the PATH"
 #                                                                             #
 #*****************************************************************************#
 
-## Number of threads should not impact clustering results (WIP)
-for ((t=1 ; t<=30 ; t++)) ; do
-    swarm -d 3 -t ${t} < ${ALL_IDENTICAL} 2> /dev/null | wc -l
-done | sort -nu > /dev/null
+## Swarm sometimes hangs endlessly.
+##
+## Torbjørn wrote: This might have something to do with the starting
+## and stopping of the threads and the synchronisation of the
+## threads. When I developed this part of Swarm I noticed that
+## sometimes it would not shut down all threads correctly and wait
+## forever. I thought I had fixed it and have never experienced it
+## myself thereafter. Perhaps a combination of OS version and bad luck
+## makes it appear once in a while.
+##
+## As of now, we cannot replicate that bug and test it.
+
+
+## Clean
+rm "${ALL_IDENTICAL}"
 
 exit 0
