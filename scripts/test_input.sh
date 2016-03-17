@@ -33,13 +33,21 @@ DESCRIPTION="check if swarm is in the PATH"
 
 #*****************************************************************************#
 #                                                                             #
-#                                 Fasta input                                 #
+#                               Input channels                                #
 #                                                                             #
 #*****************************************************************************#
 
 # swarm reads from a stream
 # swarm reads from a file
 # swarm reads from a redirection
+# swarm reads from a named pipe
+
+
+#*****************************************************************************#
+#                                                                             #
+#                                 Fasta input                                 #
+#                                                                             #
+#*****************************************************************************#
 
 # issue 2: ASCII characters accepted in fasta headers (test all of them: \x01 should be valid)
 # issue 2: test non-ASCII characters (frédéric and torbjørn)
@@ -53,6 +61,17 @@ DESCRIPTION="check if swarm is in the PATH"
 # Clustering with only one sequence should work
 
 # Clustering sequences of length 1 should work with d > 1 too (shorter than kmers)
+
+## Fasta headers can contain more than one underscore symbol
+DESCRIPTION="Fasta headers can contain more than one underscore symbol"
+STATS=$(mktemp)
+IDENTIFIER="a_2_2"
+echo -e ">${IDENTIFIER}_3\nACGTACGT" | \
+    "${SWARM}" -s "${STATS}" 2> /dev/null > /dev/null
+grep -qE "[[:blank:]]${IDENTIFIER}[[:blank:]]" "${STATS}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${STATS}"
 
 ## Clean
 rm "${ALL_IDENTICAL}"
