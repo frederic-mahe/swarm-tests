@@ -33,6 +33,18 @@ DESCRIPTION="check if swarm is in the PATH"
 
 #*****************************************************************************#
 #                                                                             #
+#                                Dereplication                                #
+#                                                                             #
+#*****************************************************************************#
+
+## Swarm complains if input sequences are not dereplicated (issue 65)
+DESCRIPTION="complains if input sequences are not dereplicated"
+"${SWARM}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+#*****************************************************************************#
+#                                                                             #
 #                             Multithreading bugs                             #
 #                                                                             #
 #*****************************************************************************#

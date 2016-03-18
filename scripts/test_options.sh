@@ -37,17 +37,13 @@ DESCRIPTION="check if swarm is in the PATH"
 #                                                                             #
 #*****************************************************************************#
 
-## Return status should be 0 after -h (GNU standards)
-DESCRIPTION="return status should be 0 after -h"
-"${SWARM}" -v 2> /dev/null && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-
-## Return status should be 0 after -v (GNU standards)
-DESCRIPTION="return status should be 0 after -v"
-"${SWARM}" -v 2> /dev/null && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
+## Return status should be 0 after -h and -v (GNU standards)
+for OPTION in "-h" "-v" ; do
+    DESCRIPTION="return status should be 0 after ${OPTION}"
+    "${SWARM}" "${OPTION}" 2> /dev/null && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+done
 
 
 #*****************************************************************************#

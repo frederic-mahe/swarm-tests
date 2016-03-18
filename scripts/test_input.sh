@@ -19,7 +19,7 @@ success () {
     printf "${GREEN}PASS${NO_COLOR}: ${1}\n"
 }
 
-## Create a test file with 100 identical sequences (different headers)
+## Create a test file with 10 identical sequences (different headers)
 ALL_IDENTICAL=$(mktemp)
 for ((i=1 ; i<=10 ; i++)) ; do
     printf ">%s%d_1\nACGT\n" "seq" ${i}
@@ -63,7 +63,7 @@ DESCRIPTION="check if swarm is in the PATH"
 # Clustering sequences of length 1 should work with d > 1 too (shorter than kmers)
 
 ## Fasta headers can contain more than one underscore symbol
-DESCRIPTION="Fasta headers can contain more than one underscore symbol"
+DESCRIPTION="fasta headers can contain more than one underscore symbol"
 STATS=$(mktemp)
 IDENTIFIER="a_2_2"
 echo -e ">${IDENTIFIER}_3\nACGTACGT" | \
@@ -73,7 +73,9 @@ grep -qE "[[:blank:]]${IDENTIFIER}[[:blank:]]" "${STATS}" && \
         failure "${DESCRIPTION}"
 rm "${STATS}"
 
+
 ## Clean
 rm "${ALL_IDENTICAL}"
 
 exit 0
+

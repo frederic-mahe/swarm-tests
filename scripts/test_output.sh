@@ -51,6 +51,10 @@ DESCRIPTION="Pairwise alignment settings are printed if d > 1"
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+## If SSE2 instructions are not available, swarm exits with an error
+## message. Is it possible to test that?
+
+
 ## Clean
 rm "${ALL_IDENTICAL}"
 
