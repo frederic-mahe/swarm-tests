@@ -33,6 +33,27 @@ DESCRIPTION="check if swarm is in the PATH"
 
 #*****************************************************************************#
 #                                                                             #
+#             Inconsistent -o and -w output when d > 1 (issue 67)             #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/67
+##
+## Bug reported by Antti Karkman first and latter by Noah Hoffman.
+##
+DESCRIPTION="when d > 1, seed is the first not the last sequence of the OTU"
+REPRESENTATIVES=$(mktemp)
+SEED="seq1"
+echo -e ">${SEED}_3\nACGTACGT\n>seq2_1\nACGTTCGT" | \
+    "${SWARM}" -w "${REPRESENTATIVES}" 2> /dev/null > /dev/null
+head -n 1 "${REPRESENTATIVES}" | grep -q "^>${SEED}_4$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${REPRESENTATIVES}"
+
+
+#*****************************************************************************#
+#                                                                             #
 #                             Multithreading bugs                             #
 #                                                                             #
 #*****************************************************************************#
