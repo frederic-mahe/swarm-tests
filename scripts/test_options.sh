@@ -38,7 +38,7 @@ DESCRIPTION="check if swarm is in the PATH"
 #*****************************************************************************#
 
 ## Return status should be 0 after -h and -v (GNU standards)
-for OPTION in "-h" "-v" ; do
+for OPTION in "-h" "--help" "-v" "--version" ; do
     DESCRIPTION="return status should be 0 after ${OPTION}"
     "${SWARM}" "${OPTION}" 2> /dev/null && \
         success "${DESCRIPTION}" || \
@@ -94,6 +94,46 @@ DESCRIPTION="swarm aborts when --threads is 8 billions"
 ## Number of threads (--threads is non-numerical)
 DESCRIPTION="swarm aborts when --threads is not numerical"
 "${SWARM}" -t "a" < "${ALL_IDENTICAL}" 2> /dev/null && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+
+#*****************************************************************************#
+#                                                                             #
+#                            Options --differences                            #
+#                                                                             #
+#*****************************************************************************#
+
+## Number of differences (--differences from 1 to 256)
+MIN=0
+MAX=256
+DESCRIPTION="swarm runs normally when --differences goes from ${MIN} to ${MAX}"
+for ((d=$MIN ; d<=$MAX ; d++)) ; do
+    "${SWARM}" -d ${d} < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null || \
+        failure "swarm aborts when --differences equals ${d}"
+done && success "${DESCRIPTION}"
+
+## Number of differences (--difference is empty)
+DESCRIPTION="swarm aborts when --difference is empty"
+"${SWARM}" -d < "${ALL_IDENTICAL}" 2> /dev/null && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+## Number of differences (--differences is 257)
+DESCRIPTION="swarm aborts when --difference is 257"
+"${SWARM}" -d 257 < "${ALL_IDENTICAL}" 2> /dev/null && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+## Number of differences (number of differences is way too large)
+DESCRIPTION="swarm aborts when --difference is 8 billions"
+"${SWARM}" -d 8000000000 < "${ALL_IDENTICAL}" 2> /dev/null && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+## Number of differences (--difference is non-numerical)
+DESCRIPTION="swarm aborts when --difference is not numerical"
+"${SWARM}" -d "a" < "${ALL_IDENTICAL}" 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
