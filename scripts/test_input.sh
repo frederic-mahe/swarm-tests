@@ -42,7 +42,6 @@ DESCRIPTION="check if swarm is in the PATH"
 # swarm reads from a redirection
 # swarm reads from a named pipe
 
-
 #*****************************************************************************#
 #                                                                             #
 #                                 Fasta input                                 #
@@ -73,6 +72,8 @@ grep -qE "[[:blank:]]${IDENTIFIER}[[:blank:]]" "${STATS}" && \
         failure "${DESCRIPTION}"
 rm "${STATS}"
 
+## Test -a, --append-abundance positive integer
+# all or *some* sequences can lack abundance values
 
 ## Clean
 rm "${ALL_IDENTICAL}"
