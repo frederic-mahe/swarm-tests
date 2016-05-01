@@ -12,7 +12,7 @@ NO_COLOR="\033[0m"
 
 failure () {
     printf "${RED}FAIL${NO_COLOR}: ${1}\n"
-    exit -1
+    # exit -1
 }
 
 success () {
@@ -42,6 +42,26 @@ DESCRIPTION="complains if input sequences are not dereplicated"
 "${SWARM}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
+
+
+#*****************************************************************************#
+#                                                                             #
+#                            Options --differences                            #
+#                                                                             #
+#*****************************************************************************#
+
+## Number of differences (--differences is 257)
+DESCRIPTION="swarm aborts when --difference is 257"
+"${SWARM}" -d 257 < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+## Number of differences (number of differences is way too large)
+DESCRIPTION="swarm aborts when --difference is 8 billions"
+"${SWARM}" -d 8000000000 < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
 
 #*****************************************************************************#
 #                                                                             #
