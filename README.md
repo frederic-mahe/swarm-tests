@@ -7,10 +7,11 @@ The objective is to gather, organize and factorize all the scripts
 written to test the behaviour, results or bugs of the clustering
 algorithm **swarm**.
 
-Test scripts are gathered into four categories:
+Tests are gathered into five categories:
 * valid and invalid option values (`test_options.sh`),
 * valid and invalid input formats (`test_input.sh`),
 * expected output formats (`test_output.sh`),
+* expected results (`test_results.sh`),
 * check for regressions (`fixed_bugs.sh`).
 
 Present and future versions of swarm should pass all the above
