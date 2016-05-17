@@ -34,20 +34,6 @@ DESCRIPTION="check if swarm is in the PATH"
 
 #*****************************************************************************#
 #                                                                             #
-#                        Options --version and --help                         #
-#                                                                             #
-#*****************************************************************************#
-
-## Return status should be 0 after -h and -v (GNU standards)
-for OPTION in "-h" "--help" "-v" "--version" ; do
-    DESCRIPTION="return status should be 0 after ${OPTION}"
-    "${SWARM}" "${OPTION}" 2> "${NULL}" && \
-        success "${DESCRIPTION}" || \
-            failure "${DESCRIPTION}"
-done
-
-#*****************************************************************************#
-#                                                                             #
 #                                  No option                                  #
 #                                                                             #
 #*****************************************************************************#
@@ -63,6 +49,22 @@ DESCRIPTION="swarm runs normally when no option is specified (data in file)"
 "${SWARM}" "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
+
+
+#*****************************************************************************#
+#                                                                             #
+#                        Options --version and --help                         #
+#                                                                             #
+#*****************************************************************************#
+
+## Return status should be 0 after -h and -v (GNU standards)
+for OPTION in "-h" "--help" "-v" "--version" ; do
+    DESCRIPTION="return status should be 0 after ${OPTION}"
+    "${SWARM}" "${OPTION}" 2> "${NULL}" && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+done
+
 
 #*****************************************************************************#
 #                                                                             #
@@ -116,7 +118,7 @@ DESCRIPTION="swarm aborts when --threads is not numerical"
 #                                                                             #
 #*****************************************************************************#
 
-## Number of differences (--differences from 1 to 256)
+## Number of differences (--differences from 0 to 256)
 MIN=0
 MAX=256
 DESCRIPTION="swarm runs normally when --differences goes from ${MIN} to ${MAX}"
@@ -358,7 +360,8 @@ while read LONG SHORT ; do
     MAX=255
     DESCRIPTION="swarm runs normally when --${LONG} goes from ${MIN} to ${MAX}"
     for ((i=$MIN ; i<=$MAX ; i++)) ; do
-        "${SWARM}" -d 2 "${SHORT}" ${i} < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" || \
+        "${SWARM}" -d 2 "${SHORT}" ${i} < "${ALL_IDENTICAL}" \
+                   > "${NULL}" 2> "${NULL}" || \
             failure "swarm aborts when --${LONG} equals ${i}"
     done && success "${DESCRIPTION}"
     
