@@ -65,6 +65,18 @@ DESCRIPTION="swarm aborts when --difference is 8 billions"
 
 #*****************************************************************************#
 #                                                                             #
+#                     Swarm radius values could be zero                       #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/1
+##
+## Swarm radius values are available in the statistics file (-s)
+# if all sequences are identical, the radius should be zero.
+
+
+#*****************************************************************************#
+#                                                                             #
 #                             Multithreading bugs                             #
 #                                                                             #
 #*****************************************************************************#
