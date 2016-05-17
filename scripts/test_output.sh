@@ -55,6 +55,10 @@ DESCRIPTION="Pairwise alignment settings are printed if d > 1"
 ## message. Is it possible to test that?
 
 
+## Statistics
+# - what happens if the OTU is a singleton? OTU radius should be zero. OK
+# - if all sequences are identical, the radius should be zero. FAIL
+
 ## Clean
 rm "${ALL_IDENTICAL}"
 
