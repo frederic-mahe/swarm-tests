@@ -53,6 +53,26 @@ DESCRIPTION="swarm runs normally when no option is specified (data in file)"
 
 #*****************************************************************************#
 #                                                                             #
+#                                Dependencies                                 #
+#                                                                             #
+#*****************************************************************************#
+
+## SSE2 instructions (first introduced in GGC 3.1)
+if $(grep -m 1 "flags" /proc/cpuinfo | grep -q sse2) ; then
+    DESCRIPTION="swarm runs normally when SSE2 instructions are available"
+    "${SWARM}" "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+else
+    DESCRIPTION="swarm aborts when SSE2 instructions are not available"
+    "${SWARM}" "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+fi
+
+
+#*****************************************************************************#
+#                                                                             #
 #                        Options --version and --help                         #
 #                                                                             #
 #*****************************************************************************#
