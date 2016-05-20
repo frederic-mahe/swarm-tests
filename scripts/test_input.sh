@@ -38,11 +38,51 @@ DESCRIPTION="check if swarm is in the PATH"
 #                                                                             #
 #*****************************************************************************#
 
-# swarm reads from a file
-# swarm reads from a redirection
-# swarm reads from a stream
-# swarm reads from a named pipe (fifo)
-# swarm reads from an anonymous pipe  (swarm <(echo -e ">a_1\nACGT\n")) FAIL
+## swarm reads from a file
+DESCRIPTION="swarm reads from a file"
+"${SWARM}" "${ALL_IDENTICAL}" 2> "${NULL}" > "${NULL}"  && \
+    success "${DESCRIPTION}" || failure "${DESCRIPTION}"
+
+## swarm reads from a pipe
+DESCRIPTION="swarm reads from a pipe"
+cat "${ALL_IDENTICAL}" | "${SWARM}" 2> "${NULL}" > "${NULL}"  && \
+    success "${DESCRIPTION}" || failure "${DESCRIPTION}"
+
+## swarm reads from a redirection
+DESCRIPTION="swarm reads from a redirection"
+"${SWARM}" < "${ALL_IDENTICAL}" 2> "${NULL}" > "${NULL}"  && \
+    success "${DESCRIPTION}" || failure "${DESCRIPTION}"
+
+## swarm reads from a HEREDOC
+DESCRIPTION="swarm reads from a HEREDOC"
+cat <<End-of-message | swarm 2> "${NULL}" > "${NULL}" \
+    && success "${DESCRIPTION}" || failure "${DESCRIPTION}"
+>a_1
+ACGT
+End-of-message
+
+## swarm reads from a symbolic link
+ALL_IDENTICAL2=$(mktemp -u)
+ln -s "${ALL_IDENTICAL}" "${ALL_IDENTICAL2}"
+DESCRIPTION="swarm reads from a symbolic link"
+"${SWARM}" "${ALL_IDENTICAL2}" 2> "${NULL}" > "${NULL}"  && \
+    success "${DESCRIPTION}" || failure "${DESCRIPTION}"
+rm -f "${ALL_IDENTICAL2}"
+
+## swarm reads from a named pipe (problem: how to close the named pipe?)
+# NAMED_PIPE=$(mktemp -u)
+# mkfifo "${NAMED_PIPE}"
+# echo -e ">a_1\nACGT\n" > "${NAMED_PIPE}"
+# DESCRIPTION="swarm reads from a named pipe"
+# "${SWARM}" "${NAMED_PIPE}" 2> "${NULL}" > "${NULL}"  && \
+#     success "${DESCRIPTION}" || failure "${DESCRIPTION}"
+# rm -f "${NAMED_PIPE}"
+
+## swarm reads from a process substitution (anonymous pipe)
+DESCRIPTION="swarm reads from a process substitution (unseekable)"
+"${SWARM}" <(echo -e ">a_1\nACGT\n") 2> "${NULL}" > "${NULL}"  && \
+    success "${DESCRIPTION}" || failure "${DESCRIPTION}"
+
 
 #*****************************************************************************#
 #                                                                             #
@@ -50,14 +90,29 @@ DESCRIPTION="check if swarm is in the PATH"
 #                                                                             #
 #*****************************************************************************#
 
-# Test empty sequence
-# Test empty header
+## Test empty sequence
+DESCRIPTION="swarm handles empty sequences"
+echo -e ">a_10\n" | \
+    "${SWARM}" 2> "${NULL}" > "${NULL}" && \
+    success "${DESCRIPTION}" || failure "${DESCRIPTION}"
 
-# Improve help regarding N characters
+## Test empty header
+DESCRIPTION="swarm aborts on empty fasta headers"
+echo -e ">;size=10\nACGT\n" | \
+    "${SWARM}" -z 2> "${NULL}" > "${NULL}" && \
+    failure "${DESCRIPTION}" || success "${DESCRIPTION}"
 
-# Clustering with only one sequence should work
+## Clustering with only one sequence is accepted
+DESCRIPTION="clustering with only one sequence is accepted"
+echo -e ">a_10\nACGNT\n" | \
+    "${SWARM}" 2> "${NULL}" > "${NULL}" && \
+    success "${DESCRIPTION}" || failure "${DESCRIPTION}"
 
-# Clustering sequences of length 1 should work with d > 1 too (shorter than kmers)
+## Clustering sequences of length 1 should work with d > 1 too (shorter than kmers)
+DESCRIPTION="clustering a sequence shorter than kmer length is accepted"
+echo -e ">a_10\nA" | \
+    "${SWARM}" -d 2 2> "${NULL}" > "${NULL}" && \
+    success "${DESCRIPTION}" || failure "${DESCRIPTION}"
 
 ## Define ASCII characters accepted in fasta headers
 DESCRIPTION="ascii characters 1-9, 11-12, 14-31, 33-127 allowed in fasta headers"
@@ -102,7 +157,13 @@ for i in {1..9} 11 12 {14..64} 66 {68..70} {72..83} {86..96} 98 100 101 102 {104
             success "${DESCRIPTION}"
 done
 
-# issue 2: test non-ASCII characters (frédéric and torbjørn)
+## Swarm aborts if fasta identifiers are not unique
+DESCRIPTION="swarm aborts if fasta headers are not unique"
+echo -e ">a_10\nACGT\n>a_10\nAAGT\n" | \
+    "${SWARM}" 2> "${NULL}" > "${NULL}" && \
+    failure "${DESCRIPTION}" || success "${DESCRIPTION}"
+
+## issue 2: test non-ASCII characters (accents, like in frédéric and torbjørn)
 
 ## Fasta headers can contain more than one underscore symbol
 DESCRIPTION="fasta headers can contain more than one underscore symbol"
@@ -113,13 +174,13 @@ echo -e ">${IDENTIFIER}_3\nACGTACGT" | \
 grep -qE "[[:blank:]]${IDENTIFIER}[[:blank:]]" "${STATS}" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${STATS}"
+rm -f "${STATS}"
 
 ## Test -a, --append-abundance positive integer
 # all or *some* sequences can lack abundance values
 
 ## Clean
-rm "${ALL_IDENTICAL}"
+rm -f "${ALL_IDENTICAL}"
 
 exit 0
 
