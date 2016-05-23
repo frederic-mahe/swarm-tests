@@ -13,7 +13,7 @@ NULL="/dev/null"
 
 failure () {
     printf "${RED}FAIL${NO_COLOR}: ${1}\n"
-    exit -1
+    # exit -1
 }
 
 success () {
@@ -85,7 +85,7 @@ echo -e ">aaa\0001aaa_1\nACGT\n" | \
 
 ## https://github.com/torognes/swarm/issues/4
 ##
-## Swarm sorts sequences by decreasing abundance (and additional
+## Swarm outputs sequences by decreasing abundance (and no additional
 ## criteria to stabilize the sorting)
 DESCRIPTION="issue 4 --- fasta entries are sorted by decreasing abundance"
 REPRESENTATIVES=$(mktemp)
@@ -122,6 +122,17 @@ rm "${REPRESENTATIVES}"
 
 #*****************************************************************************#
 #                                                                             #
+#                   Store sequences using 2 bits (issue 7)                    #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/7
+##
+## That optimization cannot be tested from the command line.
+
+
+#*****************************************************************************#
+#                                                                             #
 #                     UCLUST file format output (issue 8)                     #
 #                                                                             #
 #*****************************************************************************#
@@ -132,8 +143,39 @@ rm "${REPRESENTATIVES}"
 DESCRIPTION="issue 8 --- produce a uclust file with -u"
 UCLUST=$(mktemp)
 "${SWARM}" -u "${UCLUST}" "${ALL_IDENTICAL}" 2> /dev/null > /dev/null
-[[ -e "${UCLUST}" ]] && success "${DESCRIPTION}" || failure "${DESCRIPTION}"
+[[ -s "${UCLUST}" ]] && success "${DESCRIPTION}" || failure "${DESCRIPTION}"
 rm "${UCLUST}"
+
+
+#*****************************************************************************#
+#                                                                             #
+#             Output detailed statistics for each swarm (issue 9)             #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/9
+##
+## Output detailed statistics for each swarm (option -s)
+DESCRIPTION="issue 9 --- produce a statistics file with -s"
+STATS=$(mktemp)
+"${SWARM}" -s "${STATS}" "${ALL_IDENTICAL}" 2> /dev/null > /dev/null
+[[ -s "${STATS}" ]] && success "${DESCRIPTION}" || failure "${DESCRIPTION}"
+rm "${STATS}"
+
+
+#*****************************************************************************#
+#                                                                             #
+#                     Check for unique headers (issue 10)                     #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/10
+##
+## Check for unique headers and report error if duplicates are found
+DESCRIPTION="issue 10 --- check for unique headers"
+echo -e ">a_10\nACGT\n>a_5\nACGT\n" | \
+    "${SWARM}" 2> /dev/null > /dev/null && \
+    failure "${DESCRIPTION}" || success "${DESCRIPTION}"
 
 
 #*****************************************************************************#
@@ -145,6 +187,17 @@ rm "${UCLUST}"
 ## https://github.com/torognes/swarm/issues/11
 ##
 ## Swarm can be compiled on a Mac.
+
+
+#*****************************************************************************#
+#                                                                             #
+#                          Adapt to AVX2 (issue 12)                           #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/12
+##
+## That optimization cannot be tested from the command line.
 
 
 #*****************************************************************************#
@@ -164,6 +217,18 @@ UCLUST=$(mktemp)
 VALUE=$(awk -F "\t" '$1 !~ "H" {print $4}' "${UCLUST}" | sort -du)
 [[ "${VALUE}" == "*" ]] && success "${DESCRIPTION}" || failure "${DESCRIPTION}"
 rm "${UCLUST}"
+
+
+#*****************************************************************************#
+#                                                                             #
+#       Swarm radius in statistics should be multiplied by d (issue 14)       #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/14
+##
+## TODO
+
 
 #*****************************************************************************#
 #                                                                             #
@@ -185,7 +250,6 @@ rm "${UCLUST}"
 ## https://github.com/torognes/swarm/issues/67
 ##
 ## Bug reported by Antti Karkman first and latter by Noah Hoffman.
-##
 DESCRIPTION="issue 67 --- when d > 1, seed is the first field of the OTU list"
 REPRESENTATIVES=$(mktemp)
 SEED="seq1"
@@ -223,6 +287,31 @@ for ((d=1 ; d<=$MAX_D ; d++)) ; do
         (( ${OTUs} == 1 )) || failure "clustering fails for d=${d} and t=${t}"
     done
 done && success "${DESCRIPTION}"
+
+
+#*****************************************************************************#
+#                                                                             #
+#       Stable input sorting to avoid variability in results (issue 80)       #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/80
+##
+## Swarm internally sorts sequences by decreasing abundance. Sequences
+## should also be sorted by increasing alpha-numerical order to
+## stabilize the sorting (assuming headers are unique)
+DESCRIPTION="issue 80 --- clustering results are not affected by input order"
+CLUSTERS_A=$(mktemp)
+CLUSTERS_B=$(mktemp)
+echo -e ">a_2\nAA\n>b_2\nTT\n>c_1\nAT\n" | \
+    "${SWARM}" -o "${CLUSTERS_A}" 2> /dev/null
+echo -e ">b_2\nTT\n>a_2\nAA\n>c_1\nAT\n" | \
+    "${SWARM}" -o "${CLUSTERS_B}" 2> /dev/null
+cmp -s "${CLUSTERS_A}" "${CLUSTERS_B}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm -f "${CLUSTERS_A}" "${CLUSTERS_B}"
+
 
 ## Clean
 rm "${ALL_IDENTICAL}"
