@@ -53,6 +53,32 @@ DESCRIPTION="swarm runs normally when no option is specified (data in file)"
 
 #*****************************************************************************#
 #                                                                             #
+#                             End of options (--)                             #
+#                                                                             #
+#*****************************************************************************#
+
+## End of option marker is supported (usefull for weirdly named input files)
+DESCRIPTION="swarm runs normally when -- marks the end of options"
+"${SWARM}" -- "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+
+#*****************************************************************************#
+#                                                                             #
+#                             Read from stdin (-)                             #
+#                                                                             #
+#*****************************************************************************#
+
+## Accept "-" as a placeholder for stdin
+DESCRIPTION="swarm reads from stdin when - is used"
+"${SWARM}" - < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+
+#*****************************************************************************#
+#                                                                             #
 #                                Dependencies                                 #
 #                                                                             #
 #*****************************************************************************#
@@ -64,6 +90,7 @@ if $(grep -m 1 "flags" /proc/cpuinfo | grep -q sse2) ; then
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 else
+    # swarm aborts with a non-zero status if SSE2 is missing (hardcoded)
     DESCRIPTION="swarm aborts when SSE2 instructions are not available"
     "${SWARM}" "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
         failure "${DESCRIPTION}" || \
@@ -120,8 +147,8 @@ DESCRIPTION="swarm aborts when --threads is 257"
         success "${DESCRIPTION}"
 
 ## Number of threads (number of threads is way too large)
-DESCRIPTION="swarm aborts when --threads is 8 billions"
-"${SWARM}" -t 8000000000 < "${ALL_IDENTICAL}" 2> "${NULL}" && \
+DESCRIPTION="swarm aborts when --threads is intmax_t"
+"${SWARM}" -t $(((1<<63)-1)) < "${ALL_IDENTICAL}" 2> "${NULL}" && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -166,8 +193,8 @@ DESCRIPTION="swarm aborts when --difference is 257"
         success "${DESCRIPTION}"
 
 ## Number of differences (number of differences is way too large)
-DESCRIPTION="swarm aborts when --difference is 8 billions"
-"${SWARM}" -d 8000000000 < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
+DESCRIPTION="swarm aborts when --difference is intmax_t"
+"${SWARM}" -d $(((1<<63)-1)) < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
