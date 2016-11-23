@@ -232,6 +232,28 @@ rm "${UCLUST}"
 
 #*****************************************************************************#
 #                                                                             #
+#             Fix bug in affine alignment backtracking (issue 15)             #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/15
+##
+## TODO: can that be tested?
+
+
+#*****************************************************************************#
+#                                                                             #
+#                Improve speed by advanced filtering (issue 16)               #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/16
+##
+## That kmer-based optimization cannot be tested from the command line.
+
+
+#*****************************************************************************#
+#                                                                             #
 #                   Remove requirement of SSE4.1 (issue 17)                   #
 #                                                                             #
 #*****************************************************************************#
@@ -239,6 +261,28 @@ rm "${UCLUST}"
 ## https://github.com/torognes/swarm/issues/17
 ##
 ## Swarm can be compiled on older computers.
+
+
+#*****************************************************************************#
+#                                                                             #
+#            Graceful exit if cpu features are missing (issue 18)             #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/18
+##
+## That optimization cannot be tested from the command line.
+
+
+#*****************************************************************************#
+#                                                                             #
+#             Avoid requirement of POPCNT instruction (issue 19)              #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/19
+##
+## That optimization cannot be tested from the command line.
 
 
 #*****************************************************************************#
