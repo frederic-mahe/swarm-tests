@@ -59,9 +59,12 @@ echo -e ">b_2\nTT\n>c_1\nAT\n>d_1\nGG\n>a_2\nAA\n" | swarm 2> /dev/null
 
 ## 
 
-## Statistics
+## Statistics (-s)
 
-# - swarm produces a 6-column table when the option -s is used (see also issue 9)
+# - swarm produces a 6-column table when the option -s is used (see also issue 9),
+# - check if a number of differences of zero is returned for identical amplicons,
+# - check if the number of lines is expected,
+# - check if columns contain the expected values.
 
 # - what happens if the OTU is a singleton? OTU radius should be zero. OK
 # - if all sequences are identical, the radius should be zero. FAIL
