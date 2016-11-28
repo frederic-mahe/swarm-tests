@@ -137,6 +137,12 @@ for i in 0 10 13 32 ; do
             success "${DESCRIPTION}"
 done 
 
+## non-ASCII characters accepted in fasta headers
+DESCRIPTION="non-ASCII characters accepted in fasta headers"
+echo -e ">ø_1\nACGT\n" | \
+    "${SWARM}"  2> "${NULL}" > "${NULL}" && \
+    success "${DESCRIPTION}" || failure "${DESCRIPTION}"
+
 ## Define ASCII characters accepted in fasta sequences
 for i in 0 10 13 65 67 71 84 85 97 99 103 116 117 ; do
     DESCRIPTION="ascii character ${i} is allowed in sequences"
@@ -148,7 +154,7 @@ for i in 0 10 13 65 67 71 84 85 97 99 103 116 117 ; do
 done
 
 ## Define ASCII characters not accepted in fasta sequences
-for i in {1..9} 11 12 {14..64} 66 {68..70} {72..83} {86..96} 98 100 101 102 {104..115} {118..127} ; do
+for i in {1..9} 11 12 {14..64} 66 {68..70} {72..83} {86..96} 98 {100..102} {104..115} {118..127} ; do
     DESCRIPTION="ascii character ${i} is not allowed in sequences"
     OCTAL=$(printf "\%04o" ${i})
     echo -e ">aaaa_1\nAC${OCTAL}GT\n" | \
@@ -163,8 +169,6 @@ echo -e ">a_10\nACGT\n>a_10\nAAGT\n" | \
     "${SWARM}" 2> "${NULL}" > "${NULL}" && \
     failure "${DESCRIPTION}" || success "${DESCRIPTION}"
 
-## issue 2: test non-ASCII characters (accents, like in frédéric and torbjørn)
-
 ## Fasta headers can contain more than one underscore symbol
 DESCRIPTION="fasta headers can contain more than one underscore symbol"
 STATS=$(mktemp)
@@ -175,6 +179,12 @@ grep -qE "[[:blank:]]${IDENTIFIER}[[:blank:]]" "${STATS}" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm -f "${STATS}"
+
+## Fasta header must contain an abundance value after being truncated
+DESCRIPTION="swarm aborts if fasta headers lacks abundance value"
+echo -e ">a a_1\nACGT" | \
+    "${SWARM}" 2> "${NULL}" && \
+    failure "${DESCRIPTION}" || success "${DESCRIPTION}"
 
 ## Test -a, --append-abundance positive integer
 # all or *some* sequences can lack abundance values
