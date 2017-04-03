@@ -284,6 +284,31 @@ rm "${UCLUST}"
 ##
 ## That optimization cannot be tested from the command line.
 
+#*****************************************************************************#
+#                                                                             #
+#             Support for usearch amplicon-abundance (issue 22)               #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/22
+##
+## support for usearch amplicon-abundance notation style
+USEARCH=$(mktemp)
+
+for OPTION in "-z" "--usearch-abundance" ; do
+    for STYLE in '/^>/ s/_/;size=/' '/^>/ s/_/;size=/ ; /^>/ s/$/;/' ; do
+	sed "${STYLE}" "${ALL_IDENTICAL}" > "${USEARCH}"
+	if [[ "${STYLE}" == '/^>/ s/_/;size=/' ]] ; then	    
+	    DESCRIPTION="issue 22 --- support for usearch abundance ending with semicolon (${OPTION})"
+	else
+	    DESCRIPTION="issue 22 --- support for usearch abundance ending without semicolon (${OPTION})"
+	fi
+	"${SWARM}" "${OPTION}" "${USEARCH}" 2> /dev/null > /dev/null && \
+	    success "${DESCRIPTION}" || failure "${DESCRIPTION}"
+    done
+done
+rm "${USEARCH}"
+
 
 #*****************************************************************************#
 #                                                                             #
