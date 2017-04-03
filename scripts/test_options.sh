@@ -211,10 +211,10 @@ DESCRIPTION="swarm aborts when --difference is not numerical"
 #                                                                             #
 #*****************************************************************************#
 
-## Deactivate the built-in OTU refinemnent
+## Deactivate the built-in OTU refinement
 INPUT=$(mktemp)
 printf ">a_10\nACGT\n>b_9\nCGGT\n>c_1\nCCGT\n" > "${INPUT}" 
-DESCRIPTION="deactivate the built-in OTU refinement (not recommended)"
+DESCRIPTION="deactivate OTU breaking"
 LINENUMBER=$("${SWARM}" -n "${INPUT}" 2> "${NULL}" | wc -l)
 [[ $LINENUMBER == 1 ]] && \
     success "${DESCRIPTION}" || \
