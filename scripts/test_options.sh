@@ -216,7 +216,6 @@ INPUT=$(mktemp)
 printf ">a_10\nACGT\n>b_9\nCGGT\n>c_1\nCCGT\n" > "${INPUT}" 
 DESCRIPTION="deactivate the built-in OTU refinement (not recommended)"
 LINENUMBER=$("${SWARM}" -n "${INPUT}" 2> "${NULL}" | wc -l)
-echo $LINENUMBER
 [[ $LINENUMBER == 1 ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -234,6 +233,16 @@ DESCRIPTION="swarm runs normally when the fastidious option is specified"
 "${SWARM}" -f < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
+
+## Swarms actually performs a second clustering
+INPUT=$(mktemp)
+printf ">a_10\nACGT\n>b_2\nAGCT\n" > "${INPUT}" 
+DESCRIPTION="swarms actually performs a second clustering (-b 3)"
+LINENUMBER=$("${SWARM}" -f "${INPUT}" 2> "${NULL}" | wc -l)
+[[ $LINENUMBER == 1 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${INPUT}"
 
 ## Boundary -------------------------------------------------------------------
 
@@ -275,6 +284,16 @@ DESCRIPTION="swarm fails when the boundary option is specified without -f"
 "${SWARM}" -b 3 < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
+
+## Boundary value is taken into account by the fastidious option (-b 2)
+INPUT=$(mktemp)
+printf ">a_10\nACGT\n>b_2\nAGCT\n" > "${INPUT}" 
+DESCRIPTION="boundary value is taken into account by the fastidious option (-b 2)"
+LINENUMBER=$("${SWARM}" -f -b 2 "${INPUT}" 2> "${NULL}" | wc -l)
+[[ $LINENUMBER == 2 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${INPUT}"
 
 ## Ceiling --------------------------------------------------------------------
 
