@@ -215,14 +215,14 @@ DESCRIPTION="swarm aborts when --difference is not numerical"
 BREAKINGINPUT=$(mktemp)
 printf ">a_10\nACGT\n>b_9\nCGGT\n>c_1\nCCGT\n" > "${BREAKINGINPUT}" 
 
-## Long version --no-otu-breaking exits successfully
-DESCRIPTION="Long version --no-otu-breaking exits successfully"
+## Swarm accepts --no-otu-breaking 
+DESCRIPTION="swarms accepts --no-otu-breaking "
 "${SWARM}" --no-otu-breaking < "${BREAKINGINPUT}" > "${NULL}" 2> "${NULL}" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## Short version -n  exits successfully
-DESCRIPTION="Short version -n  exits successfully"
+## Swarm accepts option -n 
+DESCRIPTION="swarm accepts option -n"
 "${SWARM}" -n < "${BREAKINGINPUT}" > "${NULL}" 2> "${NULL}" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -257,11 +257,10 @@ DESCRIPTION="swarm runs normally when the fastidious option is specified"
 
 ## Swarms actually performs a second clustering 
 DESCRIPTION="swarms actually performs a second clustering (-b 3)"
-LINENUMBER=$("${SWARM}" -f "${INPUT}" 2> "${NULL}" | wc -l)
+LINENUMBER=$("${SWARM}" -f "${FASTIDIOUSINPUT}" 2> "${NULL}" | wc -l)
 [[ $LINENUMBER == 1 ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${INPUT}"
 
 ## Boundary -------------------------------------------------------------------
 
@@ -306,11 +305,10 @@ DESCRIPTION="swarm fails when the boundary option is specified without -f"
 
 ## Boundary value is taken into account by the fastidious option (-b 2)
 DESCRIPTION="boundary value is taken into account by the fastidious option (-b 2)"
-LINENUMBER=$("${SWARM}" -f -b 2 "${INPUT}" 2> "${NULL}" | wc -l)
+LINENUMBER=$("${SWARM}" -f -b 2 "${FASTIDIOUSINPUT}" 2> "${NULL}" | wc -l)
 [[ $LINENUMBER == 2 ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${INPUT}"
 
 ## Ceiling --------------------------------------------------------------------
 
@@ -403,6 +401,48 @@ DESCRIPTION="swarm fails when the --bloom-bits option is specified without -f"
 "${SWARM}" -y 16 < "${FASTIDOUSINPUT}" > "${NULL}" 2> "${NULL}" && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
+rm "${FASTIDOUSINPUT}"
+
+
+#*****************************************************************************#
+#                                                                             #
+#                            Input/Output options                             #
+#                                                                             #
+#*****************************************************************************#
+
+## Initializing log file
+LOG=$(mktemp)
+
+## Swarm accepts --log option
+DESCRIPTION="swarm accepts --log option"
+"${SWARM}" --log "${LOG}" < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## Swarm accepts -l option
+DESCRIPTION="swarm accepts -l option"
+"${SWARM}" -l "${LOG}" < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${LOG}"
+
+## Swarm does not write on error output when using -l
+ERRORINPUT=$(mktemp)
+DESCRIPTION="swarm does not write on error output when using -l"
+"${SWARM}" -l "${NULL}" < "${ALL_IDENTICAL}" > "${NULL}" 2> "${ERRORINPUT}"
+[[ ! -s "${ERRORINPUT}" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${ERRORINPUT}"
+
+## Swarm does write on error output when using -l if it fails
+ERRORINPUT=$(mktemp)
+DESCRIPTION="swarm does write on error output when using -l if it fails"
+"${SWARM}" -d -l "${NULL}" < "${ALL_IDENTICAL}" > "${NULL}" 2> "${ERRORINPUT}"
+[[ -s "${ERRORINPUT}" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${ERRORINPUT}"
 
 
 #*****************************************************************************#
