@@ -19,7 +19,7 @@ success () {
     printf "${GREEN}PASS${NO_COLOR}: ${1}\n"
 }
 
-## Create a test file with 100 identical sequences (different headers)
+## Create a test file with 10 identical sequences (different headers)
 ALL_IDENTICAL=$(mktemp)
 for ((i=1 ; i<=10 ; i++)) ; do
     printf ">%s%d_1\nACGT\n" "seq" ${i}
@@ -421,7 +421,7 @@ DESCRIPTION="swarm accepts -a option"
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## Swarm append the abundance number set with -a
+## Swarm appends the abundance value set with -a
 INPUT=$(mktemp)
 OUTPUT=$(mktemp)
 printf ">b\nACGT\n" > "${INPUT}"
@@ -461,48 +461,27 @@ rm "${INPUT}"
 rm "${OUTPUT}"
 
 ## Swarm append the abundance number set with -a for swarm notation
-INPUT=$(mktemp)
 OUTPUT=$(mktemp)
-printf ">a_3\nACGT\n>b\nACGT\n" > "${INPUT}"
 DESCRIPTION="swarm append the abundance number set with -a for vsearch notation"
-"${SWARM}" -a 2 -w "${OUTPUT}" < "${INPUT}" > /dev/null 2> /dev/null
+printf ">a_3\nACGT\n>b\nACGT\n" | \
+    "${SWARM}" -a 2 -w "${OUTPUT}" > /dev/null 2> /dev/null
 SUMABUNDANCES=$(sed -n '/^>/ s/.*_//p' "${OUTPUT}")
 [[ "${SUMABUNDANCES}" -eq 5 ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${INPUT}"
 rm "${OUTPUT}"
 
 ## Swarm append the abundance number set with -a for usearch notation
-INPUT=$(mktemp)
 OUTPUT=$(mktemp)
-printf ">a;size=3\nACGT\n>b\nACGT\n" > "${INPUT}"
 DESCRIPTION="swarm append the abundance number set with -a for usearch notation"
-"${SWARM}" -z -a 2 -w "${OUTPUT}" < "${INPUT}" > /dev/null 2> /dev/null
+printf ">a;size=3\nACGT\n>b\nACGT\n" | \
+    "${SWARM}" -z -a 2 -w "${OUTPUT}" > /dev/null 2> /dev/null
 SUMABUNDANCES=$(awk -F "[;=]" '/^>/ {print $3}' "${OUTPUT}")
 [[ "${SUMABUNDANCES}" -eq 5 ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${INPUT}"
 rm "${OUTPUT}"
 
-## Swarms -a option set abundance value for swarm style
-INPUT=$(mktemp)
-printf ">a_\nACGT\n" > "${INPUT}"
-DESCRIPTION="swarms -a option set abundance value for vsearch style"
-"${SWARM}" -a "${LOG}" < "${INPUT}" > /dev/null 2> /dev/null && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${INPUT}"
-
-## Swarms -a option does not overwrite abundance value for vsearch style
-INPUT=$(mktemp)
-printf ">a_\nACGT\n" > "${INPUT}"
-DESCRIPTION="swarms -a option does not overwrite abundance value for vsearch style"
-"${SWARM}" -a "${LOG}" < "${INPUT}" > /dev/null 2> /dev/null && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${INPUT}"
 
 ## Initializing log file
 LOG=$(mktemp)
@@ -520,18 +499,18 @@ DESCRIPTION="swarm accepts -l option"
         failure "${DESCRIPTION}"
 rm "${LOG}"
 
-## Swarm does not write on error output when using -l
+## Swarm does not write on standard error when using -l
 ERRORINPUT=$(mktemp)
-DESCRIPTION="swarm does not write on error output when using -l"
+DESCRIPTION="swarm does not write on standard error when using -l"
 "${SWARM}" -l /dev/null < "${ALL_IDENTICAL}" > /dev/null 2> "${ERRORINPUT}"
 [[ ! -s "${ERRORINPUT}" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${ERRORINPUT}"
 
-## Swarm does write on error output when using -l if it fails
+## Swarm does write on standard error when using -l, except for errors
 ERRORINPUT=$(mktemp)
-DESCRIPTION="swarm does write on error output when using -l if it fails"
+DESCRIPTION="swarm does write on standard error when using -l, except for errors"
 "${SWARM}" -d -l /dev/null < "${ALL_IDENTICAL}" > /dev/null 2> "${ERRORINPUT}"
 [[ -s "${ERRORINPUT}" ]] && \
     success "${DESCRIPTION}" || \
@@ -554,7 +533,7 @@ DESCRIPTION="swarm accepts --output-file option"
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
 
-## Swarm create output file with -o option
+## Swarm creates output file with -o option
 OUTPUT=$(mktemp)
 DESCRIPTION="swarm create output file with -o option"
 "${SWARM}" -o  "${OUTPUT}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null
@@ -563,7 +542,7 @@ DESCRIPTION="swarm create output file with -o option"
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
 
-## Swarm fill correctly output file with -o option
+## Swarm fills correctly output file with -o option
 OUTPUT=$(mktemp)
 DESCRIPTION="swarm fill correctly output file with -o option"
 "${SWARM}" -o  "${OUTPUT}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null
