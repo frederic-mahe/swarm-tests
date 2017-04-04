@@ -228,15 +228,16 @@ rm "${INPUT}"
 #                                                                             #
 #*****************************************************************************#
 
+FASTIDOUSINPUT=$(mktemp)
+printf ">a_10\nACGT\n>b_2\nAGCT\n" > "${FASTIDOUSINPUT}"
+
 ## Swarm should run normally when the fastidious option is specified
 DESCRIPTION="swarm runs normally when the fastidious option is specified"
-"${SWARM}" -f < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
+"${SWARM}" -f < "${FASTIDOUSINPUT}" > "${NULL}" 2> "${NULL}" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## Swarms actually performs a second clustering
-INPUT=$(mktemp)
-printf ">a_10\nACGT\n>b_2\nAGCT\n" > "${INPUT}" 
+## Swarms actually performs a second clustering 
 DESCRIPTION="swarms actually performs a second clustering (-b 3)"
 LINENUMBER=$("${SWARM}" -f "${INPUT}" 2> "${NULL}" | wc -l)
 [[ $LINENUMBER == 1 ]] && \
@@ -248,25 +249,25 @@ rm "${INPUT}"
 
 ## Boundary (-b is empty)
 DESCRIPTION="swarm aborts when --boundary is empty"
-"${SWARM}" -f -b < "${ALL_IDENTICAL}" 2> "${NULL}" && \
+"${SWARM}" -f -b < "${FASTIDOUSINPUT}" 2> "${NULL}" && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Boundary (-b is negative)
 DESCRIPTION="swarm aborts when --boundary is -1"
-"${SWARM}" -f -b -1 < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
+"${SWARM}" -f -b -1 < "${FASTIDOUSINPUT}" > "${NULL}" 2> "${NULL}" && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Boundary (-b is non-numerical)
 DESCRIPTION="swarm aborts when --boundary is not numerical"
-"${SWARM}" -f -b "a" < "${ALL_IDENTICAL}" 2> "${NULL}" && \
+"${SWARM}" -f -b "a" < "${FASTIDOUSINPUT}" 2> "${NULL}" && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Boundary (-b == 1)
 DESCRIPTION="swarm aborts when --boundary is 1"
-"${SWARM}" -f -b 1 < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
+"${SWARM}" -f -b 1 < "${FASTIDOUSINPUT}" > "${NULL}" 2> "${NULL}" && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -275,19 +276,17 @@ MIN=2
 MAX=255
 DESCRIPTION="swarm runs normally when --boundary goes from ${MIN} to ${MAX}"
 for ((b=$MIN ; b<=$MAX ; b++)) ; do
-    "${SWARM}" -f -b ${b} < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" || \
+    "${SWARM}" -f -b ${b} < "${FASTIDOUSINPUT}" > "${NULL}" 2> "${NULL}" || \
         failure "swarm aborts when --boundary equals ${b}"
 done && success "${DESCRIPTION}"
 
 ## Passing the --boundary option without the fastidious option should fail
 DESCRIPTION="swarm fails when the boundary option is specified without -f"
-"${SWARM}" -b 3 < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
+"${SWARM}" -b 3 < "${FASTIDOUSINPUT}" > "${NULL}" 2> "${NULL}" && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Boundary value is taken into account by the fastidious option (-b 2)
-INPUT=$(mktemp)
-printf ">a_10\nACGT\n>b_2\nAGCT\n" > "${INPUT}" 
 DESCRIPTION="boundary value is taken into account by the fastidious option (-b 2)"
 LINENUMBER=$("${SWARM}" -f -b 2 "${INPUT}" 2> "${NULL}" | wc -l)
 [[ $LINENUMBER == 2 ]] && \
@@ -299,25 +298,25 @@ rm "${INPUT}"
 
 ## Ceiling (-c is empty)
 DESCRIPTION="swarm aborts when --ceiling is empty"
-"${SWARM}" -f -c < "${ALL_IDENTICAL}" 2> "${NULL}" && \
+"${SWARM}" -f -c < "${FASTIDOUSINPUT}" 2> "${NULL}" && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Ceiling (-c is negative)
 DESCRIPTION="swarm aborts when --ceiling is -1"
-"${SWARM}" -f -c -1 < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
+"${SWARM}" -f -c -1 < "${FASTIDOUSINPUT}" > "${NULL}" 2> "${NULL}" && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Ceiling (-c is non-numerical)
 DESCRIPTION="swarm aborts when --ceiling is not numerical"
-"${SWARM}" -f -c "a" < "${ALL_IDENTICAL}" 2> "${NULL}" && \
+"${SWARM}" -f -c "a" < "${FASTIDOUSINPUT}" 2> "${NULL}" && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Ceiling (-c == 0)
 DESCRIPTION="swarm aborts when --ceiling is 0"
-"${SWARM}" -f -c 0 < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
+"${SWARM}" -f -c 0 < "${FASTIDOUSINPUT}" > "${NULL}" 2> "${NULL}" && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -326,13 +325,13 @@ MIN=1
 MAX=255
 DESCRIPTION="swarm runs normally when --ceiling goes from ${MIN} to ${MAX}"
 for ((c=$MIN ; c<=$MAX ; c++)) ; do
-    "${SWARM}" -f -c ${c} < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" || \
+    "${SWARM}" -f -c ${c} < "${FASTIDOUSINPUT}" > "${NULL}" 2> "${NULL}" || \
         failure "swarm aborts when --ceiling equals ${c}"
 done && success "${DESCRIPTION}"
 
 ## Passing the --ceiling option without the fastidious option should fail
 DESCRIPTION="swarm fails when the ceiling option is specified without -f"
-"${SWARM}" -c 10 < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
+"${SWARM}" -c 10 < "${FASTIDOUSINPUT}" > "${NULL}" 2> "${NULL}" && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -340,19 +339,19 @@ DESCRIPTION="swarm fails when the ceiling option is specified without -f"
 
 ## Bloom bits (-y is empty)
 DESCRIPTION="swarm aborts when --bloom-bits is empty"
-"${SWARM}" -f -y < "${ALL_IDENTICAL}" 2> "${NULL}" && \
+"${SWARM}" -f -y < "${FASTIDOUSINPUT}" 2> "${NULL}" && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Bloom bits (-y is negative)
 DESCRIPTION="swarm aborts when --bloom-bits is -1"
-"${SWARM}" -f -y -1 < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
+"${SWARM}" -f -y -1 < "${FASTIDOUSINPUT}" > "${NULL}" 2> "${NULL}" && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Bloom bits (-y is non-numerical)
 DESCRIPTION="swarm aborts when --bloom-bits is not numerical"
-"${SWARM}" -f -y "a" < "${ALL_IDENTICAL}" 2> "${NULL}" && \
+"${SWARM}" -f -y "a" < "${FASTIDOUSINPUT}" 2> "${NULL}" && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -361,14 +360,14 @@ MIN=2
 MAX=64
 DESCRIPTION="swarm runs normally when --bloom-bits goes from ${MIN} to ${MAX}"
 for ((y=$MIN ; y<=$MAX ; y++)) ; do
-    "${SWARM}" -f -y ${y} < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" || \
+    "${SWARM}" -f -y ${y} < "${FASTIDOUSINPUT}" > "${NULL}" 2> "${NULL}" || \
         failure "swarm aborts when --bloom-bits equals ${y}"
 done && success "${DESCRIPTION}"
 
 ## Rejected values for the --bloom-bits option are < 2
 DESCRIPTION="swarm aborts when --bloom-bits is lower than 2"
 for y in 0 1 ; do
-    "${SWARM}" -f -y ${y} < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
+    "${SWARM}" -f -y ${y} < "${FASTIDOUSINPUT}" > "${NULL}" 2> "${NULL}" && \
         failure "swarm runs normally when --bloom-bits equals ${y}"
 done || success "${DESCRIPTION}"
 
@@ -377,13 +376,13 @@ MIN=65
 MAX=255
 DESCRIPTION="swarm aborts when --bloom-bits is higher than 64"
 for ((y=$MIN ; y<=$MAX ; y++)) ; do
-    "${SWARM}" -f -y ${y} < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
+    "${SWARM}" -f -y ${y} < "${FASTIDOUSINPUT}" > "${NULL}" 2> "${NULL}" && \
         failure "swarm runs normally when --bloom-bits equals ${y}"
 done || success "${DESCRIPTION}"
 
 ## Passing the --bloom-bits option without the fastidious option should fail
 DESCRIPTION="swarm fails when the --bloom-bits option is specified without -f"
-"${SWARM}" -y 16 < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
+"${SWARM}" -y 16 < "${FASTIDOUSINPUT}" > "${NULL}" 2> "${NULL}" && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
