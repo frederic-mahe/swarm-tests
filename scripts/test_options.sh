@@ -211,15 +211,33 @@ DESCRIPTION="swarm aborts when --difference is not numerical"
 #                                                                             #
 #*****************************************************************************#
 
+## Initialiasing input that should break
+BREAKINGINPUT=$(mktemp)
+printf ">a_10\nACGT\n>b_9\nCGGT\n>c_1\nCCGT\n" > "${BREAKINGINPUT}" 
+
+## Long version --no-otu-breaking exits successfully
+DESCRIPTION="Long version --no-otu-breaking exits successfully"
+"${SWARM}" --no-otu-breaking < "${BREAKINGINPUT}" > "${NULL}" 2> "${NULL}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## Short version -n  exits successfully
+DESCRIPTION="Short version -n  exits successfully"
+"${SWARM}" -n < "${BREAKINGINPUT}" > "${NULL}" 2> "${NULL}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 ## Deactivate the built-in OTU refinement
 INPUT=$(mktemp)
 printf ">a_10\nACGT\n>b_9\nCGGT\n>c_1\nCCGT\n" > "${INPUT}" 
 DESCRIPTION="deactivate OTU breaking"
-LINENUMBER=$("${SWARM}" -n "${INPUT}" 2> "${NULL}" | wc -l)
+LINENUMBER=$("${SWARM}" -n "${BREAKINGINPUT}" 2> "${NULL}" | wc -l)
 [[ $LINENUMBER == 1 ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${INPUT}"
+rm "${BREAKINGINPUT}"
+
+
 
 
 #*****************************************************************************#
