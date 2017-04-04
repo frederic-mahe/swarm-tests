@@ -9,7 +9,6 @@ printf "# %s %s\n" "${LINE:${#SCRIPT_NAME}}" "${SCRIPT_NAME}"
 RED="\033[1;31m"
 GREEN="\033[1;32m"
 NO_COLOR="\033[0m"
-NULL="/dev/null"
 
 failure () {
     printf "${RED}FAIL${NO_COLOR}: ${1}\n"
@@ -40,13 +39,13 @@ DESCRIPTION="check if swarm is in the PATH"
 
 ## No option, only standard input
 DESCRIPTION="swarm runs normally when no option is specified (data on stdin)"
-"${SWARM}" < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
+"${SWARM}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
 ## No option, only a fasta file
 DESCRIPTION="swarm runs normally when no option is specified (data in file)"
-"${SWARM}" "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
+"${SWARM}" "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -59,7 +58,7 @@ DESCRIPTION="swarm runs normally when no option is specified (data in file)"
 
 ## End of option marker is supported (usefull for weirdly named input files)
 DESCRIPTION="swarm runs normally when -- marks the end of options"
-"${SWARM}" -- "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
+"${SWARM}" -- "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -72,7 +71,7 @@ DESCRIPTION="swarm runs normally when -- marks the end of options"
 
 ## Accept "-" as a placeholder for stdin
 DESCRIPTION="swarm reads from stdin when - is used"
-"${SWARM}" - < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
+"${SWARM}" - < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -86,13 +85,13 @@ DESCRIPTION="swarm reads from stdin when - is used"
 ## SSE2 instructions (first introduced in GGC 3.1)
 if $(grep -m 1 "flags" /proc/cpuinfo | grep -q sse2) ; then
     DESCRIPTION="swarm runs normally when SSE2 instructions are available"
-    "${SWARM}" "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
+    "${SWARM}" "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 else
     # swarm aborts with a non-zero status if SSE2 is missing (hardcoded)
     DESCRIPTION="swarm aborts when SSE2 instructions are not available"
-    "${SWARM}" "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
+    "${SWARM}" "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
 fi
@@ -107,7 +106,7 @@ fi
 ## Return status should be 0 after -h and -v (GNU standards)
 for OPTION in "-h" "--help" "-v" "--version" ; do
     DESCRIPTION="return status should be 0 after ${OPTION}"
-    "${SWARM}" "${OPTION}" 2> "${NULL}" && \
+    "${SWARM}" "${OPTION}" 2> /dev/null && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
@@ -124,37 +123,37 @@ MIN=1
 MAX=256
 DESCRIPTION="swarm runs normally when --threads goes from ${MIN} to ${MAX}"
 for ((t=$MIN ; t<=$MAX ; t++)) ; do
-    "${SWARM}" -t ${t} < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" || \
+    "${SWARM}" -t ${t} < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null || \
         failure "swarm aborts when --threads equals ${t}"
 done && success "${DESCRIPTION}"
 
 ## Number of threads (--threads is empty)
 DESCRIPTION="swarm aborts when --threads is empty"
-"${SWARM}" -t < "${ALL_IDENTICAL}" 2> "${NULL}" && \
+"${SWARM}" -t < "${ALL_IDENTICAL}" 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Number of threads (--threads is zero)
 DESCRIPTION="swarm aborts when --threads is zero"
-"${SWARM}" -t 0 < "${ALL_IDENTICAL}" 2> "${NULL}" && \
+"${SWARM}" -t 0 < "${ALL_IDENTICAL}" 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Number of threads (--threads is 257)
 DESCRIPTION="swarm aborts when --threads is 257"
-"${SWARM}" -t 257 < "${ALL_IDENTICAL}" 2> "${NULL}" && \
+"${SWARM}" -t 257 < "${ALL_IDENTICAL}" 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Number of threads (number of threads is way too large)
 DESCRIPTION="swarm aborts when --threads is intmax_t"
-"${SWARM}" -t $(((1<<63)-1)) < "${ALL_IDENTICAL}" 2> "${NULL}" && \
+"${SWARM}" -t $(((1<<63)-1)) < "${ALL_IDENTICAL}" 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Number of threads (--threads is non-numerical)
 DESCRIPTION="swarm aborts when --threads is not numerical"
-"${SWARM}" -t "a" < "${ALL_IDENTICAL}" 2> "${NULL}" && \
+"${SWARM}" -t "a" < "${ALL_IDENTICAL}" 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -170,37 +169,37 @@ MIN=0
 MAX=256
 DESCRIPTION="swarm runs normally when --differences goes from ${MIN} to ${MAX}"
 for ((d=$MIN ; d<=$MAX ; d++)) ; do
-    "${SWARM}" -d ${d} < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" || \
+    "${SWARM}" -d ${d} < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null || \
         failure "swarm aborts when --differences equals ${d}"
 done && success "${DESCRIPTION}"
 
 ## Number of differences (--difference is empty)
 DESCRIPTION="swarm aborts when --difference is empty"
-"${SWARM}" -d < "${ALL_IDENTICAL}" 2> "${NULL}" && \
+"${SWARM}" -d < "${ALL_IDENTICAL}" 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Number of differences (--differences is negative)
 DESCRIPTION="swarm aborts when --difference is -1"
-"${SWARM}" -d -1 < "${ALL_IDENTICAL}" 2> "${NULL}" && \
+"${SWARM}" -d -1 < "${ALL_IDENTICAL}" 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Number of differences (--differences is 257)
 DESCRIPTION="swarm aborts when --difference is 257"
-"${SWARM}" -d 257 < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
+"${SWARM}" -d 257 < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Number of differences (number of differences is way too large)
 DESCRIPTION="swarm aborts when --difference is intmax_t"
-"${SWARM}" -d $(((1<<63)-1)) < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
+"${SWARM}" -d $(((1<<63)-1)) < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Number of differences (--difference is non-numerical)
 DESCRIPTION="swarm aborts when --difference is not numerical"
-"${SWARM}" -d "a" < "${ALL_IDENTICAL}" 2> "${NULL}" && \
+"${SWARM}" -d "a" < "${ALL_IDENTICAL}" 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -217,13 +216,13 @@ printf ">a_10\nACGT\n>b_9\nCGGT\n>c_1\nCCGT\n" > "${BREAKINGINPUT}"
 
 ## Swarm accepts --no-otu-breaking 
 DESCRIPTION="swarms accepts --no-otu-breaking "
-"${SWARM}" --no-otu-breaking < "${BREAKINGINPUT}" > "${NULL}" 2> "${NULL}" && \
+"${SWARM}" --no-otu-breaking < "${BREAKINGINPUT}" > /dev/null 2> /dev/null && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
 ## Swarm accepts option -n 
 DESCRIPTION="swarm accepts option -n"
-"${SWARM}" -n < "${BREAKINGINPUT}" > "${NULL}" 2> "${NULL}" && \
+"${SWARM}" -n < "${BREAKINGINPUT}" > /dev/null 2> /dev/null && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -231,7 +230,7 @@ DESCRIPTION="swarm accepts option -n"
 INPUT=$(mktemp)
 printf ">a_10\nACGT\n>b_9\nCGGT\n>c_1\nCCGT\n" > "${INPUT}" 
 DESCRIPTION="deactivate OTU breaking"
-LINENUMBER=$("${SWARM}" -n "${BREAKINGINPUT}" 2> "${NULL}" | wc -l)
+LINENUMBER=$("${SWARM}" -n "${BREAKINGINPUT}" 2> /dev/null | wc -l)
 [[ $LINENUMBER == 1 ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -250,40 +249,41 @@ printf ">a_10\nACGT\n>b_2\nAGCT\n" > "${FASTIDOUSINPUT}"
 
 ## Swarm should run normally when the fastidious option is specified
 DESCRIPTION="swarm runs normally when the fastidious option is specified"
-"${SWARM}" -f < "${FASTIDOUSINPUT}" > "${NULL}" 2> "${NULL}" && \
+"${SWARM}" -f < "${FASTIDOUSINPUT}" > /dev/null 2> /dev/null && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
 ## Swarms actually performs a second clustering 
 DESCRIPTION="swarms actually performs a second clustering (-b 3)"
-LINENUMBER=$("${SWARM}" -f "${FASTIDIOUSINPUT}" 2> "${NULL}" | wc -l)
+LINENUMBER=$("${SWARM}" -f "${FASTIDIOUSINPUT}" 2> /dev/null | wc -l)
 [[ $LINENUMBER == 1 ]] && \
     success "${DESCRIPTION}" || \
+	
         failure "${DESCRIPTION}"
 
 ## Boundary -------------------------------------------------------------------
 
 ## Boundary (-b is empty)
 DESCRIPTION="swarm aborts when --boundary is empty"
-"${SWARM}" -f -b < "${FASTIDOUSINPUT}" 2> "${NULL}" && \
+"${SWARM}" -f -b < "${FASTIDOUSINPUT}" 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Boundary (-b is negative)
 DESCRIPTION="swarm aborts when --boundary is -1"
-"${SWARM}" -f -b -1 < "${FASTIDOUSINPUT}" > "${NULL}" 2> "${NULL}" && \
+"${SWARM}" -f -b -1 < "${FASTIDOUSINPUT}" > /dev/null 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Boundary (-b is non-numerical)
 DESCRIPTION="swarm aborts when --boundary is not numerical"
-"${SWARM}" -f -b "a" < "${FASTIDOUSINPUT}" 2> "${NULL}" && \
+"${SWARM}" -f -b "a" < "${FASTIDOUSINPUT}" 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Boundary (-b == 1)
 DESCRIPTION="swarm aborts when --boundary is 1"
-"${SWARM}" -f -b 1 < "${FASTIDOUSINPUT}" > "${NULL}" 2> "${NULL}" && \
+"${SWARM}" -f -b 1 < "${FASTIDOUSINPUT}" > /dev/null 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -292,19 +292,19 @@ MIN=2
 MAX=255
 DESCRIPTION="swarm runs normally when --boundary goes from ${MIN} to ${MAX}"
 for ((b=$MIN ; b<=$MAX ; b++)) ; do
-    "${SWARM}" -f -b ${b} < "${FASTIDOUSINPUT}" > "${NULL}" 2> "${NULL}" || \
+    "${SWARM}" -f -b ${b} < "${FASTIDOUSINPUT}" > /dev/null 2> /dev/null || \
         failure "swarm aborts when --boundary equals ${b}"
 done && success "${DESCRIPTION}"
 
 ## Passing the --boundary option without the fastidious option should fail
 DESCRIPTION="swarm fails when the boundary option is specified without -f"
-"${SWARM}" -b 3 < "${FASTIDOUSINPUT}" > "${NULL}" 2> "${NULL}" && \
+"${SWARM}" -b 3 < "${FASTIDOUSINPUT}" > /dev/null 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Boundary value is taken into account by the fastidious option (-b 2)
 DESCRIPTION="boundary value is taken into account by the fastidious option (-b 2)"
-LINENUMBER=$("${SWARM}" -f -b 2 "${FASTIDIOUSINPUT}" 2> "${NULL}" | wc -l)
+LINENUMBER=$("${SWARM}" -f -b 2 "${FASTIDIOUSINPUT}" 2> /dev/null | wc -l)
 [[ $LINENUMBER == 2 ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -313,25 +313,25 @@ LINENUMBER=$("${SWARM}" -f -b 2 "${FASTIDIOUSINPUT}" 2> "${NULL}" | wc -l)
 
 ## Ceiling (-c is empty)
 DESCRIPTION="swarm aborts when --ceiling is empty"
-"${SWARM}" -f -c < "${FASTIDOUSINPUT}" 2> "${NULL}" && \
+"${SWARM}" -f -c < "${FASTIDOUSINPUT}" 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Ceiling (-c is negative)
 DESCRIPTION="swarm aborts when --ceiling is -1"
-"${SWARM}" -f -c -1 < "${FASTIDOUSINPUT}" > "${NULL}" 2> "${NULL}" && \
+"${SWARM}" -f -c -1 < "${FASTIDOUSINPUT}" > /dev/null 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Ceiling (-c is non-numerical)
 DESCRIPTION="swarm aborts when --ceiling is not numerical"
-"${SWARM}" -f -c "a" < "${FASTIDOUSINPUT}" 2> "${NULL}" && \
+"${SWARM}" -f -c "a" < "${FASTIDOUSINPUT}" 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Ceiling (-c == 0)
 DESCRIPTION="swarm aborts when --ceiling is 0"
-"${SWARM}" -f -c 0 < "${FASTIDOUSINPUT}" > "${NULL}" 2> "${NULL}" && \
+"${SWARM}" -f -c 0 < "${FASTIDOUSINPUT}" > /dev/null 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -340,13 +340,13 @@ MIN=1
 MAX=255
 DESCRIPTION="swarm runs normally when --ceiling goes from ${MIN} to ${MAX}"
 for ((c=$MIN ; c<=$MAX ; c++)) ; do
-    "${SWARM}" -f -c ${c} < "${FASTIDOUSINPUT}" > "${NULL}" 2> "${NULL}" || \
+    "${SWARM}" -f -c ${c} < "${FASTIDOUSINPUT}" > /dev/null 2> /dev/null || \
         failure "swarm aborts when --ceiling equals ${c}"
 done && success "${DESCRIPTION}"
 
 ## Passing the --ceiling option without the fastidious option should fail
 DESCRIPTION="swarm fails when the ceiling option is specified without -f"
-"${SWARM}" -c 10 < "${FASTIDOUSINPUT}" > "${NULL}" 2> "${NULL}" && \
+"${SWARM}" -c 10 < "${FASTIDOUSINPUT}" > /dev/null 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -354,19 +354,19 @@ DESCRIPTION="swarm fails when the ceiling option is specified without -f"
 
 ## Bloom bits (-y is empty)
 DESCRIPTION="swarm aborts when --bloom-bits is empty"
-"${SWARM}" -f -y < "${FASTIDOUSINPUT}" 2> "${NULL}" && \
+"${SWARM}" -f -y < "${FASTIDOUSINPUT}" 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Bloom bits (-y is negative)
 DESCRIPTION="swarm aborts when --bloom-bits is -1"
-"${SWARM}" -f -y -1 < "${FASTIDOUSINPUT}" > "${NULL}" 2> "${NULL}" && \
+"${SWARM}" -f -y -1 < "${FASTIDOUSINPUT}" > /dev/null 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Bloom bits (-y is non-numerical)
 DESCRIPTION="swarm aborts when --bloom-bits is not numerical"
-"${SWARM}" -f -y "a" < "${FASTIDOUSINPUT}" 2> "${NULL}" && \
+"${SWARM}" -f -y "a" < "${FASTIDOUSINPUT}" 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -375,14 +375,14 @@ MIN=2
 MAX=64
 DESCRIPTION="swarm runs normally when --bloom-bits goes from ${MIN} to ${MAX}"
 for ((y=$MIN ; y<=$MAX ; y++)) ; do
-    "${SWARM}" -f -y ${y} < "${FASTIDOUSINPUT}" > "${NULL}" 2> "${NULL}" || \
+    "${SWARM}" -f -y ${y} < "${FASTIDOUSINPUT}" > /dev/null 2> /dev/null || \
         failure "swarm aborts when --bloom-bits equals ${y}"
 done && success "${DESCRIPTION}"
 
 ## Rejected values for the --bloom-bits option are < 2
 DESCRIPTION="swarm aborts when --bloom-bits is lower than 2"
 for y in 0 1 ; do
-    "${SWARM}" -f -y ${y} < "${FASTIDOUSINPUT}" > "${NULL}" 2> "${NULL}" && \
+    "${SWARM}" -f -y ${y} < "${FASTIDOUSINPUT}" > /dev/null 2> /dev/null && \
         failure "swarm runs normally when --bloom-bits equals ${y}"
 done || success "${DESCRIPTION}"
 
@@ -391,13 +391,13 @@ MIN=65
 MAX=255
 DESCRIPTION="swarm aborts when --bloom-bits is higher than 64"
 for ((y=$MIN ; y<=$MAX ; y++)) ; do
-    "${SWARM}" -f -y ${y} < "${FASTIDOUSINPUT}" > "${NULL}" 2> "${NULL}" && \
+    "${SWARM}" -f -y ${y} < "${FASTIDOUSINPUT}" > /dev/null 2> /dev/null && \
         failure "swarm runs normally when --bloom-bits equals ${y}"
 done || success "${DESCRIPTION}"
 
 ## Passing the --bloom-bits option without the fastidious option should fail
 DESCRIPTION="swarm fails when the --bloom-bits option is specified without -f"
-"${SWARM}" -y 16 < "${FASTIDOUSINPUT}" > "${NULL}" 2> "${NULL}" && \
+"${SWARM}" -y 16 < "${FASTIDOUSINPUT}" > /dev/null 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 rm "${FASTIDOUSINPUT}"
@@ -411,13 +411,13 @@ rm "${FASTIDOUSINPUT}"
 
 ## Swarm accepts --append-abundance option
 DESCRIPTION="swarm accepts --append-abundance option"
-"${SWARM}" --append-abundance "${LOG}" < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
+"${SWARM}" --append-abundance "${LOG}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
 ## Swarm accepts -a option
 DESCRIPTION="swarm accepts -a option"
-"${SWARM}" -a "${LOG}" < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
+"${SWARM}" -a "${LOG}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -426,7 +426,7 @@ INPUT=$(mktemp)
 OUTPUT=$(mktemp)
 printf ">b\nACGT\n" > "${INPUT}"
 DESCRIPTION="swarm append the abundance number set with -a"
-"${SWARM}" -a 2 -w "${OUTPUT}" < "${INPUT}" > "${NULL}" 2> "${NULL}"
+"${SWARM}" -a 2 -w "${OUTPUT}" < "${INPUT}" > /dev/null 2> /dev/null
 SUMABUNDANCES=$(sed -n '/^>/ s/.*_//p' "${OUTPUT}")
 [[ "${SUMABUNDANCES}" -eq 2 ]] && \
     success "${DESCRIPTION}" || \
@@ -439,7 +439,7 @@ INPUT=$(mktemp)
 OUTPUT=$(mktemp)
 printf ">b_3\nACGT\n" > "${INPUT}"
 DESCRIPTION="swarm does not overwrite the abundance number with -a for vsearch notation"
-"${SWARM}" -a 2 -w "${OUTPUT}" < "${INPUT}" > "${NULL}" 2> "${NULL}"
+"${SWARM}" -a 2 -w "${OUTPUT}" < "${INPUT}" > /dev/null 2> /dev/null
 SUMABUNDANCES=$(sed -n '/^>/ s/.*_//p' "${OUTPUT}")
 [[ "${SUMABUNDANCES}" -eq 3 ]] && \
     success "${DESCRIPTION}" || \
@@ -452,7 +452,7 @@ INPUT=$(mktemp)
 OUTPUT=$(mktemp)
 printf ">b;size=3\nACGT\n" > "${INPUT}"
 DESCRIPTION="swarm does not overwrite the abundance number with -a for usearch notation"
-"${SWARM}" -z -a 2 -w "${OUTPUT}" < "${INPUT}" > "${NULL}" 2> "${NULL}"
+"${SWARM}" -z -a 2 -w "${OUTPUT}" < "${INPUT}" > /dev/null 2> /dev/null
 SUMABUNDANCES=$(awk -F "[;=]" '/^>/ {print $3}' "${OUTPUT}")
 [[ "${SUMABUNDANCES}" -eq 3 ]] && \
     success "${DESCRIPTION}" || \
@@ -465,7 +465,7 @@ INPUT=$(mktemp)
 OUTPUT=$(mktemp)
 printf ">a_3\nACGT\n>b\nACGT\n" > "${INPUT}"
 DESCRIPTION="swarm append the abundance number set with -a for vsearch notation"
-"${SWARM}" -a 2 -w "${OUTPUT}" < "${INPUT}" > "${NULL}" 2> "${NULL}"
+"${SWARM}" -a 2 -w "${OUTPUT}" < "${INPUT}" > /dev/null 2> /dev/null
 SUMABUNDANCES=$(sed -n '/^>/ s/.*_//p' "${OUTPUT}")
 [[ "${SUMABUNDANCES}" -eq 5 ]] && \
     success "${DESCRIPTION}" || \
@@ -478,7 +478,7 @@ INPUT=$(mktemp)
 OUTPUT=$(mktemp)
 printf ">a;size=3\nACGT\n>b\nACGT\n" > "${INPUT}"
 DESCRIPTION="swarm append the abundance number set with -a for usearch notation"
-"${SWARM}" -z -a 2 -w "${OUTPUT}" < "${INPUT}" > "${NULL}" 2> "${NULL}"
+"${SWARM}" -z -a 2 -w "${OUTPUT}" < "${INPUT}" > /dev/null 2> /dev/null
 SUMABUNDANCES=$(awk -F "[;=]" '/^>/ {print $3}' "${OUTPUT}")
 [[ "${SUMABUNDANCES}" -eq 5 ]] && \
     success "${DESCRIPTION}" || \
@@ -490,7 +490,7 @@ rm "${OUTPUT}"
 INPUT=$(mktemp)
 printf ">a_\nACGT\n" > "${INPUT}"
 DESCRIPTION="swarms -a option set abundance value for vsearch style"
-"${SWARM}" -a "${LOG}" < "${INPUT}" > "${NULL}" 2> "${NULL}" && \
+"${SWARM}" -a "${LOG}" < "${INPUT}" > /dev/null 2> /dev/null && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${INPUT}"
@@ -499,7 +499,7 @@ rm "${INPUT}"
 INPUT=$(mktemp)
 printf ">a_\nACGT\n" > "${INPUT}"
 DESCRIPTION="swarms -a option does not overwrite abundance value for vsearch style"
-"${SWARM}" -a "${LOG}" < "${INPUT}" > "${NULL}" 2> "${NULL}" && \
+"${SWARM}" -a "${LOG}" < "${INPUT}" > /dev/null 2> /dev/null && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${INPUT}"
@@ -509,13 +509,13 @@ LOG=$(mktemp)
 
 ## Swarm accepts --log option
 DESCRIPTION="swarm accepts --log option"
-"${SWARM}" --log "${LOG}" < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
+"${SWARM}" --log "${LOG}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
 ## Swarm accepts -l option
 DESCRIPTION="swarm accepts -l option"
-"${SWARM}" -l "${LOG}" < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
+"${SWARM}" -l "${LOG}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${LOG}"
@@ -523,7 +523,7 @@ rm "${LOG}"
 ## Swarm does not write on error output when using -l
 ERRORINPUT=$(mktemp)
 DESCRIPTION="swarm does not write on error output when using -l"
-"${SWARM}" -l "${NULL}" < "${ALL_IDENTICAL}" > "${NULL}" 2> "${ERRORINPUT}"
+"${SWARM}" -l /dev/null < "${ALL_IDENTICAL}" > /dev/null 2> "${ERRORINPUT}"
 [[ ! -s "${ERRORINPUT}" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -532,7 +532,7 @@ rm "${ERRORINPUT}"
 ## Swarm does write on error output when using -l if it fails
 ERRORINPUT=$(mktemp)
 DESCRIPTION="swarm does write on error output when using -l if it fails"
-"${SWARM}" -d -l "${NULL}" < "${ALL_IDENTICAL}" > "${NULL}" 2> "${ERRORINPUT}"
+"${SWARM}" -d -l /dev/null < "${ALL_IDENTICAL}" > /dev/null 2> "${ERRORINPUT}"
 [[ -s "${ERRORINPUT}" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -541,7 +541,7 @@ rm "${ERRORINPUT}"
 ## Swarm accepts -o option
 OUTPUT=$(mktemp)
 DESCRIPTION="swarm accepts -o option"
-"${SWARM}" -o "${OUTPUT}" < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
+"${SWARM}" -o "${OUTPUT}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -549,7 +549,7 @@ rm "${OUTPUT}"
 ## Swarm accepts --output-file option
 OUTPUT=$(mktemp)
 DESCRIPTION="swarm accepts --output-file option"
-"${SWARM}" --output-file "${OUTPUT}" < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
+"${SWARM}" --output-file "${OUTPUT}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -557,7 +557,7 @@ rm "${OUTPUT}"
 ## Swarm create output file with -o option
 OUTPUT=$(mktemp)
 DESCRIPTION="swarm create output file with -o option"
-"${SWARM}" -o  "${OUTPUT}" < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}"
+"${SWARM}" -o  "${OUTPUT}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null
 [[ -s "${OUTPUT}" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -566,7 +566,7 @@ rm "${OUTPUT}"
 ## Swarm fill correctly output file with -o option
 OUTPUT=$(mktemp)
 DESCRIPTION="swarm fill correctly output file with -o option"
-"${SWARM}" -o  "${OUTPUT}" < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}"
+"${SWARM}" -o  "${OUTPUT}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null
 [[ $(cat "${OUTPUT}") == "seq1_1 seq2_1 seq3_1 seq4_1 seq5_1 seq6_1 seq7_1 seq8_1 seq9_1 seq10_1" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -583,26 +583,26 @@ while read LONG SHORT ; do
     ## Using option when d = 1 should fail (or warning?)
     DESCRIPTION="swarm fails when --${LONG} is specified and d = 1"
     "${SWARM}" -d 1 "${OPTION}" 1 < "${ALL_IDENTICAL}" \
-               > "${NULL}" 2> "${NULL}" && \
+               > /dev/null 2> /dev/null && \
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
 
     ## option is empty
     DESCRIPTION="swarm aborts when --${LONG} is empty"
-    "${SWARM}" -d 2 ${SHORT} < "${ALL_IDENTICAL}" 2> "${NULL}" && \
+    "${SWARM}" -d 2 ${SHORT} < "${ALL_IDENTICAL}" 2> /dev/null && \
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
 
     ## option is negative
     DESCRIPTION="swarm aborts when --${LONG} is -1"
     "${SWARM}" -d 2 ${SHORT} -1 < "${ALL_IDENTICAL}" \
-               > "${NULL}" 2> "${NULL}" && \
+               > /dev/null 2> /dev/null && \
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
 
     ## option is non-numerical
     DESCRIPTION="swarm aborts when --${LONG} is not numerical"
-    "${SWARM}" -d 2 ${SHORT} "a" < "${ALL_IDENTICAL}" 2> "${NULL}" && \
+    "${SWARM}" -d 2 ${SHORT} "a" < "${ALL_IDENTICAL}" 2> /dev/null && \
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
 
@@ -610,13 +610,13 @@ while read LONG SHORT ; do
     if [[ "${SHORT}" == "-m" || "${SHORT}" == "-p" ]] ; then
         DESCRIPTION="swarm aborts when --${LONG} is null"
         "${SWARM}" -d 2 ${SHORT} 0 < "${ALL_IDENTICAL}" \
-                   > "${NULL}" 2> "${NULL}" && \
+                   > /dev/null 2> /dev/null && \
             failure "${DESCRIPTION}" || \
                 success "${DESCRIPTION}"
     elif [[ "${SHORT}" == "-g" || "${SHORT}" == "-e" ]] ; then
         DESCRIPTION="swarm runs normally when --${LONG} is null"
         "${SWARM}" -d 2 ${SHORT} 0 < "${ALL_IDENTICAL}" \
-                   > "${NULL}" 2> "${NULL}" && \
+                   > /dev/null 2> /dev/null && \
             success "${DESCRIPTION}" || \
                 failure "${DESCRIPTION}"
     else
@@ -630,7 +630,7 @@ while read LONG SHORT ; do
     DESCRIPTION="swarm runs normally when --${LONG} goes from ${MIN} to ${MAX}"
     for ((i=$MIN ; i<=$MAX ; i++)) ; do
         "${SWARM}" -d 2 "${SHORT}" ${i} < "${ALL_IDENTICAL}" \
-                   > "${NULL}" 2> "${NULL}" || \
+                   > /dev/null 2> /dev/null || \
             failure "swarm aborts when --${LONG} equals ${i}"
     done && success "${DESCRIPTION}"
     
