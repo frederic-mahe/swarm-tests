@@ -410,6 +410,20 @@ rm "${FASTIDOUSINPUT}"
 #                                                                             #
 #*****************************************************************************#
 
+## Swarm accepts --append-abundance option
+DESCRIPTION="swarm accepts --append-abundance option"
+"${SWARM}" --append-abundance "${LOG}" < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## Swarm accepts -a option
+DESCRIPTION="swarm accepts -a option"
+"${SWARM}" -a "${LOG}" < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+
+
 ## Initializing log file
 LOG=$(mktemp)
 
