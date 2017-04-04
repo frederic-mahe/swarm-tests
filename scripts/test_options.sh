@@ -422,6 +422,91 @@ DESCRIPTION="swarm accepts -a option"
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+## Swarm append the abundance number set with -a
+INPUT=$(mktemp)
+OUTPUT=$(mktemp)
+printf ">b\nACGT\n" > "${INPUT}"
+DESCRIPTION="swarm append the abundance number set with -a"
+"${SWARM}" -a 2 -w "${OUTPUT}" < "${INPUT}" > "${NULL}" 2> "${NULL}"
+SUMABUNDANCES=$(sed -n '/^>/ s/.*_//p' "${OUTPUT}")
+[[ "${SUMABUNDANCES}" -eq 2 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${INPUT}"
+rm "${OUTPUT}"
+
+## Swarm does not overwrite the abundance number with -a for vsearch notation
+INPUT=$(mktemp)
+OUTPUT=$(mktemp)
+printf ">b_3\nACGT\n" > "${INPUT}"
+DESCRIPTION="swarm does not overwrite the abundance number with -a for vsearch notation"
+"${SWARM}" -a 2 -w "${OUTPUT}" < "${INPUT}" > "${NULL}" 2> "${NULL}"
+SUMABUNDANCES=$(sed -n '/^>/ s/.*_//p' "${OUTPUT}")
+[[ "${SUMABUNDANCES}" -eq 3 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${INPUT}"
+rm "${OUTPUT}"
+
+## Swarm does not overwrite the abundance number with -a for usearch notation
+INPUT=$(mktemp)
+OUTPUT=$(mktemp)
+printf ">b;size=3\nACGT\n" > "${INPUT}"
+DESCRIPTION="swarm does not overwrite the abundance number with -a for usearch notation"
+"${SWARM}" -z -a 2 -w "${OUTPUT}" < "${INPUT}" > "${NULL}" 2> "${NULL}"
+SUMABUNDANCES=$(awk -F "[;=]" '/^>/ {print $3}' "${OUTPUT}")
+[[ "${SUMABUNDANCES}" -eq 3 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${INPUT}"
+rm "${OUTPUT}"
+
+## Swarm append the abundance number set with -a for vsearch notation
+INPUT=$(mktemp)
+OUTPUT=$(mktemp)
+printf ">a_3\nACGT\n>b\nACGT\n" > "${INPUT}"
+DESCRIPTION="swarm append the abundance number set with -a for vsearch notation"
+"${SWARM}" -a 2 -w "${OUTPUT}" < "${INPUT}" > "${NULL}" 2> "${NULL}"
+SUMABUNDANCES=$(sed -n '/^>/ s/.*_//p' "${OUTPUT}")
+[[ "${SUMABUNDANCES}" -eq 5 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${INPUT}"
+rm "${OUTPUT}"
+
+## Swarm append the abundance number set with -a for usearch notation
+INPUT=$(mktemp)
+OUTPUT=$(mktemp)
+printf ">a;size=3\nACGT\n>b\nACGT\n" > "${INPUT}"
+DESCRIPTION="swarm append the abundance number set with -a for usearch notation"
+"${SWARM}" -z -a 2 -w "${OUTPUT}" < "${INPUT}" > "${NULL}" 2> "${NULL}"
+SUMABUNDANCES=$(awk -F "[;=]" '/^>/ {print $3}' "${OUTPUT}")
+[[ "${SUMABUNDANCES}" -eq 5 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${INPUT}"
+rm "${OUTPUT}"
+
+exit -1
+
+## Swarms -a option set abundance value for vsearch style
+INPUT=$(mktemp)
+printf ">a_\nACGT\n" > "${INPUT}"
+DESCRIPTION="swarms -a option set abundance value for vsearch style"
+"${SWARM}" -a "${LOG}" < "${INPUT}" > "${NULL}" 2> "${NULL}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${INPUT}"
+
+## Swarms -a option does not overwrite abundance value for vsearch style
+INPUT=$(mktemp)
+printf ">a_\nACGT\n" > "${INPUT}"
+DESCRIPTION="swarms -a option does not overwrite abundance value for vsearch style"
+"${SWARM}" -a "${LOG}" < "${INPUT}" > "${NULL}" 2> "${NULL}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${INPUT}"
+
 
 
 ## Initializing log file
