@@ -235,9 +235,8 @@ LINENUMBER=$("${SWARM}" -n "${BREAKINGINPUT}" 2> "${NULL}" | wc -l)
 [[ $LINENUMBER == 1 ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
+rm "${INPUT}"
 rm "${BREAKINGINPUT}"
-
-
 
 
 #*****************************************************************************#
@@ -435,7 +434,7 @@ SUMABUNDANCES=$(sed -n '/^>/ s/.*_//p' "${OUTPUT}")
 rm "${INPUT}"
 rm "${OUTPUT}"
 
-## Swarm does not overwrite the abundance number with -a for vsearch notation
+## Swarm does not overwrite the abundance number with -a for swarm notation
 INPUT=$(mktemp)
 OUTPUT=$(mktemp)
 printf ">b_3\nACGT\n" > "${INPUT}"
@@ -461,7 +460,7 @@ SUMABUNDANCES=$(awk -F "[;=]" '/^>/ {print $3}' "${OUTPUT}")
 rm "${INPUT}"
 rm "${OUTPUT}"
 
-## Swarm append the abundance number set with -a for vsearch notation
+## Swarm append the abundance number set with -a for swarm notation
 INPUT=$(mktemp)
 OUTPUT=$(mktemp)
 printf ">a_3\nACGT\n>b\nACGT\n" > "${INPUT}"
@@ -487,9 +486,7 @@ SUMABUNDANCES=$(awk -F "[;=]" '/^>/ {print $3}' "${OUTPUT}")
 rm "${INPUT}"
 rm "${OUTPUT}"
 
-exit -1
-
-## Swarms -a option set abundance value for vsearch style
+## Swarms -a option set abundance value for swarm style
 INPUT=$(mktemp)
 printf ">a_\nACGT\n" > "${INPUT}"
 DESCRIPTION="swarms -a option set abundance value for vsearch style"
@@ -506,8 +503,6 @@ DESCRIPTION="swarms -a option does not overwrite abundance value for vsearch sty
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${INPUT}"
-
-
 
 ## Initializing log file
 LOG=$(mktemp)
@@ -542,6 +537,40 @@ DESCRIPTION="swarm does write on error output when using -l if it fails"
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${ERRORINPUT}"
+
+## Swarm accepts -o option
+OUTPUT=$(mktemp)
+DESCRIPTION="swarm accepts -o option"
+"${SWARM}" -o "${OUTPUT}" < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## Swarm accepts --output-file option
+OUTPUT=$(mktemp)
+DESCRIPTION="swarm accepts --output-file option"
+"${SWARM}" --output-file "${OUTPUT}" < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## Swarm create output file with -o option
+OUTPUT=$(mktemp)
+DESCRIPTION="swarm create output file with -o option"
+"${SWARM}" -o  "${OUTPUT}" < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}"
+[[ -s "${OUTPUT}" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## Swarm fill correctly output file with -o option
+OUTPUT=$(mktemp)
+DESCRIPTION="swarm fill correctly output file with -o option"
+"${SWARM}" -o  "${OUTPUT}" < "${ALL_IDENTICAL}" > "${NULL}" 2> "${NULL}"
+[[ $(cat "${OUTPUT}") == "seq1_1 seq2_1 seq3_1 seq4_1 seq5_1 seq6_1 seq7_1 seq8_1 seq9_1 seq10_1" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
 
 
 #*****************************************************************************#
