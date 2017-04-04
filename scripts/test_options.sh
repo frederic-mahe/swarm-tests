@@ -546,7 +546,8 @@ rm "${OUTPUT}"
 OUTPUT=$(mktemp)
 DESCRIPTION="swarm fill correctly output file with -o option"
 "${SWARM}" -o  "${OUTPUT}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null
-[[ $(cat "${OUTPUT}") == "seq1_1 seq2_1 seq3_1 seq4_1 seq5_1 seq6_1 seq7_1 seq8_1 seq9_1 seq10_1" ]] && \
+EXPECTED=$(sed -n '/^>/ s/>//p' "${ALL_IDENTICAL}" | tr "\n" " " | sed 's/ $//')
+[[ $(cat "${OUTPUT}") == "${EXPECTED}" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
