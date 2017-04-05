@@ -409,6 +409,8 @@ rm "${FASTIDOUSINPUT}"
 #                                                                             #
 #*****************************************************************************#
 
+## ----------------------------------------------------------- append-abundance
+
 ## Swarm accepts --append-abundance option
 DESCRIPTION="swarm accepts --append-abundance option"
 "${SWARM}" --append-abundance "${LOG}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
@@ -550,6 +552,9 @@ SUMABUNDANCES=$(awk -F "[;=]" '/^>/ {print $3}' "${OUTPUT}")
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
 
+
+## --------------------------------------------------------- internal structure
+
 ## Swarm accepts --internal-structure option
 OUTPUT=$(mktemp)
 DESCRIPTION="swarm accepts --internal-structure option"
@@ -640,22 +645,21 @@ OUTPUT=$(awk -F "\t" '{print $5}' "${OUTPUT}" | sed '2q;d')
     [[ "${OUTPUT}" == "2" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-    
-## Initializing log file
-LOG=$(mktemp)
 
+    
+## ------------------------------------------------------------------------ log
+    
 ## Swarm accepts --log option
 DESCRIPTION="swarm accepts --log option"
-"${SWARM}" --log "${LOG}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
+"${SWARM}" --log /dev/null < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
 ## Swarm accepts -l option
 DESCRIPTION="swarm accepts -l option"
-"${SWARM}" -l "${LOG}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
+"${SWARM}" -l /dev/null < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${LOG}"
 
 ## Swarm does not write on standard error when using -l
 ERRORINPUT=$(mktemp)
@@ -669,31 +673,31 @@ rm "${ERRORINPUT}"
 ## Swarm does write on standard error when using -l, except for errors
 ERRORINPUT=$(mktemp)
 DESCRIPTION="swarm does write on standard error when using -l, except for errors"
+# voluntary error (missing d value) to create an error message
 "${SWARM}" -d -l /dev/null < "${ALL_IDENTICAL}" > /dev/null 2> "${ERRORINPUT}"
 [[ -s "${ERRORINPUT}" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${ERRORINPUT}"
 
+
+## ---------------------------------------------------------------- output-file
+
 ## Swarm accepts -o option
-OUTPUT=$(mktemp)
 DESCRIPTION="swarm accepts -o option"
-"${SWARM}" -o "${OUTPUT}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
+"${SWARM}" -o /dev/null < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
 
 ## Swarm accepts --output-file option
-OUTPUT=$(mktemp)
 DESCRIPTION="swarm accepts --output-file option"
-"${SWARM}" --output-file "${OUTPUT}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
+"${SWARM}" --output-file /dev/null < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
 
 ## Swarm creates output file with -o option
 OUTPUT=$(mktemp)
-DESCRIPTION="swarm create output file with -o option"
+DESCRIPTION="swarm -o writes to the specified output file"
 "${SWARM}" -o  "${OUTPUT}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null
 [[ -s "${OUTPUT}" ]] && \
     success "${DESCRIPTION}" || \
@@ -702,13 +706,16 @@ rm "${OUTPUT}"
 
 ## Swarm fills correctly output file with -o option
 OUTPUT=$(mktemp)
-DESCRIPTION="swarm fill correctly output file with -o option"
+DESCRIPTION="swarm -o fill correctly output file with -o option"
 "${SWARM}" -o  "${OUTPUT}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null
 EXPECTED=$(sed -n '/^>/ s/>//p' "${ALL_IDENTICAL}" | tr "\n" " " | sed 's/ $//')
 [[ $(cat "${OUTPUT}") == "${EXPECTED}" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+
+
+## ------------------------------------------------------------ statistics-file
 
 ## Swarm accepts --statistics-file option
 DESCRIPTION="swarm accepts --statistics-file option"
@@ -870,6 +877,9 @@ OUTPUT=$(awk -F "\t" '{print $5}' "${OUTPUT}" | sed '2q;d')
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+
+## ---------------------------------------------------------------------- seeds
+
 ## Swarm accepts --seeds option
 DESCRIPTION="swarm accepts --seeds option"
 OUTPUT=$(mktemp)
@@ -896,7 +906,7 @@ printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
 
 ## Swarm -w create anf fill file given in argument
 OUTPUT=$(mktemp)
-DESCRIPTION="swarm -w create anf fill file given in argument"
+DESCRIPTION="swarm -w create and fill file given in argument"
 printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
 "${SWARM}" -w "${OUTPUT}" > /dev/null 2> /dev/null
 [[ -s "${OUTPUT}" ]] && \
@@ -906,11 +916,10 @@ rm "${OUTPUT}"
 
 ## Swarm -w gives expected output
 OUTPUT=$(mktemp)
-
 DESCRIPTION="swarm -w gives expected output"
 EXPECTED=$(printf ">a_2\naaaa\n>c_1\ngggg\n")
 printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
-"${SWARM}" -w "${OUTPUT}" > /dev/null 2> /dev/null
+    "${SWARM}" -w "${OUTPUT}" > /dev/null 2> /dev/null
 [[ "$(cat "${OUTPUT}")" == "${EXPECTED}" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
