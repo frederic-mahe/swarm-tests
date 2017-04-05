@@ -483,6 +483,164 @@ SUMABUNDANCES=$(awk -F "[;=]" '/^>/ {print $3}' "${OUTPUT}")
 rm "${OUTPUT}"
 
 
+## Swarm accepts -a option
+DESCRIPTION="swarm accepts -a option"
+"${SWARM}" -a "${LOG}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## Swarm appends the abundance value set with -a
+INPUT=$(mktemp)
+OUTPUT=$(mktemp)
+printf ">b\nACGT\n" > "${INPUT}"
+DESCRIPTION="swarm append the abundance number set with -a"
+"${SWARM}" -a 2 -w "${OUTPUT}" < "${INPUT}" > /dev/null 2> /dev/null
+SUMABUNDANCES=$(sed -n '/^>/ s/.*_//p' "${OUTPUT}")
+[[ "${SUMABUNDANCES}" -eq 2 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${INPUT}"
+rm "${OUTPUT}"
+
+## Swarm does not overwrite the abundance number with -a for swarm notation
+INPUT=$(mktemp)
+OUTPUT=$(mktemp)
+printf ">b_3\nACGT\n" > "${INPUT}"
+DESCRIPTION="swarm does not overwrite the abundance number with -a for vsearch notation"
+"${SWARM}" -a 2 -w "${OUTPUT}" < "${INPUT}" > /dev/null 2> /dev/null
+SUMABUNDANCES=$(sed -n '/^>/ s/.*_//p' "${OUTPUT}")
+[[ "${SUMABUNDANCES}" -eq 3 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${INPUT}"
+rm "${OUTPUT}"
+
+## Swarm does not overwrite the abundance number with -a for usearch notation
+INPUT=$(mktemp)
+OUTPUT=$(mktemp)
+printf ">b;size=3\nACGT\n" > "${INPUT}"
+DESCRIPTION="swarm does not overwrite the abundance number with -a for usearch notation"
+"${SWARM}" -z -a 2 -w "${OUTPUT}" < "${INPUT}" > /dev/null 2> /dev/null
+SUMABUNDANCES=$(awk -F "[;=]" '/^>/ {print $3}' "${OUTPUT}")
+[[ "${SUMABUNDANCES}" -eq 3 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${INPUT}"
+rm "${OUTPUT}"
+
+## Swarm append the abundance number set with -a for swarm notation
+OUTPUT=$(mktemp)
+DESCRIPTION="swarm append the abundance number set with -a for vsearch notation"
+printf ">a_3\nACGT\n>b\nACGT\n" | \
+    "${SWARM}" -a 2 -w "${OUTPUT}" > /dev/null 2> /dev/null
+SUMABUNDANCES=$(sed -n '/^>/ s/.*_//p' "${OUTPUT}")
+[[ "${SUMABUNDANCES}" -eq 5 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## Swarm append the abundance number set with -a for usearch notation
+OUTPUT=$(mktemp)
+DESCRIPTION="swarm append the abundance number set with -a for usearch notation"
+printf ">a;size=3\nACGT\n>b\nACGT\n" | \
+    "${SWARM}" -z -a 2 -w "${OUTPUT}" > /dev/null 2> /dev/null
+SUMABUNDANCES=$(awk -F "[;=]" '/^>/ {print $3}' "${OUTPUT}")
+[[ "${SUMABUNDANCES}" -eq 5 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## Swarm accepts --internal-structure option
+OUTPUT=$(mktemp)
+DESCRIPTION="swarm accepts --internal-structure option"
+"${SWARM}" --internal-structure "${OUTPUT}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## Swarm accepts -i option
+OUTPUT=$(mktemp)
+DESCRIPTION="swarm accepts -i option"
+"${SWARM}" -i "${OUTPUT}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## Swarm -i fails if no output file given
+DESCRIPTION="swarm -i fails if no output file given"
+"${SWARM}" -i  < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+## Swarm -i create and fill given output file
+OUTPUT=$(mktemp)
+DESCRIPTION="swarm -i create and fill given output file"
+"${SWARM}" --internal-structure "${OUTPUT}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null
+    [[ -s "${OUTPUT}" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## -i number of differences is correct (0 expected)
+OUTPUT=$(mktemp)
+DESCRIPTION="number of differences is correct (0 expected)"
+printf ">a_1\nAAAA\n>b_1\nAAAA\n" | \
+"${SWARM}" -i "${OUTPUT}" > /dev/null 2> /dev/null
+OUTPUT=$(awk -F "\t" '{print $3}' "${OUTPUT}")
+    [[ "${OUTPUT}" == "0" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -i number of differences is correct while -d 2 (2 expected)
+OUTPUT=$(mktemp)
+DESCRIPTION="-i number of differences is correct while -d 2 (2 expected)"
+printf ">a_1\nAAAA\n>b_1\nAACC\n" | \
+"${SWARM}" -d 2 -i "${OUTPUT}" > /dev/null 2> /dev/null
+OUTPUT=$(awk -F "\t" '{print $3}' "${OUTPUT}")
+    [[ "${OUTPUT}" == "2" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -i number of steps is correct (1 expected)
+OUTPUT=$(mktemp)
+DESCRIPTION="-i number of steps is correct (1 expected)"
+printf ">a_1\nAAAA\n>b_1\nAAAC\n" | \
+"${SWARM}" -i "${OUTPUT}" > /dev/null 2> /dev/null
+OUTPUT=$(awk -F "\t" '{print $5}' "${OUTPUT}")
+    [[ "${OUTPUT}" == "1" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -i number of steps is correct (3 expected)
+OUTPUT=$(mktemp)
+DESCRIPTION="-i number of steps is correct (3 expected)"
+printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nAACC\n>d_1\nACCC\n" | \
+"${SWARM}" -i "${OUTPUT}" > /dev/null 2> /dev/null
+OUTPUT=$(awk -F "\t" '{print $5}' "${OUTPUT}" | sed '3q;d' )
+    [[ "${OUTPUT}" == "3" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -i number of steps is correct while -d 2 (1 expected)
+OUTPUT=$(mktemp)
+DESCRIPTION="-i number of steps is correct while -d 2 (1 expected)"
+printf ">a_1\nAAAA\n>c_1\nAACC\n" | \
+"${SWARM}" -d 2 -i "${OUTPUT}" > /dev/null 2> /dev/null
+OUTPUT=$(awk -F "\t" '{print $5}' "${OUTPUT}" )
+    [[ "${OUTPUT}" == "1" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -i number of steps is correct while -d 2 (2 expected)
+OUTPUT=$(mktemp)
+DESCRIPTION="-i number of steps is correct while -d 2 (2 expected)"
+printf ">a_1\nAAAA\n>b_1\nAACC\n>c_1\nACCC\n" | \
+"${SWARM}" -d 2 -i "${OUTPUT}" > /dev/null 2> /dev/null
+OUTPUT=$(awk -F "\t" '{print $5}' "${OUTPUT}" | sed '2q;d')
+    [[ "${OUTPUT}" == "2" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+    
 ## Initializing log file
 LOG=$(mktemp)
 
@@ -548,6 +706,92 @@ DESCRIPTION="swarm fill correctly output file with -o option"
 "${SWARM}" -o  "${OUTPUT}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null
 EXPECTED=$(sed -n '/^>/ s/>//p' "${ALL_IDENTICAL}" | tr "\n" " " | sed 's/ $//')
 [[ $(cat "${OUTPUT}") == "${EXPECTED}" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## Swarm accepts --statistics-file option
+DESCRIPTION="swarm accepts --statistics-file option"
+OUTPUT=$(mktemp)
+"${SWARM}" --statistics-file "${OUTPUT}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## Swarm accepts -s option
+DESCRIPTION="swarm accepts -s option"
+OUTPUT=$(mktemp)
+"${SWARM}" -s "${OUTPUT}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## Swarm -s create and fill given filename
+DESCRIPTION="swarm -s create and fill filename given"
+OUTPUT=$(mktemp)
+"${SWARM}" -s "${OUTPUT}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null
+[[ -s "${OUTPUT}" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## Swarm -s fails if no filename given
+DESCRIPTION="Swarm -s fails if no filename given"
+"${SWARM}" -s  < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+## Swarm -s create and fill given filename
+DESCRIPTION="swarm -s create and fill filename given"
+OUTPUT=$(mktemp)
+"${SWARM}" -s "${OUTPUT}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null
+[[ -s "${OUTPUT}" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## Swarm accepts --seeds option
+DESCRIPTION="swarm accepts --seeds option"
+OUTPUT=$(mktemp)
+printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
+"${SWARM}" --seeds "${OUTPUT}"  > /dev/null 2> /dev/null && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## Swarm accepts -w option
+OUTPUT=$(mktemp)
+DESCRIPTION="swarm accepts -w option"
+printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
+"${SWARM}" -w "${OUTPUT}"  > /dev/null 2> /dev/null && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## Swarm -w fails if no output file given
+DESCRIPTION="swarm -w fails if no output file given"
+printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
+"${SWARM}" -w > /dev/null 2> /dev/null && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+## Swarm -w create anf fill file given in argument
+OUTPUT=$(mktemp)
+DESCRIPTION="swarm -w create anf fill file given in argument"
+printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
+"${SWARM}" -w "${OUTPUT}" > /dev/null 2> /dev/null
+[[ -s "${OUTPUT}" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"  
+
+## Swarm -w gives expected output
+OUTPUT=$(mktemp)
+
+DESCRIPTION="swarm -w gives expected output"
+EXPECTED=$(printf ">a_2\naaaa\n>c_1\ngggg\n")
+printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
+"${SWARM}" -w "${OUTPUT}" > /dev/null 2> /dev/null
+[[ "$(cat "${OUTPUT}")" == "${EXPECTED}" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
