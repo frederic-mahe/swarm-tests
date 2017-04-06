@@ -1103,6 +1103,135 @@ SORTED_OUTPUT=$(awk -F "\t" '{print $7}' "${OUTPUT}" | sed '1q;d')
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
 
+## ---------------------------------------------------------------- uclust-file
+
+## Swarm accepts --uclust-file option
+DESCRIPTION="swarm accepts --uclust-file option"
+OUTPUT=$(mktemp)
+printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
+"${SWARM}" --uclust-file "${OUTPUT}"  > /dev/null 2> /dev/null && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## Swarm accepts -u option
+OUTPUT=$(mktemp)
+DESCRIPTION="swarm accepts -u option"
+printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
+"${SWARM}" -u "${OUTPUT}"  > /dev/null 2> /dev/null && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## Swarm -u fails if no output file given
+DESCRIPTION="swarm -u fails if no output file given"
+printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
+"${SWARM}" -u > /dev/null 2> /dev/null && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+## Swarm -u create anf fill file given in argument
+OUTPUT=$(mktemp)
+DESCRIPTION="swarm -u create and fill file given in argument"
+printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
+"${SWARM}" -u "${OUTPUT}" > /dev/null 2> /dev/null
+[[ -s "${OUTPUT}" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"  
+
+## -u number of hits is correct in 1st row #1
+DESCRIPTION="-u number of hits is correct in st row #1"
+OUTPUT=$(mktemp)
+printf ">a_3\nAAAA\n>b_3\nAAAC\n" | \
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2> /dev/null
+SORTED_OUTPUT=$(grep -c "^H" "${OUTPUT}")
+[[ "${SORTED_OUTPUT}" -eq 1 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## -u number of hits is correct in 1st row #2
+DESCRIPTION="-u number of hits is correct in st row #2"
+OUTPUT=$(mktemp)
+printf ">a_3\nGGGG\n>b_3\nAAAA\n>c_3\nAAAC\n>d_3\nAACC\n" | \
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2> /dev/null
+SORTED_OUTPUT=$(grep -c "^H" "${OUTPUT}")
+[[ "${SORTED_OUTPUT}" -eq 2 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## -u number of centroids is correct in 1st row #1
+DESCRIPTION="-u number of centroids is correct in 1st row #1"
+OUTPUT=$(mktemp)
+printf ">a_3\nGGGG\n>b_3\nAAAA\n>c_3\nAAAC\n>d_3\nAACC\n" | \
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2> /dev/null
+SORTED_OUTPUT=$(grep -c "^S" "${OUTPUT}")
+[[ "${SORTED_OUTPUT}" -eq 2 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## -u number of centroids is correct in 1st row #2
+DESCRIPTION="-u number of centroids is correct in 1st row #2"
+OUTPUT=$(mktemp)
+printf ">a_3\nGGGG\n" | \
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2> /dev/null
+SORTED_OUTPUT=$(grep -c "^S" "${OUTPUT}")
+[[ "${SORTED_OUTPUT}" -eq 1 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## -u number of cluster records is correct in 1st row #1
+DESCRIPTION="-u number of cluster records is correct in 1st row #1"
+OUTPUT=$(mktemp)
+printf ">a_3\nGGGG\n>b_3\nAAAA\n>c_3\nAAAC\n>d_3\nAACC\n" | \
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2> /dev/null
+SORTED_OUTPUT=$(grep -c "^C" "${OUTPUT}")
+[[ "${SORTED_OUTPUT}" -eq 2 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## -u number of cluster records is correct in 1st row #2
+DESCRIPTION="-u number of cluster records is correct in 1st row #2"
+OUTPUT=$(mktemp)
+printf ">a_3\nGGGG\n" | \
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2> /dev/null
+SORTED_OUTPUT=$(grep -c "^C" "${OUTPUT}")
+[[ "${SORTED_OUTPUT}" -eq 1 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## -u cluster number is correct in 2nd row #1
+DESCRIPTION="-u cluster number is correct in 2nd row #1"
+OUTPUT=$(mktemp)
+printf ">a_3\nGGGG\n" | \
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2> /dev/null
+SORTED_OUTPUT=$(grep -m 1 "^C" "${OUTPUT}" | \
+                       awk -F "\t" '{print $2}')
+[[ "${SORTED_OUTPUT}" -eq 0 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## -u cluster number is correct in 2nd row #2
+DESCRIPTION="-u cluster number is correct in 2nd row #2"
+OUTPUT=$(mktemp)
+printf ">a_3\nGGGG\n>b_3\nAAAA\n>c_3\nAAAC\n" | \
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2> /dev/null
+SORTED_OUTPUT=$(grep "^C" "${OUTPUT}" | \
+                       awk -F "\t" '{if (NR == 2) {print $2}}')
+[[ "${SORTED_OUTPUT}" -eq 1 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+
+exit -1
 
 ## ---------------------------------------------------------------------- seeds
 
