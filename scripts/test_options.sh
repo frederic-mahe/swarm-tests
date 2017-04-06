@@ -651,6 +651,8 @@ SORTED_OUTPUT=$(awk -F "\t" '{print $5}' "${OUTPUT}" | sed '2q;d')
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+
+    
     
     
 ## ------------------------------------------------------------------------ log
@@ -720,6 +722,92 @@ EXPECTED=$(sed -n '/^>/ s/>//p' "${ALL_IDENTICAL}" | tr "\n" " " | sed 's/ $//')
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
 
+## --------------------------------------------------------------------- mothur
+
+## Swarm accepts --mothur option
+DESCRIPTION="swarm accepts --mothur option"
+OUTPUT=$(mktemp)
+"${SWARM}" --mothur < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## Swarm accepts -r option
+DESCRIPTION="swarm accepts -r option"
+OUTPUT=$(mktemp)
+"${SWARM}" -r < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## -r first row is correct
+DESCRIPTION="-r first row is correct"
+OUTPUT=$(mktemp)
+printf ">a_5\nAAAA\n" | \
+    "${SWARM}" -r  > "${OUTPUT}" 2> /dev/null
+SORTED_OUTPUT=$(awk -F "\t" '{print $1}' "${OUTPUT}")
+[[ "${SORTED_OUTPUT}" == "swarm_1" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## -r first row is correct with -d 2
+DESCRIPTION="-r first row is correct with -d 2"
+OUTPUT=$(mktemp)
+printf ">a_5\nAAAA\n" | \
+    "${SWARM}" -r -d 2 > "${OUTPUT}" 2> /dev/null
+SORTED_OUTPUT=$(awk -F "\t" '{print $1}' "${OUTPUT}")
+[[ "${SORTED_OUTPUT}" == "swarm_2" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## -r number of OTUs is correct (1 expected)
+DESCRIPTION="-r number of OTUs is correct (1 expected)"
+OUTPUT=$(mktemp)
+printf ">a_5\nAAAA\n" | \
+    "${SWARM}" -r -d 2 > "${OUTPUT}" 2> /dev/null
+SORTED_OUTPUT=$(awk -F "\t" '{print $2}' "${OUTPUT}")
+[[ "${SORTED_OUTPUT}" == "1" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## -r number of OTUs is correct (2 expected)
+DESCRIPTION="-r number of OTUs is correct (2 expected)"
+OUTPUT=$(mktemp)
+printf ">a_5\nAAAA\n>b_5\nAAAA\n>c_5\nAACC\n" | \
+    "${SWARM}" -r > "${OUTPUT}" 2> /dev/null
+SORTED_OUTPUT=$(awk -F "\t" '{print $2}' "${OUTPUT}")
+[[ "${SORTED_OUTPUT}" == "2" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## -r compostion of OTUs is correct
+DESCRIPTION="-r compostion of OTUs is correct"
+OUTPUT=$(mktemp)
+printf ">a_5\nAAAA\n>b_5\nAAAA\n>c_5\nAACC\n" | \
+    "${SWARM}" -r > "${OUTPUT}" 2> /dev/null
+SORTED_OUTPUT=$(awk -F "\t" '{print $3}' "${OUTPUT}")
+[[ "${SORTED_OUTPUT}" == "a_5,b_5" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## -r compostion of OTUs is correct
+DESCRIPTION="-r compostion of OTUs is correct"
+OUTPUT=$(mktemp)
+printf ">a_5\nAAAA\n>b_5\nAAAA\n>c_5\nAACC\n" | \
+    "${SWARM}" -r > "${OUTPUT}" 2> /dev/null
+SORTED_OUTPUT=$(awk -F "\t" '{print $3}' "${OUTPUT}")
+[[ "${SORTED_OUTPUT}" == "a_5,b_5" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+
+exit -1
 
 ## ------------------------------------------------------------ statistics-file
 
