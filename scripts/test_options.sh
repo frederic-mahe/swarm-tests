@@ -895,6 +895,85 @@ SORTED_OUTPUT=$(awk -F "\t" '{print $5}' "${OUTPUT}" | sed '2q;d')
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
 
+## Number of iterations is correct with -s (0 expected)
+DESCRIPTION="number of iterations is correct with -s (0 expected)"
+OUTPUT=$(mktemp)
+printf ">a_2\nAAAA\n" | \
+    "${SWARM}" -s "${OUTPUT}" > /dev/null 2> /dev/null
+SORTED_OUTPUT=$(awk -F "\t" '{print $6}' "${OUTPUT}" | sed '1q;d')
+[[ "${SORTED_OUTPUT}" == "0" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+
+## Number of iterations is correct with -s -d 2 (1 expected)
+DESCRIPTION="number of iterations is correct with -s (1 expected)"
+OUTPUT=$(mktemp)
+printf ">a_2\nAAAA\n>c_1\nAACC\n" | \
+    "${SWARM}" -d 2 -s "${OUTPUT}" > /dev/null 2> /dev/null
+SORTED_OUTPUT=$(awk -F "\t" '{print $6}' "${OUTPUT}" | sed '1q;d')
+[[ "${SORTED_OUTPUT}" == "1" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## Number of iterations is correct with -s -d 2 (2 expected)
+DESCRIPTION="number of iterations is correct with -s (2 expected)"
+OUTPUT=$(mktemp)
+printf ">a_2\nAAAA\n>b_2\nAAAC\n>c_1\nACCC\n" | \
+    "${SWARM}" -d 2 -s "${OUTPUT}" > /dev/null 2> /dev/null
+SORTED_OUTPUT=$(awk -F "\t" '{print $6}' "${OUTPUT}" | sed '1q;d')
+[[ "${SORTED_OUTPUT}" == "2" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## Theorical radius is correct with -s (0 expected)
+DESCRIPTION="theorical maximum radius is correct with -s (0 expected)"
+OUTPUT=$(mktemp)
+printf ">a_3\nAAAA\n" | \
+    "${SWARM}" -s "${OUTPUT}" > /dev/null 2> /dev/null
+SORTED_OUTPUT=$(awk -F "\t" '{print $7}' "${OUTPUT}" | sed '1q;d')
+[[ "${SORTED_OUTPUT}" == "0" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## Theorical radius is correct with -s (2 expected)
+DESCRIPTION="theorical maximum radius is correct with -s (2 expected)"
+OUTPUT=$(mktemp)
+printf ">a_3\nAAAA\n>b_2\nAAAC\n>c_1\nAACC\n" | \
+    "${SWARM}" -s "${OUTPUT}" > /dev/null 2> /dev/null
+SORTED_OUTPUT=$(awk -F "\t" '{print $7}' "${OUTPUT}" | sed '1q;d')
+[[ "${SORTED_OUTPUT}" == "2" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## Theorical radius is correct with -s -d 2 (2 expected)
+DESCRIPTION="theorical maximum radius is correct with -s -d 2 (2 expected)"
+OUTPUT=$(mktemp)
+printf ">a_2\nAAAA\n>c_1\nAACC\n" | \
+    "${SWARM}" -d 2 -s "${OUTPUT}" > /dev/null 2> /dev/null
+SORTED_OUTPUT=$(awk -F "\t" '{print $7}' "${OUTPUT}" | sed '1q;d')
+[[ "${SORTED_OUTPUT}" == "2" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## Theorical radius != actuel radius  with -s -d 2
+DESCRIPTION="theorical radius != actuel radius  with -s -d 2"
+OUTPUT=$(mktemp)
+printf ">a_3\nAAAAA\n>b_3\nAAACC\n>c_2\nACCCC\n>c_2\nACCAC\n" | \
+    "${SWARM}" -d 2 -s "${OUTPUT}" > /dev/null 2> /dev/null
+SORTED_OUTPUT=$(awk -F "\t" '{print $7}' "${OUTPUT}" | sed '1q;d')
+[[ "${SORTED_OUTPUT}" == "5" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+
 ## ---------------------------------------------------------------------- seeds
 
 ## Swarm accepts --seeds option
