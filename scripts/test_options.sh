@@ -591,61 +591,67 @@ OUTPUT=$(mktemp)
 DESCRIPTION="number of differences is correct (0 expected)"
 printf ">a_1\nAAAA\n>b_1\nAAAA\n" | \
 "${SWARM}" -i "${OUTPUT}" > /dev/null 2> /dev/null
-OUTPUT=$(awk -F "\t" '{print $3}' "${OUTPUT}")
-    [[ "${OUTPUT}" == "0" ]] && \
+SORTED_OUTPUT=$(awk -F "\t" '{print $3}' "${OUTPUT}")
+    [[ "${SORTED_OUTPUT}" == "0" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
+rm "${OUTPUT}"
 
 ## -i number of differences is correct while -d 2 (2 expected)
 OUTPUT=$(mktemp)
 DESCRIPTION="-i number of differences is correct while -d 2 (2 expected)"
 printf ">a_1\nAAAA\n>b_1\nAACC\n" | \
 "${SWARM}" -d 2 -i "${OUTPUT}" > /dev/null 2> /dev/null
-OUTPUT=$(awk -F "\t" '{print $3}' "${OUTPUT}")
-    [[ "${OUTPUT}" == "2" ]] && \
+SORTED_OUTPUT=$(awk -F "\t" '{print $3}' "${OUTPUT}")
+    [[ "${SORTED_OUTPUT}" == "2" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-
+rm "${OUTPUT}"
+    
 ## -i number of steps is correct (1 expected)
 OUTPUT=$(mktemp)
 DESCRIPTION="-i number of steps is correct (1 expected)"
 printf ">a_1\nAAAA\n>b_1\nAAAC\n" | \
 "${SWARM}" -i "${OUTPUT}" > /dev/null 2> /dev/null
-OUTPUT=$(awk -F "\t" '{print $5}' "${OUTPUT}")
-    [[ "${OUTPUT}" == "1" ]] && \
+SORTED_OUTPUT=$(awk -F "\t" '{print $5}' "${OUTPUT}")
+    [[ "${SORTED_OUTPUT}" == "1" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
+rm "${OUTPUT}"
 
 ## -i number of steps is correct (3 expected)
 OUTPUT=$(mktemp)
 DESCRIPTION="-i number of steps is correct (3 expected)"
 printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nAACC\n>d_1\nACCC\n" | \
 "${SWARM}" -i "${OUTPUT}" > /dev/null 2> /dev/null
-OUTPUT=$(awk -F "\t" '{print $5}' "${OUTPUT}" | sed '3q;d' )
-    [[ "${OUTPUT}" == "3" ]] && \
+SORTED_OUTPUT=$(awk -F "\t" '{print $5}' "${OUTPUT}" | sed '3q;d' )
+    [[ "${SORTED_OUTPUT}" == "3" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
+rm "${OUTPUT}"
 
 ## -i number of steps is correct while -d 2 (1 expected)
 OUTPUT=$(mktemp)
 DESCRIPTION="-i number of steps is correct while -d 2 (1 expected)"
 printf ">a_1\nAAAA\n>c_1\nAACC\n" | \
 "${SWARM}" -d 2 -i "${OUTPUT}" > /dev/null 2> /dev/null
-OUTPUT=$(awk -F "\t" '{print $5}' "${OUTPUT}" )
-    [[ "${OUTPUT}" == "1" ]] && \
+SORTED_OUTPUT=$(awk -F "\t" '{print $5}' "${OUTPUT}" )
+    [[ "${SORTED_OUTPUT}" == "1" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
+rm "${OUTPUT}"
 
 ## -i number of steps is correct while -d 2 (2 expected)
 OUTPUT=$(mktemp)
 DESCRIPTION="-i number of steps is correct while -d 2 (2 expected)"
 printf ">a_1\nAAAA\n>b_1\nAACC\n>c_1\nACCC\n" | \
 "${SWARM}" -d 2 -i "${OUTPUT}" > /dev/null 2> /dev/null
-OUTPUT=$(awk -F "\t" '{print $5}' "${OUTPUT}" | sed '2q;d')
-    [[ "${OUTPUT}" == "2" ]] && \
+SORTED_OUTPUT=$(awk -F "\t" '{print $5}' "${OUTPUT}" | sed '2q;d')
+    [[ "${SORTED_OUTPUT}" == "2" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-
+rm "${OUTPUT}"
+    
     
 ## ------------------------------------------------------------------------ log
     
@@ -757,126 +763,137 @@ OUTPUT=$(mktemp)
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
 
-## Number of unique amplicons is correct for -s (1 expected)
-DESCRIPTION="number of unique amplicons is correct for -s (1 expected)"
+## Number of unique amplicons is correct with -s (1 expected)
+DESCRIPTION="number of unique amplicons is correct with -s (1 expected)"
 OUTPUT=$(mktemp)
 printf ">a_5\nAAAA\n" | \
     "${SWARM}" -s "${OUTPUT}" > /dev/null 2> /dev/null
-OUTPUT=$(awk -F "\t" '{print $1}' "${OUTPUT}")
-[[ "${OUTPUT}" == "1" ]] && \
+SORTED_OUTPUT=$(awk -F "\t" '{print $1}' "${OUTPUT}")
+[[ "${SORTED_OUTPUT}" == "1" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
+rm "${OUTPUT}"
 
-## Number of unique amplicons is correct for -s (2 expected)
-DESCRIPTION="number of unique amplicons is correct for -s (2 expected)"
+## Number of unique amplicons is correct with -s (2 expected)
+DESCRIPTION="number of unique amplicons is correct with -s (2 expected)"
 OUTPUT=$(mktemp)
 printf ">a_5\nAAAA\n>b_1\nAAAC\n" | \
     "${SWARM}" -s "${OUTPUT}" > /dev/null 2> /dev/null
-OUTPUT=$(awk -F "\t" '{print $1}' "${OUTPUT}")
-[[ "${OUTPUT}" == "2" ]] && \
+SORTED_OUTPUT=$(awk -F "\t" '{print $1}' "${OUTPUT}")
+[[ "${SORTED_OUTPUT}" == "2" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
+rm "${OUTPUT}"
 
-## Number of unique amplicons is still correct for -s (2 expected)
-DESCRIPTION="number of unique amplicons is still correct for -s (2 expected)"
+## Number of unique amplicons is still correct with -s (2 expected)
+DESCRIPTION="number of unique amplicons is still correct with -s (2 expected)"
 OUTPUT=$(mktemp)
 printf ">a_5\nAAAA\n>b_5\nAAAC\n>c_1\nGGGG\n" | \
     "${SWARM}" -s "${OUTPUT}" > /dev/null 2> /dev/null
-OUTPUT=$(awk -F "\t" '{print $1}' "${OUTPUT}" | sed '1q;d')
-[[ "${OUTPUT}" == "2" ]] && \
+SORTED_OUTPUT=$(awk -F "\t" '{print $1}' "${OUTPUT}" | sed '1q;d')
+[[ "${SORTED_OUTPUT}" == "2" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
+rm "${OUTPUT}"
 
-## Total abundance of amplicons is correct for -s (1 expected)
-DESCRIPTION="total abundance of amplicons is correct for -s (1 expected)"
+## Total abundance of amplicons is correct with -s (1 expected)
+DESCRIPTION="total abundance of amplicons is correct with -s (1 expected)"
 OUTPUT=$(mktemp)
 printf ">a_1\nAAAA\n" | \
     "${SWARM}" -s "${OUTPUT}" > /dev/null 2> /dev/null
-OUTPUT=$(awk -F "\t" '{print $2}' "${OUTPUT}")
-[[ "${OUTPUT}" == "1" ]] && \
+SORTED_OUTPUT=$(awk -F "\t" '{print $2}' "${OUTPUT}")
+[[ "${SORTED_OUTPUT}" == "1" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
+rm "${OUTPUT}"
 
-## Total abundance of amplicons is correct for -s (5 expected)
-DESCRIPTION="total abundance of amplicons is correct for -s (5 expected)"
+## Total abundance of amplicons is correct with -s (5 expected)
+DESCRIPTION="total abundance of amplicons is correct with -s (5 expected)"
 OUTPUT=$(mktemp)
 printf ">a_5\nAAAA\n" | \
     "${SWARM}" -s "${OUTPUT}" > /dev/null 2> /dev/null
-OUTPUT=$(awk -F "\t" '{print $2}' "${OUTPUT}" | sed '1q;d')
-[[ "${OUTPUT}" == "5" ]] && \
+SORTED_OUTPUT=$(awk -F "\t" '{print $2}' "${OUTPUT}" | sed '1q;d')
+[[ "${SORTED_OUTPUT}" == "5" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
+rm "${OUTPUT}"
 
-## Total abundance of amplicons is still correct for -s (5 expected)
-DESCRIPTION="total abundance of amplicons is still correct for -s (5 expected)"
+## Total abundance of amplicons is still correct with -s (5 expected)
+DESCRIPTION="total abundance of amplicons is still correct with -s (5 expected)"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_2\nAAAC\n>c_1\nGGGG\n" | \
     "${SWARM}" -s "${OUTPUT}" > /dev/null 2> /dev/null
-OUTPUT=$(awk -F "\t" '{print $2}' "${OUTPUT}" | sed '1q;d')
-[[ "${OUTPUT}" == "5" ]] && \
+SORTED_OUTPUT=$(awk -F "\t" '{print $2}' "${OUTPUT}" | sed '1q;d')
+[[ "${SORTED_OUTPUT}" == "5" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
+rm "${OUTPUT}"
 
 ## Id of initial seed is correct with -s
 DESCRIPTION="Id of initial seed is correct with -s"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_2\nAAAC\n>c_1\nGGGG\n" | \
     "${SWARM}" -s "${OUTPUT}" > /dev/null 2> /dev/null
-OUTPUT=$(awk -F "\t" '{print $3}' "${OUTPUT}" | sed '1q;d')
-[[ "${OUTPUT}" == "a" ]] && \
+SORTED_OUTPUT=$(awk -F "\t" '{print $3}' "${OUTPUT}" | sed '1q;d')
+[[ "${SORTED_OUTPUT}" == "a" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
+rm "${OUTPUT}"
 
 ## Id of initial seed is still correct with -s
 DESCRIPTION="Id of initial seed is still correct with -s"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_2\nAAAC\n>c_1\nGGGG\n" | \
     "${SWARM}" -s "${OUTPUT}" > /dev/null 2> /dev/null
-OUTPUT=$(awk -F "\t" '{print $3}' "${OUTPUT}" | sed '2q;d')
-[[ "${OUTPUT}" == "c" ]] && \
+SORTED_OUTPUT=$(awk -F "\t" '{print $3}' "${OUTPUT}" | sed '2q;d')
+[[ "${SORTED_OUTPUT}" == "c" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
+rm "${OUTPUT}"
 
 ## Abundance of initial seed is correct with -s
 DESCRIPTION="abundance of initial seed is correct with -s"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_2\nAAAC\n>c_1\nGGGG\n" | \
     "${SWARM}" -s "${OUTPUT}" > /dev/null 2> /dev/null
-OUTPUT=$(awk -F "\t" '{print $4}' "${OUTPUT}" | sed '1q;d')
-[[ "${OUTPUT}" == "3" ]] && \
+SORTED_OUTPUT=$(awk -F "\t" '{print $4}' "${OUTPUT}" | sed '1q;d')
+[[ "${SORTED_OUTPUT}" == "3" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
+rm "${OUTPUT}"
 
 ## Abundance of initial seed is still correct with -s
 DESCRIPTION="abundance of initial seed is still correct with -s"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_2\nAAAC\n>c_1\nGGGG\n" | \
     "${SWARM}" -s "${OUTPUT}" > /dev/null 2> /dev/null
-OUTPUT=$(awk -F "\t" '{print $4}' "${OUTPUT}" | sed '2q;d')
-[[ "${OUTPUT}" == "1" ]] && \
+SORTED_OUTPUT=$(awk -F "\t" '{print $4}' "${OUTPUT}" | sed '2q;d')
+[[ "${SORTED_OUTPUT}" == "1" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
+rm "${OUTPUT}"
 
 ## Number of amplicons with an abundance of 1 is correct with -s (0 exp)
 DESCRIPTION="number of amplicons with an abundance of 1 is correct with -s (0 exp)"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_2\nAAAC\n>c_1\nGGGG\n" | \
     "${SWARM}" -s "${OUTPUT}" > /dev/null 2> /dev/null
-OUTPUT=$(awk -F "\t" '{print $5}' "${OUTPUT}" | sed '1q;d')
-[[ "${OUTPUT}" == "0" ]] && \
+SORTED_OUTPUT=$(awk -F "\t" '{print $5}' "${OUTPUT}" | sed '1q;d')
+[[ "${SORTED_OUTPUT}" == "0" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
+rm "${OUTPUT}"
 
 ## Number of amplicons with an abundance of 1 is correct with -s (1 exp)
 DESCRIPTION="number of amplicons with an abundance of 1 is correct with -s (1 exp)"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_2\nAAAC\n>c_1\nGGGG\n" | \
     "${SWARM}" -s "${OUTPUT}" > /dev/null 2> /dev/null
-OUTPUT=$(awk -F "\t" '{print $5}' "${OUTPUT}" | sed '2q;d')
-[[ "${OUTPUT}" == "1" ]] && \
+SORTED_OUTPUT=$(awk -F "\t" '{print $5}' "${OUTPUT}" | sed '2q;d')
+[[ "${SORTED_OUTPUT}" == "1" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-
+rm "${OUTPUT}"
 
 ## ---------------------------------------------------------------------- seeds
 
@@ -887,6 +904,7 @@ printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
 "${SWARM}" --seeds "${OUTPUT}"  > /dev/null 2> /dev/null && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
+rm "${OUTPUT}"
 
 ## Swarm accepts -w option
 OUTPUT=$(mktemp)
