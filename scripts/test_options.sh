@@ -784,8 +784,8 @@ SORTED_OUTPUT=$(awk -F "\t" '{print $2}' "${OUTPUT}")
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
 
-## -r compostion of OTUs is correct
-DESCRIPTION="-r compostion of OTUs is correct"
+## -r compostion of OTUs is correct #1
+DESCRIPTION="-r compostion of OTUs is correct #1"
 OUTPUT=$(mktemp)
 printf ">a_5\nAAAA\n>b_5\nAAAA\n>c_5\nAACC\n" | \
     "${SWARM}" -r > "${OUTPUT}" 2> /dev/null
@@ -795,19 +795,61 @@ SORTED_OUTPUT=$(awk -F "\t" '{print $3}' "${OUTPUT}")
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
 
-## -r compostion of OTUs is correct
-DESCRIPTION="-r compostion of OTUs is correct"
+## -r compostion of OTUs is correct #2
+DESCRIPTION="-r compostion of OTUs is correct #2"
 OUTPUT=$(mktemp)
-printf ">a_5\nAAAA\n>b_5\nAAAA\n>c_5\nAACC\n" | \
+printf ">a_5\nAAAA\n>b_5\nACCC\n>c_5\nAAAC\n" | \
     "${SWARM}" -r > "${OUTPUT}" 2> /dev/null
 SORTED_OUTPUT=$(awk -F "\t" '{print $3}' "${OUTPUT}")
-[[ "${SORTED_OUTPUT}" == "a_5,b_5" ]] && \
+[[ "${SORTED_OUTPUT}" == "a_5,c_5" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
 
+## -r compostion of OTUs is correct #3
+DESCRIPTION="-r compostion of OTUs is correct #3"
+OUTPUT=$(mktemp)
+printf ">a_5\nAAAA\n>b_5\nACCC\n>c_5\nAACC\n" | \
+    "${SWARM}" -r > "${OUTPUT}" 2> /dev/null
+SORTED_OUTPUT=$(awk -F "\t" '{print $3}' "${OUTPUT}")
+[[ "${SORTED_OUTPUT}" == "a_5" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
 
-exit -1
+## -r compostion of OTUs is correct with -a 2 #1
+DESCRIPTION="-r compostion of OTUs is correct with -a 2 #1"
+OUTPUT=$(mktemp)
+printf ">a_5\nAAAA\n>b_\nAAAC\n>c_\nACCC\n" | \
+    "${SWARM}" -r -a 2 > "${OUTPUT}" 2> /dev/null
+SORTED_OUTPUT=$(awk -F "\t" '{print $3}' "${OUTPUT}")
+[[ "${SORTED_OUTPUT}" == "a_5,b_" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## -r compostion of OTUs is correct with -a 2 #2
+DESCRIPTION="-r compostion of OTUs is correct with -a 2 #2"
+OUTPUT=$(mktemp)
+printf ">a_5\nAAAA\n>b_\nACCC\n>c_\nAAAC\n" | \
+    "${SWARM}" -r -a 2 > "${OUTPUT}" 2> /dev/null
+SORTED_OUTPUT=$(awk -F "\t" '{print $3}' "${OUTPUT}")
+[[ "${SORTED_OUTPUT}" == "a_5,c_" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## -r compostion of OTUs is correct with -z
+DESCRIPTION="-r compostion of OTUs is correct with -z"
+OUTPUT=$(mktemp)
+printf ">a;size=5\nAAAA\n>b;size=4\nAAAC\n>c;size=5\nACCC\n" | \
+    "${SWARM}" -r -z > "${OUTPUT}" 2> /dev/null
+SORTED_OUTPUT=$(awk -F "\t" '{print $3}' "${OUTPUT}")
+[[ "${SORTED_OUTPUT}" == "a;size=5,b;size=4" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
 
 ## ------------------------------------------------------------ statistics-file
 
