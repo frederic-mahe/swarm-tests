@@ -1254,6 +1254,54 @@ SORTED_OUTPUT=$(grep "^C" "${OUTPUT}" | \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
 
+## -u centroid length is correct in 3rd column #1
+DESCRIPTION="-u centroid length is correct in 3rd column #1"
+OUTPUT=$(mktemp)
+printf ">a_3\nGGGG\n" | \
+    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+SORTED_OUTPUT=$(grep "^S" "${OUTPUT}" | \
+                       awk -F "\t" '{if (NR == 1) {print $3}}')
+[[ "${SORTED_OUTPUT}" -eq 4 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## -u centroid length is correct in 3rd column #2
+DESCRIPTION="-u centroid length is correct in 3rd column #2"
+OUTPUT=$(mktemp)
+printf ">a_3\nGGGG\n>b_3\nA\n>c_3\nC\n" | \
+    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+SORTED_OUTPUT=$(grep "^S" "${OUTPUT}" | \
+                       awk -F "\t" '{if (NR == 2) {print $3}}')
+[[ "${SORTED_OUTPUT}" -eq 1 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## -u query length is correct in 3rd column #1
+DESCRIPTION="-u query length is correct in 3rd column #1"
+OUTPUT=$(mktemp)
+printf ">a_3\nGGGG\n>b_3\nAA\n>c_3\nAAA\n" | \
+    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+SORTED_OUTPUT=$(grep "^H" "${OUTPUT}" | \
+                       awk -F "\t" '{if (NR == 1) {print $3}}')
+[[ "${SORTED_OUTPUT}" -eq 3 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## -u query length is correct in 3rd column #2
+DESCRIPTION="-u query length is correct in 3rd column #2"
+OUTPUT=$(mktemp)
+printf ">a_3\nGGGG\n>b_3\nA\n>c_3\nA\n" | \
+    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+SORTED_OUTPUT=$(grep "^H" "${OUTPUT}" | \
+                       awk -F "\t" '{if (NR == 1) {print $3}}')
+[[ "${SORTED_OUTPUT}" -eq 1 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
 ## -u similarity percentage is correct in 4th column #1
 DESCRIPTION="-u similarity percentage is correct in 4th column #1"
 OUTPUT=$(mktemp)
@@ -1626,6 +1674,7 @@ SORTED_OUTPUT=$(grep "^S" "${OUTPUT}" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+
 
 ## ---------------------------------------------------------------------- seeds
 
