@@ -1627,11 +1627,6 @@ SORTED_OUTPUT=$(grep "^S" "${OUTPUT}" | \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
 
-
-
-
-exit -1
-
 ## ---------------------------------------------------------------------- seeds
 
 ## Swarm accepts --seeds option
