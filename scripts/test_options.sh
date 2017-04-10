@@ -688,8 +688,6 @@ DESCRIPTION="swarm does write on standard error when using -l, except for errors
         failure "${DESCRIPTION}"
 rm "${ERRORINPUT}"
 
-exit -1
-
 ## ---------------------------------------------------------------- output-file
 
 ## Swarm accepts -o option
