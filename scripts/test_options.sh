@@ -672,7 +672,7 @@ DESCRIPTION="swarm accepts -l option"
 ## Swarm does not write on standard error when using -l
 ERRORINPUT=$(mktemp)
 DESCRIPTION="swarm does not write on standard error when using -l"
-"${SWARM}" -l /dev/null < "${ALL_IDENTICAL}" &> "${ERRORINPUT}"
+"${SWARM}" -l /dev/null < "${ALL_IDENTICAL}" > /dev/null 2> "${ERRORINPUT}"
 [[ ! -s "${ERRORINPUT}" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -688,6 +688,7 @@ DESCRIPTION="swarm does write on standard error when using -l, except for errors
         failure "${DESCRIPTION}"
 rm "${ERRORINPUT}"
 
+exit -1
 
 ## ---------------------------------------------------------------- output-file
 
