@@ -369,6 +369,25 @@ for ((d=1 ; d<=$MAX_D ; d++)) ; do
     done
 done && success "${DESCRIPTION}"
 
+#*****************************************************************************#
+#                                                                             #
+#        Pairwise alignement settings not printed with -d 1 (issue 75)        #
+#                                                                             #
+#*****************************************************************************#
+
+## Pairwise alignment settings are not printed if d = 1 (issue #75)
+DESCRIPTION="Pairwise alignment settings are not printed if d = 1"
+"${SWARM}" -d 1 < "${ALL_IDENTICAL}" 2>&1 | \
+    grep --quiet "^Scores:\|Gap penalties:\|Converted costs:" && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+## Pairwise alignment settings are printed if d > 1 (issue #75)
+DESCRIPTION="Pairwise alignment settings are printed if d > 1"
+"${SWARM}" -d 2 < "${ALL_IDENTICAL}" 2>&1 | \
+    grep --quiet "^Scores:\|Gap penalties:\|Converted costs:" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 #*****************************************************************************#
 #                                                                             #
