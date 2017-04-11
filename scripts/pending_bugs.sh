@@ -31,17 +31,7 @@ DESCRIPTION="check if swarm is in the PATH"
 [[ "${SWARM}" ]] && success "${DESCRIPTION}" || failure "${DESCRIPTION}"
 
 
-#*****************************************************************************#
-#                                                                             #
-#                                Dereplication                                #
-#                                                                             #
-#*****************************************************************************#
 
-## Swarm complains if input sequences are not dereplicated (issue 65)
-DESCRIPTION="complains if input sequences are not dereplicated"
-"${SWARM}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
-    failure "${DESCRIPTION}" || \
-        success "${DESCRIPTION}"
 
 
 #*****************************************************************************#
@@ -56,11 +46,6 @@ DESCRIPTION="swarm aborts when --difference is 257"
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
-## Number of differences (number of differences is way too large)
-DESCRIPTION="swarm aborts when --difference is 8 billions"
-"${SWARM}" -d 8000000000 < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
-    failure "${DESCRIPTION}" || \
-        success "${DESCRIPTION}"
 
 
 #*****************************************************************************#

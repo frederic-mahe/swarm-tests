@@ -310,6 +310,17 @@ for OPTION in "-z" "--usearch-abundance" ; do
 done
 rm "${USEARCH}"
 
+#*****************************************************************************#
+#                                                                             #
+#                                Dereplication                                #
+#                                                                             #
+#*****************************************************************************#
+
+## Swarm complains if input sequences are not dereplicated (issue 65)
+DESCRIPTION="complains if input sequences are not dereplicated"
+"${SWARM}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
 
 #*****************************************************************************#
 #                                                                             #

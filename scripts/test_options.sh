@@ -192,6 +192,12 @@ DESCRIPTION="swarm aborts when --difference is 257"
         success "${DESCRIPTION}"
 
 ## Number of differences (number of differences is way too large)
+DESCRIPTION="swarm aborts when --difference is 8 billions"
+"${SWARM}" -d 8000000000 < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+## Number of differences (number of differences is way too large)
 DESCRIPTION="swarm aborts when --difference is intmax_t"
 "${SWARM}" -d $(((1<<63)-1)) < "${ALL_IDENTICAL}" &> /dev/null && \
     failure "${DESCRIPTION}" || \
