@@ -17,7 +17,7 @@ failure () {
 
 success () {
     printf "${GREEN}PASS${NO_COLOR}: ${1}\n"
-}
+}       
 
 ## Create a test file with 10 identical sequences (different headers)
 ALL_IDENTICAL=$(mktemp)
@@ -1711,7 +1711,7 @@ printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
 ## Swarm -w create anf fill file given in argument
 OUTPUT=$(mktemp)
 DESCRIPTION="swarm -w create and fill file given in argument"
-printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
+printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG\n" | \
 "${SWARM}" -w "${OUTPUT}" &> /dev/null
 [[ -s "${OUTPUT}" ]] && \
     success "${DESCRIPTION}" || \
@@ -1729,6 +1729,31 @@ printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
 
+#*****************************************************************************#
+#                                                                             #
+#                              Output sorting                                 #
+#                                                                             #
+#*****************************************************************************#
+
+## Swarm sorts fasta output files by decreasing abundance
+OUTPUT=$(mktemp)
+DESCRIPTION="swarm sorts fasta output files by decreasing abundance"
+printf ">c_1\nAAAA\n>a_3\nAAAC\n>b_2\nAACC\n" | \
+    "${SWARM}" > "${OUTPUT}" 2> /dev/null
+grep -q "^a_3 b_2 c_1$" "${OUTPUT}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"  
+
+## Swarm sorts fasta output files by decreasing abundance
+OUTPUT=$(mktemp)
+DESCRIPTION="swarm sorts fasta output files by decreasing abundance"
+printf ">c_1\nAAAA\n>a_3\nGGGG\n>b_2\nTTTT\n" | \
+    "${SWARM}" > "${OUTPUT}" 2> /dev/null
+[[ $(cat "${OUTPUT}") == $(printf "a_3\nb_2\nc_1") ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"  
 
 #*****************************************************************************#
 #                                                                             #
