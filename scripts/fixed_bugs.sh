@@ -284,6 +284,23 @@ rm "${UCLUST}"
 ##
 ## That optimization cannot be tested from the command line.
 
+#*****************************************************************************#
+#                                                                             #
+#            Errors in statistics: radius and generation (issue 20)           #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/20
+##
+
+#*****************************************************************************#
+#                                                                             #
+#        More informative error message for illegal characters (issue 21)     #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/21
+##
 
 #*****************************************************************************#
 #                                                                             #
@@ -321,6 +338,42 @@ DESCRIPTION="complains if input sequences are not dereplicated"
 "${SWARM}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
+
+#*****************************************************************************#
+#                                                                             #
+#                Provide Mothur-compatible output files (issue 23)            #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/23
+##
+
+#*****************************************************************************#
+#                                                                             #
+#        More informative error message for illegal characters (issue 24)     #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/24
+##
+
+#*****************************************************************************#
+#                                                                             #
+#                         Refine clustering (issue 25)                        #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/25
+##
+
+#*****************************************************************************#
+#                                                                             #
+# Unstable order of amplicons with new approach d=1 with >1 thread (issue 33) #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/33
+##
 
 #*****************************************************************************#
 #                                                                             #
