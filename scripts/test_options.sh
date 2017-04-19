@@ -1098,7 +1098,7 @@ SORTED_OUTPUT=$(awk -F "\t" '{print $7}' "${OUTPUT}" | sed '1q;d')
 rm "${OUTPUT}"
 
 ## Theorical radius != actuel radius  with -s -d 2
-DESCRIPTION="theorical radius != actuel radius  with -s -d 2"
+DESCRIPTION="theorical radius != actuel radius with -s -d 2"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAAA\n>b_3\nAAACC\n>c_2\nACCCC\n>c_2\nACCAC\n" | \
     "${SWARM}" -d 2 -s "${OUTPUT}" &> /dev/null
