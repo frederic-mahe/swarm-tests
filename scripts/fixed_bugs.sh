@@ -465,6 +465,33 @@ cmp -s "${CLUSTERS_A}" "${CLUSTERS_B}" && \
         failure "${DESCRIPTION}"
 rm -f "${CLUSTERS_A}" "${CLUSTERS_B}"
 
+#*****************************************************************************#
+#                                                                             #
+#         How to handle duplicated parameters or options ? (issue 101)        #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/101
+##
+## issue 101 --- fail if an option is passed twice #1
+DESCRIPTION="issue 101 --- fail if an option is passed twice #1"
+"${SWARM}" -d 2 -d 2 < "${ALL_IDENTICAL}" &> /dev/null && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+## issue 101 --- fail if an option is passed twice #2
+DESCRIPTION="issue 101 --- fail if an option is passed twice #2"
+"${SWARM}" -v -v < "${ALL_IDENTICAL}" &> /dev/null && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+## issue 101 --- fail if an unknown option is passed 
+DESCRIPTION="issue 101 --- fail if an option is passed twice"
+"${SWARM}" -smurf < "${ALL_IDENTICAL}" &> /dev/null && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+
 
 ## Clean
 rm "${ALL_IDENTICAL}"
