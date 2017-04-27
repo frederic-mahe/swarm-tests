@@ -44,10 +44,11 @@ DESCRIPTION="check if swarm is in the PATH"
 DESCRIPTION="issue 1 --- theoretical radii of OTUs is available with -s"
 STATISTICS=$(mktemp)
 echo -e ">seq1_3\nACGTACGT\n>seq2_1\nACGTTCGT" | \
-    "${SWARM}" -d 1 -s "${STATISTICS}" 2> /dev/null > /dev/null
+    "${SWARM}" -d 1 -s "${STATISTICS}" &> /dev/null
 RADIUS=$(awk -F "\t" '{print $7}' "${STATISTICS}")
 [[ "${RADIUS}" -eq 1 ]] && success "${DESCRIPTION}" || failure "${DESCRIPTION}"
 rm "${STATISTICS}"
+
 
 #*****************************************************************************#
 #                                                                             #
@@ -61,7 +62,7 @@ rm "${STATISTICS}"
 ## separate entries in the FASTA headers of the NR and NT databases).
 DESCRIPTION="issue 2 --- ascii \\\x01 is allowed in fasta headers"
 echo -e ">aaa\0001aaa_1\nACGT\n" | \
-    "${SWARM}" 2> /dev/null > /dev/null && \
+    "${SWARM}" &> /dev/null && \
     success "${DESCRIPTION}" || failure "${DESCRIPTION}"
 
 
@@ -75,6 +76,8 @@ echo -e ">aaa\0001aaa_1\nACGT\n" | \
 ##
 ## Sequence uniqueness is not checked by swarm (pre-dereplication is
 ## stated as mandatory in the documentation)
+DESCRIPTION="issue 3 --- check for unique sequences"
+failure "${DESCRIPTION}"
 
 
 #*****************************************************************************#
@@ -91,7 +94,7 @@ DESCRIPTION="issue 4 --- fasta entries are sorted by decreasing abundance"
 REPRESENTATIVES=$(mktemp)
 SEED="seq1"
 echo -e ">b_1\nACGTACGT\n>${SEED}_10\nACGTTCGT\n" | \
-    "${SWARM}" -w "${REPRESENTATIVES}" 2> /dev/null > /dev/null
+    "${SWARM}" -w "${REPRESENTATIVES}" &> /dev/null
 head -n 1 "${REPRESENTATIVES}" | grep -q "^>${SEED}_11$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -142,7 +145,7 @@ rm "${REPRESENTATIVES}"
 ## Simply check that swarm produces a non-empty file when using -u
 DESCRIPTION="issue 8 --- produce a uclust file with -u"
 UCLUST=$(mktemp)
-"${SWARM}" -u "${UCLUST}" "${ALL_IDENTICAL}" 2> /dev/null > /dev/null
+"${SWARM}" -u "${UCLUST}" "${ALL_IDENTICAL}" &> /dev/null
 [[ -s "${UCLUST}" ]] && success "${DESCRIPTION}" || failure "${DESCRIPTION}"
 rm "${UCLUST}"
 
@@ -158,7 +161,7 @@ rm "${UCLUST}"
 ## Output detailed statistics for each swarm (option -s)
 DESCRIPTION="issue 9 --- produce a statistics file with -s"
 STATS=$(mktemp)
-"${SWARM}" -s "${STATS}" "${ALL_IDENTICAL}" 2> /dev/null > /dev/null
+"${SWARM}" -s "${STATS}" "${ALL_IDENTICAL}" &> /dev/null
 [[ -s "${STATS}" ]] && success "${DESCRIPTION}" || failure "${DESCRIPTION}"
 rm "${STATS}"
 
@@ -174,7 +177,7 @@ rm "${STATS}"
 ## Check for unique headers and report error if duplicates are found
 DESCRIPTION="issue 10 --- check for unique headers"
 echo -e ">a_10\nACGT\n>a_5\nACGT\n" | \
-    "${SWARM}" 2> /dev/null > /dev/null && \
+    "${SWARM}" &> /dev/null && \
     failure "${DESCRIPTION}" || success "${DESCRIPTION}"
 
 
@@ -209,11 +212,11 @@ echo -e ">a_10\nACGT\n>a_5\nACGT\n" | \
 ## https://github.com/torognes/swarm/issues/13
 ##
 ## Check if the 4th column for lines starting with C is "*" (according
-## to http://www.drive5.com/usearch/manual/ucout.html, %id should only
-## be given for H-records)
+## to http://www.drive5.com/usearch/manual/ucout.html, identity
+## percentage should only be given for H-records)
 DESCRIPTION="issue 13 --- uclust-file's 4th column is \"*\" for non-H lines"
 UCLUST=$(mktemp)
-"${SWARM}" -u "${UCLUST}" "${ALL_IDENTICAL}" 2> /dev/null > /dev/null
+"${SWARM}" -u "${UCLUST}" "${ALL_IDENTICAL}" &> /dev/null
 VALUE=$(awk -F "\t" '$1 !~ "H" {print $4}' "${UCLUST}" | sort -du)
 [[ "${VALUE}" == "*" ]] && success "${DESCRIPTION}" || failure "${DESCRIPTION}"
 rm "${UCLUST}"
@@ -227,7 +230,28 @@ rm "${UCLUST}"
 
 ## https://github.com/torognes/swarm/issues/14
 ##
-## TODO
+## The 7th column in statistic file represents the maximum radius. It
+## is computed as the sum of the differences from the initial seed to
+## to the subseed. This value should be less or equal to the
+## generation number multipled by /d/. In the examples below, the
+## expected sum is 4 differences (2 + 2), or 3 differences (2 + 1).
+DESCRIPTION="issue 14 --- radius is at most a multiple of d (radius <= g * d)"
+OUTPUT=$(mktemp)
+printf ">a_3\nAAAA\n>b_2\nAACC\n>c_1\nCCCC\n" | \
+    "${SWARM}" -d 2 -s "${OUTPUT}" &> /dev/null
+(( $(awk -F "\t" '{print $7}' "${OUTPUT}") == 4 )) && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+DESCRIPTION="issue 14 --- radius is in fact the sum of differences"
+OUTPUT=$(mktemp)
+printf ">a_3\nAAA\n>b_2\nACC\n>c_1\nCCC\n" | \
+    "${SWARM}" -d 2 -s "${OUTPUT}" &> /dev/null
+(( $(awk -F "\t" '{print $7}' "${OUTPUT}") == 3 )) && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
 
 
 #*****************************************************************************#
@@ -284,6 +308,7 @@ rm "${UCLUST}"
 ##
 ## That optimization cannot be tested from the command line.
 
+
 #*****************************************************************************#
 #                                                                             #
 #            Errors in statistics: radius and generation (issue 20)           #
@@ -292,6 +317,9 @@ rm "${UCLUST}"
 
 ## https://github.com/torognes/swarm/issues/20
 ##
+## Description is not precise enough to create a test. There are tests
+## covering the -s output in the file test_options.sh
+
 
 #*****************************************************************************#
 #                                                                             #
@@ -301,6 +329,17 @@ rm "${UCLUST}"
 
 ## https://github.com/torognes/swarm/issues/21
 ##
+## When an illegal character in a sequence is detected, inform the
+## user of where that character was found. SWARM (1.2.6) now reports
+## the line number and the bad character.
+DESCRIPTION="issue 21 --- report first illegal fasta character and line number"
+OCTAL=$(printf "\%04o" 66)
+echo -e ">aaaa_1\nAC${OCTAL}GT\n" | \
+    "${SWARM}" 2>&1 | \
+    grep -qE "Error: Illegal character \'.\' in sequence on line [0-9]+" && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
 
 #*****************************************************************************#
 #                                                                             #
@@ -312,32 +351,20 @@ rm "${UCLUST}"
 ##
 ## support for usearch amplicon-abundance notation style
 USEARCH=$(mktemp)
-
 for OPTION in "-z" "--usearch-abundance" ; do
     for STYLE in '/^>/ s/_/;size=/' '/^>/ s/_/;size=/ ; /^>/ s/$/;/' ; do
-	sed "${STYLE}" "${ALL_IDENTICAL}" > "${USEARCH}"
-	if [[ "${STYLE}" == '/^>/ s/_/;size=/' ]] ; then	    
-	    DESCRIPTION="issue 22 --- support for usearch abundance ending with semicolon (${OPTION})"
-	else
-	    DESCRIPTION="issue 22 --- support for usearch abundance ending without semicolon (${OPTION})"
-	fi
-	"${SWARM}" "${OPTION}" "${USEARCH}" 2> /dev/null > /dev/null && \
-	    success "${DESCRIPTION}" || failure "${DESCRIPTION}"
+	    sed "${STYLE}" "${ALL_IDENTICAL}" > "${USEARCH}"
+	    if [[ "${STYLE}" == '/^>/ s/_/;size=/' ]] ; then	    
+	        DESCRIPTION="issue 22 --- support for usearch abundance ending with semicolon (${OPTION})"
+	    else
+	        DESCRIPTION="issue 22 --- support for usearch abundance ending without semicolon (${OPTION})"
+	    fi
+	    "${SWARM}" "${OPTION}" "${USEARCH}" &> /dev/null && \
+	        success "${DESCRIPTION}" || failure "${DESCRIPTION}"
     done
 done
 rm "${USEARCH}"
 
-#*****************************************************************************#
-#                                                                             #
-#                                Dereplication                                #
-#                                                                             #
-#*****************************************************************************#
-
-## Swarm complains if input sequences are not dereplicated (issue 65)
-DESCRIPTION="complains if input sequences are not dereplicated"
-"${SWARM}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
-    failure "${DESCRIPTION}" || \
-        success "${DESCRIPTION}"
 
 #*****************************************************************************#
 #                                                                             #
@@ -347,6 +374,8 @@ DESCRIPTION="complains if input sequences are not dereplicated"
 
 ## https://github.com/torognes/swarm/issues/23
 ##
+## !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! TODO
+
 
 #*****************************************************************************#
 #                                                                             #
@@ -438,6 +467,20 @@ DESCRIPTION="complains if input sequences are not dereplicated"
 ## https://github.com/torognes/swarm/issues/33
 ##
 
+
+#*****************************************************************************#
+#                                                                             #
+#                                Dereplication                                #
+#                                                                             #
+#*****************************************************************************#
+
+## Swarm complains if input sequences are not dereplicated (issue 65)
+DESCRIPTION="complains if input sequences are not dereplicated"
+"${SWARM}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+
 #*****************************************************************************#
 #                                                                             #
 #              Bug in the -b option output (critical) (issue 34)              #
@@ -514,7 +557,7 @@ DESCRIPTION="issue 67 --- when d > 1, seed is the first field of the OTU list"
 REPRESENTATIVES=$(mktemp)
 SEED="seq1"
 echo -e ">${SEED}_3\nACGTACGT\n>seq2_1\nACGTTCGT" | \
-    "${SWARM}" -w "${REPRESENTATIVES}" 2> /dev/null > /dev/null
+    "${SWARM}" -w "${REPRESENTATIVES}" &> /dev/null
 head -n 1 "${REPRESENTATIVES}" | grep -q "^>${SEED}_4$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -548,6 +591,7 @@ for ((d=1 ; d<=$MAX_D ; d++)) ; do
     done
 done && success "${DESCRIPTION}"
 
+
 #*****************************************************************************#
 #                                                                             #
 #        Pairwise alignement settings not printed with -d 1 (issue 75)        #
@@ -567,6 +611,7 @@ DESCRIPTION="Pairwise alignment settings are printed if d > 1"
     grep --quiet "^Scores:\|Gap penalties:\|Converted costs:" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
+
 
 #*****************************************************************************#
 #                                                                             #
@@ -591,6 +636,7 @@ cmp -s "${CLUSTERS_A}" "${CLUSTERS_B}" && \
         failure "${DESCRIPTION}"
 rm -f "${CLUSTERS_A}" "${CLUSTERS_B}"
 
+
 #*****************************************************************************#
 #                                                                             #
 #         How to handle duplicated parameters or options ? (issue 101)        #
@@ -611,12 +657,11 @@ DESCRIPTION="issue 101 --- fail if an option is passed twice #2"
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
-## issue 101 --- fail if an unknown option is passed 
-DESCRIPTION="issue 101 --- fail if an option is passed twice"
-"${SWARM}" -smurf < "${ALL_IDENTICAL}" &> /dev/null && \
+## issue 101 --- fail if an unknown option is passed
+DESCRIPTION="issue 101 --- fail if an unknown option is passed"
+"${SWARM}" --smurf < "${ALL_IDENTICAL}" &> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
-
 
 
 ## Clean
