@@ -233,14 +233,11 @@ DESCRIPTION="swarm accepts option -n"
         failure "${DESCRIPTION}"
 
 ## Deactivate the built-in OTU refinement
-INPUT=$(mktemp)
-printf ">a_10\nACGT\n>b_9\nCGGT\n>c_1\nCCGT\n" > "${INPUT}" 
 DESCRIPTION="deactivate OTU breaking"
 LINENUMBER=$("${SWARM}" -n "${BREAKINGINPUT}" 2> /dev/null | wc -l)
 [[ $LINENUMBER == 1 ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${INPUT}"
 rm "${BREAKINGINPUT}"
 
 
@@ -621,6 +618,28 @@ printf ">a_1\nAAAA\n>b_1\nAAAC\n" | \
     "${SWARM}" -d 2 -i "${OUTPUT}" &> /dev/null
 SORTED_OUTPUT=$(awk -F "\t" '{print $3}' "${OUTPUT}")
 (( "${SORTED_OUTPUT}" == 1 )) && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## -i number of the OTU is correct #1
+OUTPUT=$(mktemp)
+DESCRIPTION="-i number of the OTU is correct #1"
+printf ">a_1\nAAAA\n>b_1\nAAAC\n" | \
+    "${SWARM}" -i "${OUTPUT}" &> /dev/null
+SORTED_OUTPUT=$(awk -F "\t" '{print $4}' "${OUTPUT}")
+(( "${SORTED_OUTPUT}" == 1 )) && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## -i number of the OTU is correct #2
+OUTPUT=$(mktemp)
+DESCRIPTION="-i number of the OTU is correct #2"
+printf ">a_1\nAA\n>b_1\nAC\n>c_1\nGG\n>d_1\nGT\n" | \
+    "${SWARM}" -i "${OUTPUT}" &> /dev/null
+SORTED_OUTPUT=$(awk '{n = $4} END {print n}' "${OUTPUT}")
+(( "${SORTED_OUTPUT}" == 2 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -1838,3 +1857,4 @@ EOF
 rm "${ALL_IDENTICAL}"
 
 exit 0
+## 

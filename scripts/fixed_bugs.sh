@@ -530,8 +530,8 @@ rm "${OUTPUT}"
 #                                                                             #
 #*****************************************************************************#
 
-## Swarm complains if input sequences are not dereplicated (issue 65)
-DESCRIPTION="complains if input sequences are not dereplicated"
+## issue 65 --- swarm complains if input sequences are not dereplicated
+DESCRIPTION="issue 65 --- swarm complains if input sequences are not dereplicated"
 "${SWARM}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
@@ -545,6 +545,8 @@ DESCRIPTION="complains if input sequences are not dereplicated"
 
 ## https://github.com/torognes/swarm/issues/34
 ##
+## Deprecated parameter -b
+
 
 #*****************************************************************************#
 #                                                                             #
@@ -554,6 +556,8 @@ DESCRIPTION="complains if input sequences are not dereplicated"
 
 ## https://github.com/torognes/swarm/issues/35
 ##
+## Deprecated paramater -a
+
 
 #*****************************************************************************#
 #                                                                             #
@@ -563,6 +567,11 @@ DESCRIPTION="complains if input sequences are not dereplicated"
 
 ## https://github.com/torognes/swarm/issues/36
 ##
+## issue 36 --- swarm reads from a pipe
+DESCRIPTION="issue 36 --- swarm reads from a pipe"
+printf ">s_1\na\n" | "${SWARM}" &> /dev/null && \
+    success "${DESCRIPTION}" || failure "${DESCRIPTION}"
+
 
 #*****************************************************************************#
 #                                                                             #
@@ -572,6 +581,17 @@ DESCRIPTION="complains if input sequences are not dereplicated"
 
 ## https://github.com/torognes/swarm/issues/37
 ##
+## issue 37 --- fasta headers can contain more than one underscore symbol
+DESCRIPTION="issue 37 --- fasta headers can contain more than one underscore symbol"
+STATS=$(mktemp)
+IDENTIFIER="a_2_2"
+echo -e ">${IDENTIFIER}_3\nACGTACGT" | \
+    "${SWARM}" -s "${STATS}" &> /dev/null
+grep -qE "[[:blank:]]${IDENTIFIER}[[:blank:]]" "${STATS}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm -f "${STATS}"
+
 
 #*****************************************************************************#
 #                                                                             #
@@ -581,6 +601,8 @@ DESCRIPTION="complains if input sequences are not dereplicated"
 
 ## https://github.com/torognes/swarm/issues/38
 ##
+## swarm_breaker.py is deprecated
+
 
 #*****************************************************************************#
 #                                                                             #
@@ -589,7 +611,8 @@ DESCRIPTION="complains if input sequences are not dereplicated"
 #*****************************************************************************#
 
 ## https://github.com/torognes/swarm/issues/39
-##
+## swarm_breaker.py is deprecated
+
 
 #*****************************************************************************#
 #                                                                             #
@@ -599,6 +622,60 @@ DESCRIPTION="complains if input sequences are not dereplicated"
 
 ## https://github.com/torognes/swarm/issues/40
 ##
+## issue 40 --- swarm performs OTU breaking by default
+DESCRIPTION="issue 40 --- swarm performs OTU breaking by default"
+LINENUMBER=$(printf ">a_10\nACGT\n>b_9\nCGGT\n>c_1\nCCGT\n" | \
+		    "${SWARM}" 2> /dev/null | wc -l)
+(( "${LINENUMBER}" == 2 )) && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+
+#*****************************************************************************#
+#                                                                             #
+#        Add the OTU number to the output of the -b option (issue 41)         #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/41
+##
+## issue 41 --- -i number of the OTU is correct #1
+OUTPUT=$(mktemp)
+DESCRIPTION="issue 41 --- -i number of the OTU is correct #1"
+printf ">a_1\nAAAA\n>b_1\nAAAC\n" | \
+    "${SWARM}" -i "${OUTPUT}" &> /dev/null
+SORTED_OUTPUT=$(awk -F "\t" '{print $4}' "${OUTPUT}")
+(( "${SORTED_OUTPUT}" == 1 )) && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## issue 41 --- -i number of the OTU is correct #2
+OUTPUT=$(mktemp)
+DESCRIPTION="issue 41 --- -i number of the OTU is correct #2"
+printf ">a_1\nAA\n>b_1\nAC\n>c_1\nGG\n>d_1\nGT\n" | \
+    "${SWARM}" -i "${OUTPUT}" &> /dev/null
+SORTED_OUTPUT=$(awk '{n = $4} END {print n}' "${OUTPUT}")
+(( "${SORTED_OUTPUT}" == 2 )) && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+
+#*****************************************************************************#
+#                                                                             #
+#        Add the OTU number to the output of the -b option (issue 42)         #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/42
+##
+## issue 42 --- warm accepts --fastidious options
+DESCRIPTION="issue 42 --- warm accepts --fastidious options"
+printf ">s_1\nA\n" | "${SWARM}" -f &> /dev/null && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 
 #*****************************************************************************#
 #                                                                             #
