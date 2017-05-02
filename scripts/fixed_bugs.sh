@@ -374,7 +374,8 @@ rm "${USEARCH}"
 
 ## https://github.com/torognes/swarm/issues/23
 ##
-## !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! TODO
+## Description is not precise enough to create a test. There are tests
+## covering the -s output in the file test_options.sh
 
 
 #*****************************************************************************#
@@ -385,6 +386,8 @@ rm "${USEARCH}"
 
 ## https://github.com/torognes/swarm/issues/24
 ##
+## Does not concern swarm itself, but the linearization command.
+
 
 #*****************************************************************************#
 #                                                                             #
@@ -394,6 +397,8 @@ rm "${USEARCH}"
 
 ## https://github.com/torognes/swarm/issues/25
 ##
+## Deprecated. That step is now performed directly by swarm.
+
 
 #*****************************************************************************#
 #                                                                             #
@@ -403,6 +408,16 @@ rm "${USEARCH}"
 
 ## https://github.com/torognes/swarm/issues/26
 ##
+## -r reports the d value
+DESCRIPTION="issue 26 --- -r reports the d value"
+OUTPUT=$(mktemp)
+D=2
+printf ">a_5\nAAAA\n" | "${SWARM}" -d "${D}" -r > "${OUTPUT}" 2> /dev/null
+grep -q "swarm_${D}" "${OUTPUT}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
 
 #*****************************************************************************#
 #                                                                             #
@@ -412,6 +427,14 @@ rm "${USEARCH}"
 
 ## https://github.com/torognes/swarm/issues/27
 ##
+## swarm indicates its progress during the clustering process
+DESCRIPTION="issue 27 ---- report progress during the clustering process"
+printf ">s_1\nA\n" | "${SWARM}" 2>&1 | \
+    sed 's/\r/\n/' | \
+    grep -q -m 2 "Clustering: .*%" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 
 #*****************************************************************************#
 #                                                                             #
@@ -421,6 +444,8 @@ rm "${USEARCH}"
 
 ## https://github.com/torognes/swarm/issues/28
 ##
+## cannot be tested from the command line.
+
 
 #*****************************************************************************#
 #                                                                             #
@@ -430,6 +455,7 @@ rm "${USEARCH}"
 
 ## https://github.com/torognes/swarm/issues/29
 ##
+## cannot be tested from the command line.
 
 #*****************************************************************************#
 #                                                                             #
@@ -439,6 +465,18 @@ rm "${USEARCH}"
 
 ## https://github.com/torognes/swarm/issues/30
 ##
+##
+## -i number of differences is correct while -d 2 (2 expected)
+OUTPUT=$(mktemp)
+DESCRIPTION="issue 30 --- number of differences is correct in -i while -d 2 (2 expected)"
+printf ">a_1\nAAAA\n>b_1\nAACC\n" | \
+    "${SWARM}" -d 2 -i "${OUTPUT}" &> /dev/null
+SORTED_OUTPUT=$(awk -F "\t" '{print $3}' "${OUTPUT}")
+(( "${SORTED_OUTPUT}" == 2 )) && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
 
 #*****************************************************************************#
 #                                                                             #
@@ -448,6 +486,8 @@ rm "${USEARCH}"
 
 ## https://github.com/torognes/swarm/issues/31
 ##
+## Deprecated.
+
 
 #*****************************************************************************#
 #                                                                             #
@@ -457,6 +497,8 @@ rm "${USEARCH}"
 
 ## https://github.com/torognes/swarm/issues/32
 ##
+## Dead end.
+
 
 #*****************************************************************************#
 #                                                                             #
@@ -466,6 +508,20 @@ rm "${USEARCH}"
 
 ## https://github.com/torognes/swarm/issues/33
 ##
+## A, B, C, D, where abundances are a such A > B > C >D, and possible
+## (d = 1)-edges as such: A - B, A - D, B - C, B - D, C - D. Without
+## sorting, we could obtain the minimum spanning tree A - D - {B, C},
+## that goes through a valley (D). The expected tree is A - {B - C, D}.
+##
+DESCRIPTION="issue 33 --- subseeds are sorted by decreasing abundant"
+OUTPUT=$(mktemp)
+EXPECTED=$(printf "a\tb\t1\t1\t1\na\tc\t1\t1\t1\nb\td\t1\t1\t2\n")
+printf ">a_5\nAA\n>d_1\nGC\n>b_2\nAC\n>c_1\nGA\n" | \
+    "${SWARM}" -i "${OUTPUT}" &> /dev/null
+[[ $(< "${OUTPUT}") == "${EXPECTED}" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
 
 
 #*****************************************************************************#
