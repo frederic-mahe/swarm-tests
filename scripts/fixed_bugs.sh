@@ -670,8 +670,8 @@ rm "${OUTPUT}"
 
 ## https://github.com/torognes/swarm/issues/42
 ##
-## issue 42 --- warm accepts --fastidious options
-DESCRIPTION="issue 42 --- warm accepts --fastidious options"
+## issue 42 --- swarm accepts --fastidious options
+DESCRIPTION="issue 42 --- swarm accepts --fastidious options"
 printf ">s_1\nA\n" | "${SWARM}" -f &> /dev/null && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -685,6 +685,7 @@ printf ">s_1\nA\n" | "${SWARM}" -f &> /dev/null && \
 
 ## https://github.com/torognes/swarm/issues/43
 ##
+## question answered requiring no test
 
 
 #*****************************************************************************#
@@ -695,6 +696,7 @@ printf ">s_1\nA\n" | "${SWARM}" -f &> /dev/null && \
 
 ## https://github.com/torognes/swarm/issues/45
 ##
+## question answered requiring no test
 
 
 #*****************************************************************************#
@@ -705,6 +707,7 @@ printf ">s_1\nA\n" | "${SWARM}" -f &> /dev/null && \
 
 ## https://github.com/torognes/swarm/issues/46
 ##
+## not testable from command line
 
 
 #*****************************************************************************#
@@ -715,8 +718,20 @@ printf ">s_1\nA\n" | "${SWARM}" -f &> /dev/null && \
 
 ## https://github.com/torognes/swarm/issues/48
 ##
+## issue 48 --- swarm accepts -d 0
+DESCRIPTION="issue 48 --- swarm accepts -d 0"
+printf ">s_1\nA\n" | "${SWARM}" -d 0 &> /dev/null && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
+## issue 48 --- -d 0 delete duplicate sequences
+DESCRIPTION="issue 48 --- -d 0 delete duplicate sequences"
+OBSERVED=$(printf ">s_1\nA\n>w_1\nC\n" | "${SWARM}" -d 0 2> /dev/null | wc -l) 
+(( "${OBSERVED}" == 2 )) && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
+    
 #*****************************************************************************#
 #                                                                             #
 #               Compilation issue with swarm 2.0.4 (issue 49)                 #
@@ -725,6 +740,7 @@ printf ">s_1\nA\n" | "${SWARM}" -f &> /dev/null && \
 
 ## https://github.com/torognes/swarm/issues/49
 ##
+## time consuming to test and no real interest
 
 
 #*****************************************************************************#
@@ -735,6 +751,7 @@ printf ">s_1\nA\n" | "${SWARM}" -f &> /dev/null && \
 
 ## https://github.com/torognes/swarm/issues/50
 ##
+## galaxy wrapper exists : https://github.com/geraldinepascal/FROGS
 
 
 #*****************************************************************************#
@@ -745,6 +762,27 @@ printf ">s_1\nA\n" | "${SWARM}" -f &> /dev/null && \
 
 ## https://github.com/torognes/swarm/issues/51
 ##
+## issue 51 --- -w gives abudance notation style matches input #1
+OUTPUT=$(mktemp)
+DESCRIPTION="issue 51 --- -w gives abudance notation style matches input #1"
+EXPECTED=$(printf ">a_1\naaaa\n")
+printf ">a_1\nAAAA\n" | \
+    "${SWARM}" -w "${OUTPUT}" &> /dev/null
+[[ "$(< "${OUTPUT}")" == "${EXPECTED}" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## issue 51 --- -w gives abudance notation style matches input #2
+OUTPUT=$(mktemp)
+DESCRIPTION="issue 51 --- -w gives abudance notation style matches input #2"
+EXPECTED=$(printf ">a;size=1;\naaaa\n")
+printf ">a;size=1;\nAAAA\n" | \
+    "${SWARM}" -w "${OUTPUT}" -z &> /dev/null
+[[ "$(< "${OUTPUT}")" == "${EXPECTED}" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
 
 
 #*****************************************************************************#
@@ -755,7 +793,7 @@ printf ">s_1\nA\n" | "${SWARM}" -f &> /dev/null && \
 
 ## https://github.com/torognes/swarm/issues/52
 ##
-
+## not really testable, but doc has been indeed improved since this question
 
 #*****************************************************************************#
 #                                                                             #
@@ -765,7 +803,7 @@ printf ">s_1\nA\n" | "${SWARM}" -f &> /dev/null && \
 
 ## https://github.com/torognes/swarm/issues/53
 ##
-
+## not testable
 
 #*****************************************************************************#
 #                                                                             #
@@ -775,7 +813,7 @@ printf ">s_1\nA\n" | "${SWARM}" -f &> /dev/null && \
 
 ## https://github.com/torognes/swarm/issues/54
 ##
-
+## nucleotide almbiguity (R,Y,S,W,K,M,M,D,B,H,V,N) won't be implemented
 
 #*****************************************************************************#
 #                                                                             #
@@ -785,17 +823,36 @@ printf ">s_1\nA\n" | "${SWARM}" -f &> /dev/null && \
 
 ## https://github.com/torognes/swarm/issues/56
 ##
+## issue 56 --- -i number of differences is correct with -d 1
+DESCRIPTION="issue 56 --- -i number of differences is correct with -d 1"
+OUTPUT=$(mktemp)
+printf ">s_1\nA\n>w_1\nA\n" | "${SWARM}" -d 1 -i "${OUTPUT}"  &> /dev/null
+OBSERVED=$(awk '{print $3}' "${OUTPUT}") 
+(( "${OBSERVED}" == 0 )) && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## issue 56 --- -i number of differences is correct with -d 2
+DESCRIPTION="issue 56 --- -i number of differences is correct with -d 2"
+OUTPUT=$(mktemp)
+printf ">s_1\nA\n>w_1\nA\n" | "${SWARM}" -d 2 -i "${OUTPUT}"  &> /dev/null
+OBSERVED=$(awk '{print $3}' "${OUTPUT}") 
+(( "${OBSERVED}" == 0 )) && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
 
 
 #*****************************************************************************#
 #                                                                             #
-# Sequence identifiers format, abundace annotation not found error (issue 57) #
+# Sequence identifiers format, abundance annotation not found error (issue 57)#
 #                                                                             #
 #*****************************************************************************#
 
 ## https://github.com/torognes/swarm/issues/57
 ##
-
+## question about normal behaviour
 
 #*****************************************************************************#
 #                                                                             #
@@ -805,7 +862,7 @@ printf ">s_1\nA\n" | "${SWARM}" -f &> /dev/null && \
 
 ## https://github.com/torognes/swarm/issues/58
 ##
-
+## ambigous nucleotides won't be implemented
 
 #*****************************************************************************#
 #                                                                             #
@@ -815,6 +872,8 @@ printf ">s_1\nA\n" | "${SWARM}" -f &> /dev/null && \
 
 ## https://github.com/torognes/swarm/issues/59
 ##
+## TODO test -a accepted; test error message when missing abundance notation;
+## output if _ in sequence name when using -a; fail if -a without arg
 
 
 #*****************************************************************************#
