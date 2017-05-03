@@ -77,6 +77,16 @@ rm -f "${ALL_IDENTICAL2}"
 #     success "${DESCRIPTION}" || failure "${DESCRIPTION}"
 # rm -f "${NAMED_PIPE}"
 
+## swarm does not accepts inputs from named pipes
+DESCRIPTION="swarm does not accepts inputs from named pipes"
+mkfifo fifoTestInput123
+"${SWARM}" --fastq_chars fifoTestInput123 && \
+    failure "${DESCRIPTION}" || \
+	failure "${DESCRIPTION}" &
+## We won't printf anything in fifo beacause the process already failed.
+## It would block the script.
+rm fifoTestInput123
+
 ## swarm reads from a process substitution (anonymous pipe)
 DESCRIPTION="swarm reads from a process substitution (unseekable)"
 "${SWARM}" <(echo -e ">a_1\nACGT\n") &> /dev/null && \
