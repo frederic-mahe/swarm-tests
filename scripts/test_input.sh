@@ -68,22 +68,13 @@ DESCRIPTION="swarm reads from a symbolic link"
     success "${DESCRIPTION}" || failure "${DESCRIPTION}"
 rm -f "${ALL_IDENTICAL2}"
 
-## swarm reads from a named pipe (problem: how to close the named pipe?)
-# NAMED_PIPE=$(mktemp -u)
-# mkfifo "${NAMED_PIPE}"
-# echo -e ">a_1\nACGT\n" > "${NAMED_PIPE}"
-# DESCRIPTION="swarm reads from a named pipe"
-# "${SWARM}" "${NAMED_PIPE}" &> /dev/null  && \
-#     success "${DESCRIPTION}" || failure "${DESCRIPTION}"
-# rm -f "${NAMED_PIPE}"
-
 ## swarm accepts inputs from named pipes
 DESCRIPTION="swarm accepts inputs from named pipes"
 mkfifo fifoTestInput123
 "${SWARM}" fifoTestInput123 &> /dev/null && \
     success "${DESCRIPTION}" || \
 	failure "${DESCRIPTION}" &
-## We won't printf anything in fifo beacause using fifo makes swarm fail.
+## We won't printf anything in fifo because using fifo makes swarm fail.
 ## It would block the script.
 rm fifoTestInput123
 
