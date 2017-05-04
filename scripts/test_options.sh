@@ -146,7 +146,7 @@ DESCRIPTION="swarm aborts when --threads is 257"
         success "${DESCRIPTION}"
 
 ## Number of threads (number of threads is way too large)
-DESCRIPTION="swarm aborts when --threads is intmax_t"
+DESCRIPTION="swarm aborts when --threads is intmax_t (signed)"
 "${SWARM}" -t $(((1<<63)-1)) < "${ALL_IDENTICAL}" 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
@@ -164,9 +164,9 @@ DESCRIPTION="swarm aborts when --threads is not numerical"
 #                                                                             #
 #*****************************************************************************#
 
-## Number of differences (--differences from 0 to 256)
+## Number of differences (--differences from 0 to 255)
 MIN=0
-MAX=256
+MAX=255
 DESCRIPTION="swarm runs normally when --differences goes from ${MIN} to ${MAX}"
 for ((d=$MIN ; d<=$MAX ; d++)) ; do
     "${SWARM}" -d ${d} < "${ALL_IDENTICAL}" &> /dev/null || \
@@ -185,20 +185,14 @@ DESCRIPTION="swarm aborts when --difference is -1"
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
-## Number of differences (--differences is 257)
-DESCRIPTION="swarm aborts when --difference is 257"
-"${SWARM}" -d 257 < "${ALL_IDENTICAL}" &> /dev/null && \
+## Number of differences (--differences is 256)
+DESCRIPTION="swarm aborts when --difference is 256"
+"${SWARM}" -d 256 < "${ALL_IDENTICAL}" &> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Number of differences (number of differences is way too large)
-DESCRIPTION="swarm aborts when --difference is 8 billions"
-"${SWARM}" -d 8000000000 < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
-    failure "${DESCRIPTION}" || \
-        success "${DESCRIPTION}"
-
-## Number of differences (number of differences is way too large)
-DESCRIPTION="swarm aborts when --difference is intmax_t"
+DESCRIPTION="swarm aborts when --difference is intmax_t (signed)"
 "${SWARM}" -d $(((1<<63)-1)) < "${ALL_IDENTICAL}" &> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
@@ -299,6 +293,18 @@ for ((b=$MIN ; b<=$MAX ; b++)) ; do
         failure "swarm aborts when --boundary equals ${b}"
 done && success "${DESCRIPTION}"
 
+## boundary option accepts large integers
+DESCRIPTION="swarm accepts large values for --boundary (2^32)"
+"${SWARM}" -f -b $(( 1 << 32 )) < "${FASTIDOUSINPUT}" &> /dev/null && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## boundary option accepts large integers
+DESCRIPTION="swarm accepts large values for --boundary (2^64, signed)"
+"${SWARM}" -f -b $(( (1 << 63) - 1 )) < "${FASTIDOUSINPUT}" &> /dev/null && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 ## Passing the --boundary option without the fastidious option should fail
 DESCRIPTION="swarm fails when the boundary option is specified without -f"
 "${SWARM}" -b 3 < "${FASTIDOUSINPUT}" &> /dev/null && \
@@ -338,7 +344,7 @@ DESCRIPTION="swarm aborts when --ceiling is 0"
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
-## Accepted values for the ceiling option are positive integers
+## ceiling option accepts positive integers
 MIN=1
 MAX=255
 DESCRIPTION="swarm runs normally when --ceiling goes from ${MIN} to ${MAX}"
@@ -346,6 +352,18 @@ for ((c=$MIN ; c<=$MAX ; c++)) ; do
     "${SWARM}" -f -c ${c} < "${FASTIDOUSINPUT}" &> /dev/null || \
         failure "swarm aborts when --ceiling equals ${c}"
 done && success "${DESCRIPTION}"
+
+## ceiling option accepts large integers
+DESCRIPTION="swarm accepts large values for --ceiling (2^32)"
+"${SWARM}" -f -c $(( 1 << 32 )) < "${FASTIDOUSINPUT}" &> /dev/null && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## ceiling option accepts large integers
+DESCRIPTION="swarm accepts large values for --ceiling (2^64, signed)"
+"${SWARM}" -f -c $(( (1 << 63) - 1 )) < "${FASTIDOUSINPUT}" &> /dev/null && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 ## Passing the --ceiling option without the fastidious option should fail
 DESCRIPTION="swarm fails when the ceiling option is specified without -f"
@@ -389,7 +407,7 @@ for y in 0 1 ; do
         failure "swarm runs normally when --bloom-bits equals ${y}"
 done || success "${DESCRIPTION}"
 
-## Accepted values for the --bloom-bits option goes from 2 to 64
+## Rejected values for the --bloom-bits option goes from 2 to 64
 MIN=65
 MAX=255
 DESCRIPTION="swarm aborts when --bloom-bits is higher than 64"
