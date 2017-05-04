@@ -690,6 +690,16 @@ printf ">s_1\nA\n" | "${SWARM}" -f &> /dev/null && \
 
 #*****************************************************************************#
 #                                                                             #
+#Rewrite search8.cc and search16.cc to allow compilation for 32-bit (issue 44)#
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/44
+##
+
+
+#*****************************************************************************#
+#                                                                             #
 #              Assigning taxonomy to swarm centroids (issue 45)               #
 #                                                                             #
 #*****************************************************************************#
@@ -708,6 +718,16 @@ printf ">s_1\nA\n" | "${SWARM}" -f &> /dev/null && \
 ## https://github.com/torognes/swarm/issues/46
 ##
 ## not testable from command line
+
+
+#*****************************************************************************#
+#                                                                             #
+#           Downstream analysis on otutable or biom file (issue 47)           #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/47
+##
 
 
 #*****************************************************************************#
@@ -815,6 +835,17 @@ rm "${OUTPUT}"
 ##
 ## nucleotide almbiguity (R,Y,S,W,K,M,M,D,B,H,V,N) won't be implemented
 
+
+#*****************************************************************************#
+#                                                                             #
+#          Complete integration of the fastidious option? (issue 55)          #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/55
+##
+
+
 #*****************************************************************************#
 #                                                                             #
 #               Clustering with d = 1 and replicates (issue 56)               #
@@ -872,8 +903,62 @@ rm "${OUTPUT}"
 
 ## https://github.com/torognes/swarm/issues/59
 ##
-## TODO test -a accepted; test error message when missing abundance notation;
-## output if _ in sequence name when using -a; fail if -a without arg
+## TODO test output if _ in sequence name when using -a; fail if -a without arg
+
+## issue 59 --- warm accepts -a option
+DESCRIPTION="issue 59 --- swarm accepts -a option"
+printf ">s\nA\n" | "${SWARM}" -a 2 &> /dev/null && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+ 
+## issue 59 --- number of missing abundance  notation is correct in error message #1
+DESCRIPTION="issue 59 --- number of missing abundance  notation is correct in error message #1"
+OUTPUT=$(mktemp)
+printf ">q_1\nA\n>s\nA\n" | "${SWARM}" 2> "${OUTPUT}"
+[[ $(awk '/^Error/{print $7}' "${OUTPUT}") == "1" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## issue 59 --- number of missing abundance  notation is correct in error message #2
+DESCRIPTION="issue 59 --- number of missing abundance  notation is correct in error message#2"
+OUTPUT=$(mktemp)
+printf ">q\nA\n>s_1\nA\n>d\nA\n" | "${SWARM}" 2> "${OUTPUT}"
+[[ $(awk '/^Error/{print $7}' "${OUTPUT}") == "2" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## issue 59 --- first line of abundance notation missing is correct in error message #1
+DESCRIPTION="issue 59 --- first line of abundance notation missing is correct in error message #1"
+OUTPUT=$(mktemp)
+printf ">q\nA\n>s_1\nA\n>d\nA\n" | "${SWARM}" 2> "${OUTPUT}"
+[[ $(awk '/^Error/{print $12}' "${OUTPUT}") == "1." ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## issue 59 --- first line of abundance notation missing is correct in error message #2
+DESCRIPTION="issue 59 --- first line of abundance notation missing is correct in error message #2"
+OUTPUT=$(mktemp)
+printf ">q_1\nA\n>s1\nA\n" | "${SWARM}" 2> "${OUTPUT}"
+[[ $(awk '/^Error/{print $12}' "${OUTPUT}") == "3." ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## issue 59 --- swarm -a fails without argument
+DESCRIPTION="issue 59 --- swarm -a fails without argument"
+printf ">s\nA\n" | "${SWARM}" -a &> /dev/null&& \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+## issue 59 --- swarm -a fails without argument
+DESCRIPTION="issue 59 --- swarm -a fails without argument"
+printf ">s\nA\n" | "${SWARM}" -a &> /dev/null&& \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
 
 
 #*****************************************************************************#
@@ -928,6 +1013,16 @@ rm "${OUTPUT}"
 
 #*****************************************************************************#
 #                                                                             #
+#            Check that all input sequences are unique (issue 65)             #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/65
+##  
+
+
+#*****************************************************************************#
+#                                                                             #
 #                   Amplicon length truncation (issue 66)                     #
 #                                                                             #
 #*****************************************************************************#
@@ -954,6 +1049,16 @@ head -n 1 "${REPRESENTATIVES}" | grep -q "^>${SEED}_4$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${REPRESENTATIVES}"
+
+
+#*****************************************************************************#
+#                                                                             #
+#  control number of generations, for the iterative growth process (issue 68) #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/68
+##  
 
 
 #*****************************************************************************#
@@ -1057,11 +1162,41 @@ DESCRIPTION="Pairwise alignment settings are printed if d > 1"
 
 #*****************************************************************************#
 #                                                                             #
+#                  Control the range of `d` values (issue 76)                 #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/76
+##  
+
+
+#*****************************************************************************#
+#                                                                             #
+#                       Sanitize input options (issue 77)                     #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/77
+##  
+
+
+#*****************************************************************************#
+#                                                                             #
 #         In rare cases Swarm does not terminate properly (issue 78)          #
 #                                                                             #
 #*****************************************************************************#
 
 ## https://github.com/torognes/swarm/issues/78
+##  
+
+
+#*****************************************************************************#
+#                                                                             #
+#             Segmentation fault on empty sequences (issue 79)                #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/79
 ##  
 
 
@@ -1087,6 +1222,26 @@ cmp -s "${CLUSTERS_A}" "${CLUSTERS_B}" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm -f "${CLUSTERS_A}" "${CLUSTERS_B}"
+
+
+#*****************************************************************************#
+#                                                                             #
+#                           Pacbio reads (issue 81)                           #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/81
+##  
+
+
+#*****************************************************************************#
+#                                                                             #
+#             Change output sequences to upper case (issue 82)                #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/82
+##  
 
 
 #*****************************************************************************#
@@ -1123,11 +1278,71 @@ rm -f "${CLUSTERS_A}" "${CLUSTERS_B}"
 
 #*****************************************************************************#
 #                                                                             #
+#               Add support for unseekable pipes (issue 86)                   #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/86
+##  
+
+
+#*****************************************************************************#
+#                                                                             #
 #                         speed of swarm (issue 87)                           #
 #                                                                             #
 #*****************************************************************************#
 
 ## https://github.com/torognes/swarm/issues/87
+##  
+
+
+#*****************************************************************************#
+#                                                                             #
+#             average pairwise distances of each OTU (issue 88)               #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/88
+##  
+
+
+#*****************************************************************************#
+#                                                                             #
+#               Develop a swarm-plugin for Qiime 2 (issue 89)                 #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/89
+##  
+
+
+#*****************************************************************************#
+#                                                                             #
+#              Abundance annotation not recognised (issue 90)                 #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/90
+##  
+
+
+#*****************************************************************************#
+#                                                                             #
+#        Remove abundance from identifiers in output file (issue 91)          #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/91
+##  
+
+
+#*****************************************************************************#
+#                                                                             #
+#      Put the cluster seed identifier in the --seeds output (issue 92)       #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/92
 ##  
 
 
@@ -1188,6 +1403,16 @@ rm -f "${CLUSTERS_A}" "${CLUSTERS_B}"
 #*****************************************************************************#
 
 ## https://github.com/torognes/swarm/issues/99
+##  
+     
+
+#*****************************************************************************#
+#                                                                             #
+#Error "‘asprintf’ not declared in this scope" compiling w/ Cygwin (issue 100)#
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/100
 ##  
      
 
