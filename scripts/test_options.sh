@@ -770,7 +770,7 @@ OUTPUT=$(mktemp)
 DESCRIPTION="swarm -o fill correctly output file with -o option"
 "${SWARM}" -o  "${OUTPUT}" < "${ALL_IDENTICAL}" &> /dev/null
 EXPECTED=$(sed -n '/^>/ s/>//p' "${ALL_IDENTICAL}" | tr "\n" " " | sed 's/ $//')
-[[ $(cat "${OUTPUT}") == "${EXPECTED}" ]] && \
+[[ $(< "${OUTPUT}") == "${EXPECTED}" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -1769,13 +1769,14 @@ rm "${OUTPUT}"
 ## Swarm -w gives expected output
 OUTPUT=$(mktemp)
 DESCRIPTION="swarm -w gives expected output"
-EXPECTED=$(printf ">a_2\naaaa\n>c_1\ngggg\n")
+EXPECTED=$(printf ">a_2\nAAAA\n>c_1\nGGGG\n")
 printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
     "${SWARM}" -w "${OUTPUT}" &> /dev/null
-[[ "$(cat "${OUTPUT}")" == "${EXPECTED}" ]] && \
+[[ "$(sed '/^>/! y/acgt/ACGT/' "${OUTPUT}")" == "${EXPECTED}" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+
 
 #*****************************************************************************#
 #                                                                             #
