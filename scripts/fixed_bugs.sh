@@ -625,7 +625,7 @@ rm -f "${STATS}"
 ## issue 40 --- swarm performs OTU breaking by default
 DESCRIPTION="issue 40 --- swarm performs OTU breaking by default"
 LINENUMBER=$(printf ">a_10\nACGT\n>b_9\nCGGT\n>c_1\nCCGT\n" | \
-		    "${SWARM}" 2> /dev/null | wc -l)
+		            "${SWARM}" 2> /dev/null | wc -l)
 (( "${LINENUMBER}" == 2 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -751,7 +751,7 @@ OBSERVED=$(printf ">s_1\nA\n>w_1\nC\n" | "${SWARM}" -d 0 2> /dev/null | wc -l)
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-    
+
 #*****************************************************************************#
 #                                                                             #
 #               Compilation issue with swarm 2.0.4 (issue 49)                 #
@@ -815,6 +815,7 @@ rm "${OUTPUT}"
 ##
 ## not really testable, but doc has been indeed improved since this question
 
+
 #*****************************************************************************#
 #                                                                             #
 #               Minor inconsistencies with fastidious (issue 53)              #
@@ -823,7 +824,32 @@ rm "${OUTPUT}"
 
 ## https://github.com/torognes/swarm/issues/53
 ##
-## not testable
+## a sequence and all its microvariants should form one OTU
+DESCRIPTION="issue 53 --- swarm correctly computes all microvariants"
+OUTPUT=$(mktemp)
+INPUT="ACGT"
+LENGTH=${#INPUT}
+for ((i=0 ; i<=LENGTH ; i++)) ; do
+    ## insertions
+    for n in A C G T ; do 
+        echo ${INPUT:0:i}${n}${INPUT:i:LENGTH}
+    done
+    if (( i > 0 )) ; then 
+        ## deletions
+        echo ${INPUT:0:i-1}${INPUT:i:LENGTH}
+        ## substitutions
+        for n in A C G T ; do
+            echo ${INPUT:0:i-1}${n}${INPUT:i:LENGTH}
+        done
+    fi
+done | awk '{print ">s"NR"_1\n"$1}' | \
+    "${SWARM}" -o "${OUTPUT}" 2> /dev/null
+(( $(wc -l < "${OUTPUT}") == 1 ))  && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+## ---------------- WIP work in progress
+
 
 #*****************************************************************************#
 #                                                                             #
@@ -908,7 +934,7 @@ DESCRIPTION="issue 59 --- swarm accepts -a option"
 printf ">s\nA\n" | "${SWARM}" -a 2 &> /dev/null && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
- 
+
 ## issue 59 --- number of missing abundance  notation is correct in error message #1
 DESCRIPTION="issue 59 --- number of missing abundance  notation is correct in error message #1"
 OUTPUT=$(mktemp)
@@ -1050,9 +1076,9 @@ SEED="seq1"
 for i in {1..3} ; do
     DESCRIPTION="issue 67 --- when d = ${i}, seed is the first field of the OTU list"
     echo -e ">${SEED}_3\nA\n>seq2_1\nA" | \
-	"${SWARM}" -d ${i} -w "${REPRESENTATIVES}" &> /dev/null
+	    "${SWARM}" -d ${i} -w "${REPRESENTATIVES}" &> /dev/null
     head -n 1 "${REPRESENTATIVES}" | grep -q "^>${SEED}_4$" && \
-	success "${DESCRIPTION}" || \
+	    success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
 rm "${REPRESENTATIVES}"
@@ -1062,10 +1088,10 @@ REPRESENTATIVES=$(mktemp)
 for i in {1..3} ; do
     DESCRIPTION="issue 67 --- the sequence of the representatives is the sequence of the seed"
     echo -e ">seq1_3\nA\n>seq2_1\nT" | \
-	"${SWARM}" -d ${i} -w "${REPRESENTATIVES}" &> /dev/null
+	    "${SWARM}" -d ${i} -w "${REPRESENTATIVES}" &> /dev/null
     ##  printf ">s\nA\n" | awk 'NR == 2 {exit /^A$/ ? 0 : 1}' && echo "true" || echo "false"
     sed "2q;d" "${REPRESENTATIVES}" | grep -qi "^A$" && \
-	success "${DESCRIPTION}" || \
+	    success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
 rm "${REPRESENTATIVES}"
@@ -1131,9 +1157,9 @@ for i in 0 10 13 32 ; do
     DESCRIPTION="issue 72 --- ascii character ${i} is not allowed in fasta headers"
     OCTAL=$(printf "\%04o" ${i})
     echo -e ">s${OCTAL}_1\nACGT\n" | \
-         "${SWARM}"  &> /dev/null && \
-         failure "${DESCRIPTION}" || \
-             success "${DESCRIPTION}"
+        "${SWARM}"  &> /dev/null && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
 done
 
 ## some ascii characters are accepted *if* present at the end of the header
@@ -1145,9 +1171,9 @@ for i in 0 10 13 32 ; do
     DESCRIPTION="issue 72 --- ascii character ${i} is accepted if present at the end of the header"
     OCTAL=$(printf "\%04o" ${i})
     echo -e ">s_1${OCTAL}\nACGT\n" | \
-         "${SWARM}"  &> /dev/null && \
-         success "${DESCRIPTION}" || \
-             failure "${DESCRIPTION}"
+        "${SWARM}"  &> /dev/null && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
 done
 
 
@@ -1489,7 +1515,7 @@ printf ">s_1\nA\n" | "${SWARM}" -w /dev/null  2>&1 | \
 
 ## https://github.com/torognes/swarm/issues/100
 ##  
-     
+
 
 #*****************************************************************************#
 #                                                                             #
