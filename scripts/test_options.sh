@@ -210,7 +210,7 @@ DESCRIPTION="swarm aborts when --difference is not numerical"
 #                                                                             #
 #*****************************************************************************#
 
-## Initialiasing input that should break
+## Initializing input that should break
 BREAKINGINPUT=$(mktemp)
 printf ">a_10\nACGT\n>b_9\nCGGT\n>c_1\nCCGT\n" > "${BREAKINGINPUT}" 
 
@@ -522,8 +522,7 @@ SUMABUNDANCES=$(sed -n '/^>/ s/.*_//p' "${OUTPUT}")
 [[ "${SUMABUNDANCES}" -eq 2 ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${INPUT}"
-rm "${OUTPUT}"
+rm "${INPUT}" "${OUTPUT}"
 
 ## Swarm does not overwrite the abundance number with -a for swarm notation
 INPUT=$(mktemp)
@@ -535,8 +534,7 @@ SUMABUNDANCES=$(sed -n '/^>/ s/.*_//p' "${OUTPUT}")
 [[ "${SUMABUNDANCES}" -eq 3 ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${INPUT}"
-rm "${OUTPUT}"
+rm "${INPUT}" "${OUTPUT}"
 
 ## Swarm does not overwrite the abundance number with -a for usearch notation
 INPUT=$(mktemp)
@@ -548,8 +546,7 @@ SUMABUNDANCES=$(awk -F "[;=]" '/^>/ {print $3}' "${OUTPUT}")
 [[ "${SUMABUNDANCES}" -eq 3 ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${INPUT}"
-rm "${OUTPUT}"
+rm "${INPUT}" "${OUTPUT}"
 
 ## Swarm append the abundance number set with -a for swarm notation
 OUTPUT=$(mktemp)
@@ -707,8 +704,6 @@ SORTED_OUTPUT=$(awk -F "\t" '{print $5}' "${OUTPUT}" | sed '2q;d')
 rm "${OUTPUT}"
 
 
-
-
 ## ------------------------------------------------------------------------ log
 
 ## Swarm accepts --log option
@@ -742,6 +737,7 @@ DESCRIPTION="swarm does write on standard error when using -l, except for errors
         failure "${DESCRIPTION}"
 rm "${ERRORINPUT}"
 
+
 ## ---------------------------------------------------------------- output-file
 
 ## Swarm accepts -o option
@@ -774,6 +770,7 @@ EXPECTED=$(sed -n '/^>/ s/>//p' "${ALL_IDENTICAL}" | tr "\n" " " | sed 's/ $//')
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+
 
 ## --------------------------------------------------------------------- mothur
 
@@ -1089,7 +1086,6 @@ SORTED_OUTPUT=$(awk -F "\t" '{print $6}' "${OUTPUT}" | sed '1q;d')
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
 
-
 ## Number of iterations is correct with -s -d 2 (1 expected)
 DESCRIPTION="number of iterations is correct with -s (1 expected)"
 OUTPUT=$(mktemp)
@@ -1155,6 +1151,7 @@ SORTED_OUTPUT=$(awk -F "\t" '{print $7}' "${OUTPUT}" | sed '1q;d')
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+
 
 ## ---------------------------------------------------------------- uclust-file
 
@@ -1876,4 +1873,3 @@ EOF
 rm "${ALL_IDENTICAL}"
 
 exit 0
-## 
