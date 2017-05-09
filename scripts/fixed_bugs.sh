@@ -825,30 +825,77 @@ rm "${OUTPUT}"
 ## https://github.com/torognes/swarm/issues/53
 ##
 ## a sequence and all its microvariants should form one OTU
+
+function microvariants() {
+    local SEQ="${1}"
+    local -i LENGTH=${#SEQ}
+    for ((i=0 ; i<=LENGTH ; i++)) ; do
+        ## insertions
+        for n in A C G T ; do 
+            echo ${SEQ:0:i}${n}${SEQ:i:LENGTH}
+        done
+        if (( i > 0 )) ; then 
+            ## deletions
+            echo ${SEQ:0:i-1}${SEQ:i:LENGTH}
+            ## substitutions
+            for n in A C G T ; do
+                echo ${SEQ:0:i-1}${n}${SEQ:i:LENGTH}
+            done
+        fi
+    done    
+}
+
+## produce a fasta set with the seed and its L1 microvariants
 DESCRIPTION="issue 53 --- swarm correctly computes all microvariants"
 OUTPUT=$(mktemp)
-INPUT="ACGT"
-LENGTH=${#INPUT}
-for ((i=0 ; i<=LENGTH ; i++)) ; do
-    ## insertions
-    for n in A C G T ; do 
-        echo ${INPUT:0:i}${n}${INPUT:i:LENGTH}
-    done
-    if (( i > 0 )) ; then 
-        ## deletions
-        echo ${INPUT:0:i-1}${INPUT:i:LENGTH}
-        ## substitutions
-        for n in A C G T ; do
-            echo ${INPUT:0:i-1}${n}${INPUT:i:LENGTH}
-        done
-    fi
-done | awk '{print ">s"NR"_1\n"$1}' | \
+SEQUENCE="ACGT"
+microvariants ${SEQUENCE} | \
+    awk '{print ">s"NR"_1\n"$1}' | \
     "${SWARM}" -o "${OUTPUT}" 2> /dev/null
-(( $(wc -l < "${OUTPUT}") == 1 ))  && \
+(( $(wc -l < "${OUTPUT}") == 1 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
-## ---------------- WIP work in progress
+
+
+## produce a fasta set with the seed, L2 microvariants and no L1 microvariants
+DESCRIPTION="issue 53 --- fastidious links L2 microvariants and the seed"
+SEQUENCE="ACGT"
+OUTPUT=$(mktemp)
+MICROVARIANTS_L1=$(microvariants ${SEQUENCE} | sort -du | grep -v "^${SEQUENCE}$")
+MICROVARIANTS_L2=$(while read MICROVARIANT ; do
+                       microvariants ${MICROVARIANT}
+                   done <<< "${MICROVARIANTS_L1}" | \
+                       sort -du | grep -v "^${SEQUENCE}$")
+(printf ">seed_1\n%s\n" ${SEQUENCE}
+comm -23 <(echo "${MICROVARIANTS_L2}") <(echo "${MICROVARIANTS_L1}") | \
+    awk '{print ">s"NR"_1\n"$1}') | \
+    "${SWARM}" -d 1 -f -o "${OUTPUT}" 2> /dev/null
+(( $(wc -l < "${OUTPUT}") == 1 )) && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+
+## perform an independent test for each L2 microvariant
+DESCRIPTION="issue 53 --- fastidious links each L2 microvariant and the seed"
+SEQUENCE="ACGT"
+OUTPUT=$(mktemp)
+## produce L1 and L2 microvariants
+MICROVARIANTS_L1=$(microvariants ${SEQUENCE} | sort -du | grep -v "^${SEQUENCE}$")
+MICROVARIANTS_L2=$(while read MICROVARIANT ; do
+                       microvariants ${MICROVARIANT}
+                   done <<< "${MICROVARIANTS_L1}" | \
+                       sort -du | grep -v "^${SEQUENCE}$")
+## produce a fasta set with the seed, L2 microvariants and no L1 microvariants
+comm -23 <(echo "${MICROVARIANTS_L2}") <(echo "${MICROVARIANTS_L1}") | \
+    while read MICROVARIANT_L2 ; do
+        printf ">seed_10\n%s\n>m_1\n%s\n" ${SEQUENCE} ${MICROVARIANT_L2} | \
+            "${SWARM}" -d 1 -f -o "${OUTPUT}" 2> /dev/null
+        (( $(wc -l < "${OUTPUT}") == 1 )) || \
+                failure "${DESCRIPTION}"
+    done && success "${DESCRIPTION}"
+rm "${OUTPUT}"
 
 
 #*****************************************************************************#
@@ -859,7 +906,7 @@ rm "${OUTPUT}"
 
 ## https://github.com/torognes/swarm/issues/54
 ##
-## nucleotide almbiguity (R,Y,S,W,K,M,M,D,B,H,V,N) won't be implemented
+## nucleotide ambiguity (R,Y,S,W,K,M,M,D,B,H,V,N) won't be implemented
 
 
 #*****************************************************************************#
@@ -911,6 +958,7 @@ rm "${OUTPUT}"
 ##
 ## question about normal behaviour
 
+
 #*****************************************************************************#
 #                                                                             #
 #                     Allow ambiguous bases? (issue 58)                       #
@@ -920,6 +968,7 @@ rm "${OUTPUT}"
 ## https://github.com/torognes/swarm/issues/58
 ##
 ## ambigous nucleotides won't be implemented
+
 
 #*****************************************************************************#
 #                                                                             #
@@ -1020,6 +1069,7 @@ rm "${OUTPUT}"
 ##  
 ## not really testable
 
+
 #*****************************************************************************#
 #                                                                             #
 #             Potential problem reported by cppcheck (issue 63)               #
@@ -1029,6 +1079,7 @@ rm "${OUTPUT}"
 ## https://github.com/torognes/swarm/issues/63
 ##  
 ## not testable
+
 
 #*****************************************************************************#
 #                                                                             #
@@ -1313,6 +1364,7 @@ rm -f "${CLUSTERS_A}" "${CLUSTERS_B}"
 ##  
 ## general question
 
+
 #*****************************************************************************#
 #                                                                             #
 #             Change output sequences to upper case (issue 82)                #
@@ -1321,6 +1373,7 @@ rm -f "${CLUSTERS_A}" "${CLUSTERS_B}"
 
 ## https://github.com/torognes/swarm/issues/82
 ##  
+
 
 #*****************************************************************************#
 #                                                                             #
@@ -1331,7 +1384,6 @@ rm -f "${CLUSTERS_A}" "${CLUSTERS_B}"
 ## https://github.com/torognes/swarm/issues/83
 ##  
 ## dead end
-
 
 
 #*****************************************************************************#
@@ -1354,6 +1406,7 @@ rm -f "${CLUSTERS_A}" "${CLUSTERS_B}"
 ## https://github.com/torognes/swarm/issues/85
 ##  
 ## general question
+
 
 #*****************************************************************************#
 #                                                                             #
@@ -1456,6 +1509,7 @@ rm "${OUTPUT}"
 ##  
 ## not testable, fixed
 
+
 #*****************************************************************************#
 #                                                                             #
 #Alignments use a slightly too large gap extension penalty when d>1 (issue 95)#
@@ -1466,6 +1520,7 @@ rm "${OUTPUT}"
 ##  
 ## not testable, fixed
 
+
 #*****************************************************************************#
 #                                                                             #
 #                  Errors in SIMD alignment code (issue 96)                   #
@@ -1475,6 +1530,7 @@ rm "${OUTPUT}"
 ## https://github.com/torognes/swarm/issues/96
 ##  
 ## not testable, fixed
+
 
 #*****************************************************************************#
 #                                                                             #
@@ -1506,6 +1562,7 @@ printf ">s_1\nA\n" | "${SWARM}" -w /dev/null  2>&1 | \
 ## https://github.com/torognes/swarm/issues/99
 ##  
 ## not testable, fixed    
+
 
 #*****************************************************************************#
 #                                                                             #
