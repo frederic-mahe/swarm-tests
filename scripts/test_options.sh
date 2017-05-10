@@ -1190,8 +1190,8 @@ DESCRIPTION="-u cluster number is correct in 2nd column #2"
 OUTPUT=$(mktemp)
 printf ">a_3\nGGGG\n>b_3\nAAAA\n>c_3\nAAAC\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
-CLUSTER_NUMBER=$(awk '/^C/ {if (NR == 3) {print $2}}' "${OUTPUT}")
-[[ "${CLUSTER_NUMBER}" == "1" ]] && \
+CLUSTER_NUMBER=$(awk '/^C/ {v = $2} END {print v}' "${OUTPUT}")
+(( "${CLUSTER_NUMBER}" == 1 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -1202,8 +1202,6 @@ OUTPUT=$(mktemp)
 printf ">a_3\nGGGG\n>b_3\nAAAA\n>c_3\nAAAC\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
 CLUSTER_SIZE=$(awk '/^C/ {if (NR == 3) {print $3}}' "${OUTPUT}")
-#CLUSTER_SIZE=$(grep "^C" "${OUTPUT}" | \
-#                      awk -F "\t" '{if (NR == 2) {print $3}}')
 (( "${CLUSTER_SIZE}" == 2 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1350,8 +1348,6 @@ OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nAGCC\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
 COLUMN_6=$(awk '/^C/ {print $6}' "${OUTPUT}")
-# COLUMN_6=$(grep "^C" "${OUTPUT}" | \
-#                        awk -F "\t" '{if (NR == 1) {print $6}}')
 [[ "${COLUMN_6}" == "*" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
