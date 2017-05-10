@@ -529,62 +529,6 @@ SUMABUNDANCES=$(awk -F "[;=]" '/^>/ {print $3}' "${OUTPUT}")
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
 
-## Swarm appends the abundance value set with -a
-OUTPUT=$(mktemp)
-DESCRIPTION="swarm append the abundance number set with -a"
-printf ">b\nACGT\n" | "${SWARM}" -a 2 -w "${OUTPUT}" &> /dev/null
-SUMABUNDANCES=$(sed -n '/^>/ s/.*_//p' "${OUTPUT}")
-(( "${SUMABUNDANCES}" == 2 )) && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-
-## Swarm does not overwrite the abundance number with -a for swarm notation
-INPUT=$(mktemp)
-OUTPUT=$(mktemp)
-printf ">b_3\nACGT\n" > "${INPUT}"
-DESCRIPTION="swarm does not overwrite the abundance number with -a for vsearch notation"
-"${SWARM}" -a 2 -w "${OUTPUT}" < "${INPUT}" &> /dev/null
-SUMABUNDANCES=$(sed -n '/^>/ s/.*_//p' "${OUTPUT}")
-[[ "${SUMABUNDANCES}" -eq 3 ]] && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${INPUT}" "${OUTPUT}"
-
-## Swarm does not overwrite the abundance number with -a for usearch notation
-INPUT=$(mktemp)
-OUTPUT=$(mktemp)
-printf ">b;size=3\nACGT\n" > "${INPUT}"
-DESCRIPTION="swarm does not overwrite the abundance number with -a for usearch notation"
-"${SWARM}" -z -a 2 -w "${OUTPUT}" < "${INPUT}" &> /dev/null
-SUMABUNDANCES=$(awk -F "[;=]" '/^>/ {print $3}' "${OUTPUT}")
-[[ "${SUMABUNDANCES}" -eq 3 ]] && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${INPUT}" "${OUTPUT}"
-
-## Swarm append the abundance number set with -a for swarm notation
-OUTPUT=$(mktemp)
-DESCRIPTION="swarm append the abundance number set with -a for vsearch notation"
-printf ">a_3\nACGT\n>b\nACGT\n" | \
-    "${SWARM}" -a 2 -w "${OUTPUT}" &> /dev/null
-SUMABUNDANCES=$(sed -n '/^>/ s/.*_//p' "${OUTPUT}")
-[[ "${SUMABUNDANCES}" -eq 5 ]] && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-
-## Swarm append the abundance number set with -a for usearch notation
-OUTPUT=$(mktemp)
-DESCRIPTION="swarm append the abundance number set with -a for usearch notation"
-printf ">a;size=3\nACGT\n>b\nACGT\n" | \
-    "${SWARM}" -z -a 2 -w "${OUTPUT}" &> /dev/null
-SUMABUNDANCES=$(awk -F "[;=]" '/^>/ {print $3}' "${OUTPUT}")
-[[ "${SUMABUNDANCES}" -eq 5 ]] && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-
 ## --------------------------------------------------------- internal structure
 
 ## Swarm accepts --internal-structure option
