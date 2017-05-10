@@ -186,8 +186,45 @@ echo -e ">a a_1\nACGT" | \
     "${SWARM}" 2> /dev/null && \
     failure "${DESCRIPTION}" || success "${DESCRIPTION}"
 
-## Test -a, --append-abundance positive integer
-# all or *some* sequences can lack abundance values
+## swarm aborts if abundance value is not a number
+DESCRIPTION="swarm aborts if abundance value is not a number"
+echo -e ">a_n\nACGT" | \
+    "${SWARM}" 2> /dev/null && \
+    failure "${DESCRIPTION}" || success "${DESCRIPTION}"
+
+## swarm aborts if abundance value is zero
+DESCRIPTION="swarm aborts if abundance value is zero"
+echo -e ">a_0\nACGT" | \
+    "${SWARM}" 2> /dev/null && \
+    failure "${DESCRIPTION}" || success "${DESCRIPTION}"
+
+## swarm aborts if abundance value is negative
+DESCRIPTION="swarm aborts if abundance value is negative"
+echo -e ">a_-1\nACGT" | \
+    "${SWARM}" 2> /dev/null && \
+    failure "${DESCRIPTION}" || success "${DESCRIPTION}"
+
+## swarm accepts large abundance values (2^32 - 1)
+DESCRIPTION="swarm accepts large abundance values (up to 2^32 - 1)"
+for POWER in {2..32} ; do
+    printf ">s1_%d\nA\n" $(( (1 << POWER) - 1 )) | \
+        "${SWARM}" &> /dev/null || \
+        failure "${DESCRIPTION}"
+done && success "${DESCRIPTION}"
+
+## swarm accepts abundance values equal to 2^32
+DESCRIPTION="swarm accepts abundance values equal to 2^32"
+printf ">s1_%d\nA\n" $(( 1 << 32 )) | \
+    "${SWARM}" &> /dev/null && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## swarm accepts abundance values equal to 2^32 + 1
+DESCRIPTION="swarm accepts abundance values equal to 2^32 + 1"
+printf ">s1_%d\nA\n" $(( (1 << 32) + 1 )) | \
+    "${SWARM}" &> /dev/null && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 ## Clean
 rm -f "${ALL_IDENTICAL}"
