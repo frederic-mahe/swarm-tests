@@ -1235,7 +1235,14 @@ done
 #*****************************************************************************#
 
 ## https://github.com/torognes/swarm/issues/73
-##  
+##
+## Return status should be 0 after -h and -v
+for OPTION in "-h" "--help" "-v" "--version" ; do
+    DESCRIPTION="issue 73 --- return status should be 0 after ${OPTION}"
+    "${SWARM}" "${OPTION}" 2> /dev/null && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+done
 
 
 #*****************************************************************************#
