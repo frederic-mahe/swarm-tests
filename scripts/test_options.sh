@@ -716,31 +716,23 @@ rm "${OUTPUT}"
 ## TODO: missing tests on the format (space separated, one line per
 ## OTU, abundance notation)
 
+
 ## --------------------------------------------------------------------- mothur
 
-## Swarm accepts --mothur option
-DESCRIPTION="swarm accepts --mothur option"
-OUTPUT=$(mktemp)
-"${SWARM}" --mothur < "${ALL_IDENTICAL}" &> /dev/null && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-
-## Swarm accepts -r option
-DESCRIPTION="swarm accepts -r option"
-OUTPUT=$(mktemp)
-"${SWARM}" -r < "${ALL_IDENTICAL}" &> /dev/null && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
+## Swarm accepts the options -r and --mothur
+for OPTION in "-r" "--mothur" ; do
+    DESCRIPTION="swarms accepts the option ${OPTION}"
+    "${SWARM}" "${OPTION}" < "${ALL_IDENTICAL}" &> /dev/null && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+done
 
 ## -r first row is correct
 DESCRIPTION="-r first row is correct"
 OUTPUT=$(mktemp)
-printf ">a_5\nAAAA\n" | \
-    "${SWARM}" -r  > "${OUTPUT}" 2> /dev/null
-SORTED_OUTPUT=$(awk -F "\t" '{print $1}' "${OUTPUT}")
-[[ "${SORTED_OUTPUT}" == "swarm_1" ]] && \
+printf ">a_5\nAAAA\n" | "${SWARM}" -r  > "${OUTPUT}" 2> /dev/null
+FIRST_ROW=$(awk -F "\t" '{print $1}' "${OUTPUT}")
+[[ "${FIRST_ROW}" == "swarm_1" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -748,10 +740,9 @@ rm "${OUTPUT}"
 ## -r first row is correct with -d 2
 DESCRIPTION="-r first row is correct with -d 2"
 OUTPUT=$(mktemp)
-printf ">a_5\nAAAA\n" | \
-    "${SWARM}" -r -d 2 > "${OUTPUT}" 2> /dev/null
-SORTED_OUTPUT=$(awk -F "\t" '{print $1}' "${OUTPUT}")
-[[ "${SORTED_OUTPUT}" == "swarm_2" ]] && \
+printf ">a_5\nAAAA\n" | "${SWARM}" -r -d 2 > "${OUTPUT}" 2> /dev/null
+FIRST_ROW=$(awk -F "\t" '{print $1}' "${OUTPUT}")
+[[ "${FIRST_ROW}" == "swarm_2" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -759,10 +750,9 @@ rm "${OUTPUT}"
 ## -r number of OTUs is correct (1 expected)
 DESCRIPTION="-r number of OTUs is correct (1 expected)"
 OUTPUT=$(mktemp)
-printf ">a_5\nAAAA\n" | \
-    "${SWARM}" -r -d 2 > "${OUTPUT}" 2> /dev/null
-SORTED_OUTPUT=$(awk -F "\t" '{print $2}' "${OUTPUT}")
-[[ "${SORTED_OUTPUT}" == "1" ]] && \
+printf ">a_5\nAAAA\n" | "${SWARM}" -r -d 2 > "${OUTPUT}" 2> /dev/null
+NUMBER_OF_OTUs=$(awk -F "\t" '{print $2}' "${OUTPUT}")
+(( "${NUMBER_OF_OTUs}" == 1 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -772,74 +762,85 @@ DESCRIPTION="-r number of OTUs is correct (2 expected)"
 OUTPUT=$(mktemp)
 printf ">a_5\nAAAA\n>b_5\nAAAA\n>c_5\nAACC\n" | \
     "${SWARM}" -r > "${OUTPUT}" 2> /dev/null
-SORTED_OUTPUT=$(awk -F "\t" '{print $2}' "${OUTPUT}")
-[[ "${SORTED_OUTPUT}" == "2" ]] && \
+NUMBER_OF_OTUs=$(awk -F "\t" '{print $2}' "${OUTPUT}")
+(( "${NUMBER_OF_OTUs}" == 2 )) && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## -r number of fields is correct (4 fields expected)
+DESCRIPTION="-r number of fields is correct (4 fields expected)"
+OUTPUT=$(mktemp)
+printf ">a_5\nAAAA\n>b_5\nAAAA\n>c_5\nAACC\n" | \
+    "${SWARM}" -r > "${OUTPUT}" 2> /dev/null
+NUMBER_OF_FIELDS=$(awk -F "\t" '{print NF}' "${OUTPUT}")
+(( "${NUMBER_OF_FIELDS}" == 4 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
 
 ## -r composition of OTUs is correct #1
-DESCRIPTION="-r compostion of OTUs is correct #1"
+DESCRIPTION="-r composition of OTUs is correct #1"
 OUTPUT=$(mktemp)
 printf ">a_5\nAAAA\n>b_5\nAAAA\n>c_5\nAACC\n" | \
     "${SWARM}" -r > "${OUTPUT}" 2> /dev/null
-SORTED_OUTPUT=$(awk -F "\t" '{print $3}' "${OUTPUT}")
-[[ "${SORTED_OUTPUT}" == "a_5,b_5" ]] && \
+OTU=$(awk -F "\t" '{print $3}' "${OUTPUT}")
+[[ "${OTU}" == "a_5,b_5" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
 
 ## -r composition of OTUs is correct #2
-DESCRIPTION="-r compostion of OTUs is correct #2"
+DESCRIPTION="-r composition of OTUs is correct #2"
 OUTPUT=$(mktemp)
 printf ">a_5\nAAAA\n>b_5\nACCC\n>c_5\nAAAC\n" | \
     "${SWARM}" -r > "${OUTPUT}" 2> /dev/null
-SORTED_OUTPUT=$(awk -F "\t" '{print $3}' "${OUTPUT}")
-[[ "${SORTED_OUTPUT}" == "a_5,c_5" ]] && \
+OTU=$(awk -F "\t" '{print $3}' "${OUTPUT}")
+[[ "${OTU}" == "a_5,c_5" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
 
 ## -r composition of OTUs is correct #3
-DESCRIPTION="-r compostion of OTUs is correct #3"
+DESCRIPTION="-r composition of OTUs is correct #3"
 OUTPUT=$(mktemp)
 printf ">a_5\nAAAA\n>b_5\nACCC\n>c_5\nAACC\n" | \
     "${SWARM}" -r > "${OUTPUT}" 2> /dev/null
-SORTED_OUTPUT=$(awk -F "\t" '{print $3}' "${OUTPUT}")
-[[ "${SORTED_OUTPUT}" == "a_5" ]] && \
+OTU=$(awk -F "\t" '{print $3}' "${OUTPUT}")
+[[ "${OTU}" == "a_5" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
 
 ## -r composition of OTUs is correct with -a 2 #1
-DESCRIPTION="-r compostion of OTUs is correct with -a 2 #1"
+DESCRIPTION="-r composition of OTUs is correct with -a 2 #1"
 OUTPUT=$(mktemp)
 printf ">a_5\nAAAA\n>b_\nAAAC\n>c_\nACCC\n" | \
     "${SWARM}" -r -a 2 > "${OUTPUT}" 2> /dev/null
-SORTED_OUTPUT=$(awk -F "\t" '{print $3}' "${OUTPUT}")
-[[ "${SORTED_OUTPUT}" == "a_5,b_" ]] && \
+OTU=$(awk -F "\t" '{print $3}' "${OUTPUT}")
+[[ "${OTU}" == "a_5,b_" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
 
 ## -r composition of OTUs is correct with -a 2 #2
-DESCRIPTION="-r compostion of OTUs is correct with -a 2 #2"
+DESCRIPTION="-r composition of OTUs is correct with -a 2 #2"
 OUTPUT=$(mktemp)
 printf ">a_5\nAAAA\n>b_\nACCC\n>c_\nAAAC\n" | \
     "${SWARM}" -r -a 2 > "${OUTPUT}" 2> /dev/null
-SORTED_OUTPUT=$(awk -F "\t" '{print $3}' "${OUTPUT}")
-[[ "${SORTED_OUTPUT}" == "a_5,c_" ]] && \
+OTU=$(awk -F "\t" '{print $3}' "${OUTPUT}")
+[[ "${OTU}" == "a_5,c_" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
 
 ## -r composition of OTUs is correct with -z
-DESCRIPTION="-r compostion of OTUs is correct with -z"
+DESCRIPTION="-r composition of OTUs is correct with -z"
 OUTPUT=$(mktemp)
 printf ">a;size=5\nAAAA\n>b;size=4\nAAAC\n>c;size=5\nACCC\n" | \
     "${SWARM}" -r -z > "${OUTPUT}" 2> /dev/null
-SORTED_OUTPUT=$(awk -F "\t" '{print $3}' "${OUTPUT}")
-[[ "${SORTED_OUTPUT}" == "a;size=5,b;size=4" ]] && \
+OTU=$(awk -F "\t" '{print $3}' "${OUTPUT}")
+[[ "${OTU}" == "a;size=5,b;size=4" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -847,21 +848,13 @@ rm "${OUTPUT}"
 
 ## ------------------------------------------------------------ statistics-file
 
-## Swarm accepts --statistics-file option
-DESCRIPTION="swarm accepts --statistics-file option"
-OUTPUT=$(mktemp)
-"${SWARM}" --statistics-file "${OUTPUT}" < "${ALL_IDENTICAL}" &> /dev/null && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-
-## Swarm accepts -s option
-DESCRIPTION="swarm accepts -s option"
-OUTPUT=$(mktemp)
-"${SWARM}" -s "${OUTPUT}" < "${ALL_IDENTICAL}" &> /dev/null && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
+## Swarm accepts the options -s and --statistics-file
+for OPTION in "-s" "--statistics-file" ; do
+    DESCRIPTION="swarms accepts the option ${OPTION}"
+    "${SWARM}" "${OPTION}" /dev/null < "${ALL_IDENTICAL}" &> /dev/null && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+done
 
 ## Swarm -s create and fill given filename
 DESCRIPTION="swarm -s create and fill filename given"
@@ -881,10 +874,9 @@ DESCRIPTION="swarm -s fails if no filename given"
 ## Number of unique amplicons is correct with -s (1 expected)
 DESCRIPTION="number of unique amplicons is correct with -s (1 expected)"
 OUTPUT=$(mktemp)
-printf ">a_5\nAAAA\n" | \
-    "${SWARM}" -s "${OUTPUT}" &> /dev/null
-SORTED_OUTPUT=$(awk -F "\t" '{print $1}' "${OUTPUT}")
-[[ "${SORTED_OUTPUT}" == "1" ]] && \
+printf ">a_5\nAAAA\n" | "${SWARM}" -s "${OUTPUT}" &> /dev/null
+UNIQUE_AMPLICONS=$(awk -F "\t" '{print $1}' "${OUTPUT}")
+(( "${UNIQUE_AMPLICONS}" == 1 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -894,8 +886,8 @@ DESCRIPTION="number of unique amplicons is correct with -s (2 expected)"
 OUTPUT=$(mktemp)
 printf ">a_5\nAAAA\n>b_1\nAAAC\n" | \
     "${SWARM}" -s "${OUTPUT}" &> /dev/null
-SORTED_OUTPUT=$(awk -F "\t" '{print $1}' "${OUTPUT}")
-[[ "${SORTED_OUTPUT}" == "2" ]] && \
+UNIQUE_AMPLICONS=$(awk -F "\t" '{print $1}' "${OUTPUT}")
+(( "${UNIQUE_AMPLICONS}" == 2 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -905,8 +897,8 @@ DESCRIPTION="number of unique amplicons is still correct with -s (2 expected)"
 OUTPUT=$(mktemp)
 printf ">a_5\nAAAA\n>b_5\nAAAC\n>c_1\nGGGG\n" | \
     "${SWARM}" -s "${OUTPUT}" &> /dev/null
-SORTED_OUTPUT=$(awk -F "\t" '{print $1}' "${OUTPUT}" | sed '1q;d')
-[[ "${SORTED_OUTPUT}" == "2" ]] && \
+UNIQUE_AMPLICONS=$(awk -F "\t" 'NR == 1 {print $1}' "${OUTPUT}")
+(( "${UNIQUE_AMPLICONS}" == 2 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -916,8 +908,8 @@ DESCRIPTION="total abundance of amplicons is correct with -s (1 expected)"
 OUTPUT=$(mktemp)
 printf ">a_1\nAAAA\n" | \
     "${SWARM}" -s "${OUTPUT}" &> /dev/null
-SORTED_OUTPUT=$(awk -F "\t" '{print $2}' "${OUTPUT}")
-[[ "${SORTED_OUTPUT}" == "1" ]] && \
+TOTAL_ABUNDANCE=$(awk -F "\t" '{print $2}' "${OUTPUT}")
+(( "${TOTAL_ABUNDANCE}" == 1 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -927,8 +919,8 @@ DESCRIPTION="total abundance of amplicons is correct with -s (5 expected)"
 OUTPUT=$(mktemp)
 printf ">a_5\nAAAA\n" | \
     "${SWARM}" -s "${OUTPUT}" &> /dev/null
-SORTED_OUTPUT=$(awk -F "\t" '{print $2}' "${OUTPUT}" | sed '1q;d')
-[[ "${SORTED_OUTPUT}" == "5" ]] && \
+TOTAL_ABUNDANCE=$(awk -F "\t" 'NR == 1 {print $2}' "${OUTPUT}")
+(( "${TOTAL_ABUNDANCE}" == 5 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -938,8 +930,8 @@ DESCRIPTION="total abundance of amplicons is still correct with -s (5 expected)"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_2\nAAAC\n>c_1\nGGGG\n" | \
     "${SWARM}" -s "${OUTPUT}" &> /dev/null
-SORTED_OUTPUT=$(awk -F "\t" '{print $2}' "${OUTPUT}" | sed '1q;d')
-[[ "${SORTED_OUTPUT}" == "5" ]] && \
+TOTAL_ABUNDANCE=$(awk -F "\t" 'NR == 1 {print $2}' "${OUTPUT}")
+(( "${TOTAL_ABUNDANCE}" == 5 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -949,8 +941,8 @@ DESCRIPTION="Id of initial seed is correct with -s"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_2\nAAAC\n>c_1\nGGGG\n" | \
     "${SWARM}" -s "${OUTPUT}" &> /dev/null
-SORTED_OUTPUT=$(awk -F "\t" '{print $3}' "${OUTPUT}" | sed '1q;d')
-[[ "${SORTED_OUTPUT}" == "a" ]] && \
+SEED_ID=$(awk -F "\t" 'NR == 1 {print $3}' "${OUTPUT}")
+[[ "${SEED_ID}" == "a" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -960,8 +952,8 @@ DESCRIPTION="Id of initial seed is still correct with -s"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_2\nAAAC\n>c_1\nGGGG\n" | \
     "${SWARM}" -s "${OUTPUT}" &> /dev/null
-SORTED_OUTPUT=$(awk -F "\t" '{print $3}' "${OUTPUT}" | sed '2q;d')
-[[ "${SORTED_OUTPUT}" == "c" ]] && \
+SEED_ID=$(awk -F "\t" 'NR == 2 {print $3}' "${OUTPUT}")
+[[ "${SEED_ID}" == "c" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -971,8 +963,8 @@ DESCRIPTION="abundance of initial seed is correct with -s"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_2\nAAAC\n>c_1\nGGGG\n" | \
     "${SWARM}" -s "${OUTPUT}" &> /dev/null
-SORTED_OUTPUT=$(awk -F "\t" '{print $4}' "${OUTPUT}" | sed '1q;d')
-[[ "${SORTED_OUTPUT}" == "3" ]] && \
+SEED_ABUNDANCE=$(awk -F "\t" 'NR == 1 {print $4}' "${OUTPUT}")
+(( "${SEED_ABUNDANCE}" == 3 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -982,8 +974,8 @@ DESCRIPTION="abundance of initial seed is still correct with -s"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_2\nAAAC\n>c_1\nGGGG\n" | \
     "${SWARM}" -s "${OUTPUT}" &> /dev/null
-SORTED_OUTPUT=$(awk -F "\t" '{print $4}' "${OUTPUT}" | sed '2q;d')
-[[ "${SORTED_OUTPUT}" == "1" ]] && \
+SEED_ABUNDANCE=$(awk -F "\t" 'NR == 2 {print $4}' "${OUTPUT}")
+(( "${SEED_ABUNDANCE}" == 1 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -993,8 +985,8 @@ DESCRIPTION="number of amplicons with an abundance of 1 is correct with -s (0 ex
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_2\nAAAC\n>c_1\nGGGG\n" | \
     "${SWARM}" -s "${OUTPUT}" &> /dev/null
-SORTED_OUTPUT=$(awk -F "\t" '{print $5}' "${OUTPUT}" | sed '1q;d')
-[[ "${SORTED_OUTPUT}" == "0" ]] && \
+NUMBER_OF_AMPLICONS=$(awk -F "\t" 'NR == 1 {print $5}' "${OUTPUT}")
+(( "${NUMBER_OF_AMPLICONS}" == 0 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -1004,8 +996,8 @@ DESCRIPTION="number of amplicons with an abundance of 1 is correct with -s (1 ex
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_2\nAAAC\n>c_1\nGGGG\n" | \
     "${SWARM}" -s "${OUTPUT}" &> /dev/null
-SORTED_OUTPUT=$(awk -F "\t" '{print $5}' "${OUTPUT}" | sed '2q;d')
-[[ "${SORTED_OUTPUT}" == "1" ]] && \
+NUMBER_OF_AMPLICONS=$(awk -F "\t" 'NR == 2 {print $5}' "${OUTPUT}")
+(( "${NUMBER_OF_AMPLICONS}" == 1 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -1015,8 +1007,8 @@ DESCRIPTION="number of iterations is correct with -s (0 expected)"
 OUTPUT=$(mktemp)
 printf ">a_2\nAAAA\n" | \
     "${SWARM}" -s "${OUTPUT}" &> /dev/null
-SORTED_OUTPUT=$(awk -F "\t" '{print $6}' "${OUTPUT}" | sed '1q;d')
-[[ "${SORTED_OUTPUT}" == "0" ]] && \
+NUMBER_OF_ITERATIONS=$(awk -F "\t" 'NR == 1 {print $6}' "${OUTPUT}")
+(( "${NUMBER_OF_ITERATIONS}" == 0 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -1026,8 +1018,8 @@ DESCRIPTION="number of iterations is correct with -s (1 expected)"
 OUTPUT=$(mktemp)
 printf ">a_2\nAAAA\n>c_1\nAACC\n" | \
     "${SWARM}" -d 2 -s "${OUTPUT}" &> /dev/null
-SORTED_OUTPUT=$(awk -F "\t" '{print $6}' "${OUTPUT}" | sed '1q;d')
-[[ "${SORTED_OUTPUT}" == "1" ]] && \
+NUMBER_OF_ITERATIONS=$(awk -F "\t" 'NR == 1 {print $6}' "${OUTPUT}")
+(( "${NUMBER_OF_ITERATIONS}" == 1 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -1037,8 +1029,8 @@ DESCRIPTION="number of iterations is correct with -s (2 expected)"
 OUTPUT=$(mktemp)
 printf ">a_2\nAAAA\n>b_2\nAAAC\n>c_1\nACCC\n" | \
     "${SWARM}" -d 2 -s "${OUTPUT}" &> /dev/null
-SORTED_OUTPUT=$(awk -F "\t" '{print $6}' "${OUTPUT}" | sed '1q;d')
-[[ "${SORTED_OUTPUT}" == "2" ]] && \
+NUMBER_OF_ITERATIONS=$(awk -F "\t" 'NR == 1 {print $6}' "${OUTPUT}")
+(( "${NUMBER_OF_ITERATIONS}" == 2 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -1048,8 +1040,8 @@ DESCRIPTION="theorical maximum radius is correct with -s (0 expected)"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n" | \
     "${SWARM}" -s "${OUTPUT}" &> /dev/null
-SORTED_OUTPUT=$(awk -F "\t" '{print $7}' "${OUTPUT}" | sed '1q;d')
-[[ "${SORTED_OUTPUT}" == "0" ]] && \
+THEORICAL_RADIUS=$(awk -F "\t" 'NR == 1 {print $7}' "${OUTPUT}")
+(( "${THEORICAL_RADIUS}" == 0 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -1059,8 +1051,8 @@ DESCRIPTION="theorical maximum radius is correct with -s (2 expected)"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_2\nAAAC\n>c_1\nAACC\n" | \
     "${SWARM}" -s "${OUTPUT}" &> /dev/null
-SORTED_OUTPUT=$(awk -F "\t" '{print $7}' "${OUTPUT}" | sed '1q;d')
-[[ "${SORTED_OUTPUT}" == "2" ]] && \
+THEORICAL_RADIUS=$(awk -F "\t" 'NR == 1 {print $7}' "${OUTPUT}")
+(( "${THEORICAL_RADIUS}" == 2 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -1070,8 +1062,8 @@ DESCRIPTION="theorical maximum radius is correct with -s -d 2 (2 expected)"
 OUTPUT=$(mktemp)
 printf ">a_2\nAAAA\n>c_1\nAACC\n" | \
     "${SWARM}" -d 2 -s "${OUTPUT}" &> /dev/null
-SORTED_OUTPUT=$(awk -F "\t" '{print $7}' "${OUTPUT}" | sed '1q;d')
-[[ "${SORTED_OUTPUT}" == "2" ]] && \
+THEORICAL_RADIUS=$(awk -F "\t" 'NR == 1 {print $7}' "${OUTPUT}")
+(( "${THEORICAL_RADIUS}" == 2 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -1081,8 +1073,8 @@ DESCRIPTION="theorical radius != actuel radius with -s -d 2"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAAA\n>b_3\nAAACC\n>c_2\nACCCC\n>c_2\nACCAC\n" | \
     "${SWARM}" -d 2 -s "${OUTPUT}" &> /dev/null
-SORTED_OUTPUT=$(awk -F "\t" '{print $7}' "${OUTPUT}" | sed '1q;d')
-[[ "${SORTED_OUTPUT}" == "5" ]] && \
+THEORICAL_RADIUS=$(awk -F "\t" 'NR == 1 {print $7}' "${OUTPUT}")
+(( "${THEORICAL_RADIUS}" == 5 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -1090,23 +1082,14 @@ rm "${OUTPUT}"
 
 ## ---------------------------------------------------------------- uclust-file
 
-## Swarm accepts --uclust-file option
-DESCRIPTION="swarm accepts --uclust-file option"
-OUTPUT=$(mktemp)
-printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
-    "${SWARM}" --uclust-file "${OUTPUT}"  &> /dev/null && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-
-## Swarm accepts -u option
-OUTPUT=$(mktemp)
-DESCRIPTION="swarm accepts -u option"
-printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
-    "${SWARM}" -u "${OUTPUT}"  &> /dev/null && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
+## Swarm accepts the options -u and --uclust-file
+for OPTION in "-u" "--uclust-file" ; do
+    DESCRIPTION="swarms accepts the option ${OPTION}"
+    printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
+        "${SWARM}" "${OPTION}" /dev/null &> /dev/null && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+done
 
 ## Swarm -u fails if no output file given
 DESCRIPTION="swarm -u fails if no output file given"
@@ -1660,7 +1643,7 @@ SORTED_OUTPUT=$(grep "^S" "${OUTPUT}" | \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
 
-
+exit
 ## ---------------------------------------------------------------------- seeds
 
 ## Swarm accepts --seeds option
