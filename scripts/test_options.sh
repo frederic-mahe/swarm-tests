@@ -469,7 +469,7 @@ rm "${FASTIDOUSINPUT}"
 
 ## ----------------------------------------------------------- append-abundance
 
-## Swarm accepts the option -a and --append-abundance
+## Swarm accepts the options -a and --append-abundance
 for OPTION in "-a" "--append-abundance" ; do
     DESCRIPTION="swarms accepts the option ${OPTION}"
     "${SWARM}" "${OPTION}" 2 < "${ALL_IDENTICAL}" &> /dev/null && \
@@ -529,33 +529,26 @@ SUMABUNDANCES=$(awk -F "[;=]" '/^>/ {print $3}' "${OUTPUT}")
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
 
+
 ## --------------------------------------------------------- internal structure
 
-## Swarm accepts --internal-structure option
-OUTPUT=$(mktemp)
-DESCRIPTION="swarm accepts --internal-structure option"
-"${SWARM}" --internal-structure "${OUTPUT}" < "${ALL_IDENTICAL}" &> /dev/null && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-
-## Swarm accepts -i option
-OUTPUT=$(mktemp)
-DESCRIPTION="swarm accepts -i option"
-"${SWARM}" -i "${OUTPUT}" < "${ALL_IDENTICAL}" &> /dev/null && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
+## Swarm accepts the options -i and --internal-structure
+for OPTION in "-i" "--internal-structure" ; do
+    DESCRIPTION="swarms accepts the option ${OPTION}"
+    "${SWARM}" "${OPTION}" /dev/null < "${ALL_IDENTICAL}" &> /dev/null && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+done
 
 ## Swarm -i fails if no output file given
-DESCRIPTION="swarm -i fails if no output file given"
+DESCRIPTION="-i fails if no output file given"
 "${SWARM}" -i  < "${ALL_IDENTICAL}" &> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Swarm -i create and fill given output file
 OUTPUT=$(mktemp)
-DESCRIPTION="swarm -i create and fill given output file"
+DESCRIPTION="-i creates and fill given output file"
 "${SWARM}" --internal-structure "${OUTPUT}" < "${ALL_IDENTICAL}" &> /dev/null
 [[ -s "${OUTPUT}" ]] && \
     success "${DESCRIPTION}" || \
@@ -564,22 +557,22 @@ rm "${OUTPUT}"
 
 ## -i number of differences is correct (0 expected)
 OUTPUT=$(mktemp)
-DESCRIPTION="number of differences is correct (0 expected)"
+DESCRIPTION="-i number of differences is correct (0 expected)"
 printf ">a_1\nAAAA\n>b_1\nAAAA\n" | \
     "${SWARM}" -i "${OUTPUT}" &> /dev/null
-SORTED_OUTPUT=$(awk -F "\t" '{print $3}' "${OUTPUT}")
-[[ "${SORTED_OUTPUT}" == "0" ]] && \
+NUMBER_OF_DIFFERENCES=$(awk -F "\t" '{print $3}' "${OUTPUT}")
+(( "${NUMBER_OF_DIFFERENCES}" == 0 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
 
-## -i number of differences is correct while -d 2 (2 expected)
+## -i number of differences is correct when -d 2 (2 expected)
 OUTPUT=$(mktemp)
-DESCRIPTION="-i number of differences is correct while -d 2 (2 expected)"
+DESCRIPTION="-i number of differences is correct when -d 2 (2 expected)"
 printf ">a_1\nAAAA\n>b_1\nAACC\n" | \
     "${SWARM}" -d 2 -i "${OUTPUT}" &> /dev/null
-SORTED_OUTPUT=$(awk -F "\t" '{print $3}' "${OUTPUT}")
-(( "${SORTED_OUTPUT}" == 2 )) && \
+NUMBER_OF_DIFFERENCES=$(awk -F "\t" '{print $3}' "${OUTPUT}")
+(( "${NUMBER_OF_DIFFERENCES}" == 2 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -589,8 +582,8 @@ OUTPUT=$(mktemp)
 DESCRIPTION="-i number of differences is correct while -d 2 (1 expected)"
 printf ">a_1\nAAAA\n>b_1\nAAAC\n" | \
     "${SWARM}" -d 2 -i "${OUTPUT}" &> /dev/null
-SORTED_OUTPUT=$(awk -F "\t" '{print $3}' "${OUTPUT}")
-(( "${SORTED_OUTPUT}" == 1 )) && \
+NUMBER_OF_DIFFERENCES=$(awk -F "\t" '{print $3}' "${OUTPUT}")
+(( "${NUMBER_OF_DIFFERENCES}" == 1 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -600,8 +593,8 @@ OUTPUT=$(mktemp)
 DESCRIPTION="-i number of the OTU is correct #1"
 printf ">a_1\nAAAA\n>b_1\nAAAC\n" | \
     "${SWARM}" -i "${OUTPUT}" &> /dev/null
-SORTED_OUTPUT=$(awk -F "\t" '{print $4}' "${OUTPUT}")
-(( "${SORTED_OUTPUT}" == 1 )) && \
+NUMBER_OF_OTUs=$(awk -F "\t" '{print $4}' "${OUTPUT}")
+(( "${NUMBER_OF_OTUs}" == 1 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -611,8 +604,8 @@ OUTPUT=$(mktemp)
 DESCRIPTION="-i number of the OTU is correct #2"
 printf ">a_1\nAA\n>b_1\nAC\n>c_1\nGG\n>d_1\nGT\n" | \
     "${SWARM}" -i "${OUTPUT}" &> /dev/null
-SORTED_OUTPUT=$(awk '{n = $4} END {print n}' "${OUTPUT}")
-(( "${SORTED_OUTPUT}" == 2 )) && \
+NUMBER_OF_OTUs=$(awk '{n = $4} END {print n}' "${OUTPUT}")
+(( "${NUMBER_OF_OTUs}" == 2 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -622,8 +615,8 @@ OUTPUT=$(mktemp)
 DESCRIPTION="-i number of steps is correct (1 expected)"
 printf ">a_1\nAAAA\n>b_1\nAAAC\n" | \
     "${SWARM}" -i "${OUTPUT}" &> /dev/null
-SORTED_OUTPUT=$(awk -F "\t" '{print $5}' "${OUTPUT}")
-[[ "${SORTED_OUTPUT}" == "1" ]] && \
+NUMBER_OF_STEPS=$(awk -F "\t" '{print $5}' "${OUTPUT}")
+(( "${NUMBER_OF_STEPS}" == 1 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -633,8 +626,8 @@ OUTPUT=$(mktemp)
 DESCRIPTION="-i number of steps is correct (3 expected)"
 printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nAACC\n>d_1\nACCC\n" | \
     "${SWARM}" -i "${OUTPUT}" &> /dev/null
-SORTED_OUTPUT=$(awk -F "\t" '{print $5}' "${OUTPUT}" | sed '3q;d' )
-[[ "${SORTED_OUTPUT}" == "3" ]] && \
+NUMBER_OF_STEPS=$(awk -F "\t" '{print $5}' "${OUTPUT}" | sed '3q;d' )
+(( "${NUMBER_OF_STEPS}" == 3 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -644,8 +637,8 @@ OUTPUT=$(mktemp)
 DESCRIPTION="-i number of steps is correct while -d 2 (1 expected)"
 printf ">a_1\nAAAA\n>c_1\nAACC\n" | \
     "${SWARM}" -d 2 -i "${OUTPUT}" &> /dev/null
-SORTED_OUTPUT=$(awk -F "\t" '{print $5}' "${OUTPUT}" )
-[[ "${SORTED_OUTPUT}" == "1" ]] && \
+NUMBER_OF_STEPS=$(awk -F "\t" '{print $5}' "${OUTPUT}" )
+(( "${NUMBER_OF_STEPS}" == 1 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -655,8 +648,8 @@ OUTPUT=$(mktemp)
 DESCRIPTION="-i number of steps is correct while -d 2 (2 expected)"
 printf ">a_1\nAAAA\n>b_1\nAACC\n>c_1\nACCC\n" | \
     "${SWARM}" -d 2 -i "${OUTPUT}" &> /dev/null
-SORTED_OUTPUT=$(awk -F "\t" '{print $5}' "${OUTPUT}" | sed '2q;d')
-[[ "${SORTED_OUTPUT}" == "2" ]] && \
+NUMBER_OF_STEPS=$(awk -F "\t" 'NR == 2 {print $5}' "${OUTPUT}")
+(( "${NUMBER_OF_STEPS}" == 2 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -664,17 +657,13 @@ rm "${OUTPUT}"
 
 ## ------------------------------------------------------------------------ log
 
-## Swarm accepts --log option
-DESCRIPTION="swarm accepts --log option"
-"${SWARM}" --log /dev/null < "${ALL_IDENTICAL}" &> /dev/null && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-
-## Swarm accepts -l option
-DESCRIPTION="swarm accepts -l option"
-"${SWARM}" -l /dev/null < "${ALL_IDENTICAL}" &> /dev/null && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
+## Swarm accepts the options -l and --log
+for OPTION in "-l" "--log" ; do
+    DESCRIPTION="swarms accepts the option ${OPTION}"
+    "${SWARM}" "${OPTION}" /dev/null < "${ALL_IDENTICAL}" &> /dev/null && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+done
 
 ## Swarm does not write on standard error when using -l
 ERRORINPUT=$(mktemp)
@@ -695,20 +684,15 @@ DESCRIPTION="swarm does write on standard error when using -l, except for errors
         failure "${DESCRIPTION}"
 rm "${ERRORINPUT}"
 
-
 ## ---------------------------------------------------------------- output-file
 
-## Swarm accepts -o option
-DESCRIPTION="swarm accepts -o option"
-"${SWARM}" -o /dev/null < "${ALL_IDENTICAL}" &> /dev/null && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-
-## Swarm accepts --output-file option
-DESCRIPTION="swarm accepts --output-file option"
-"${SWARM}" --output-file /dev/null < "${ALL_IDENTICAL}" &> /dev/null && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
+## Swarm accepts the options -o and --output-file
+for OPTION in "-o" "--output-file" ; do
+    DESCRIPTION="swarms accepts the option ${OPTION}"
+    "${SWARM}" "${OPTION}" /dev/null < "${ALL_IDENTICAL}" &> /dev/null && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+done
 
 ## Swarm creates output file with -o option
 OUTPUT=$(mktemp)
@@ -729,6 +713,8 @@ EXPECTED=$(sed -n '/^>/ s/>//p' "${ALL_IDENTICAL}" | tr "\n" " " | sed 's/ $//')
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
 
+## TODO: missing tests on the format (space separated, one line per
+## OTU, abundance notation)
 
 ## --------------------------------------------------------------------- mothur
 
@@ -891,15 +877,6 @@ DESCRIPTION="swarm -s fails if no filename given"
 "${SWARM}" -s  < "${ALL_IDENTICAL}" &> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
-
-## Swarm -s create and fill given filename
-DESCRIPTION="swarm -s create and fill filename given"
-OUTPUT=$(mktemp)
-"${SWARM}" -s "${OUTPUT}" < "${ALL_IDENTICAL}" &> /dev/null
-[[ -s "${OUTPUT}" ]] && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
 
 ## Number of unique amplicons is correct with -s (1 expected)
 DESCRIPTION="number of unique amplicons is correct with -s (1 expected)"
@@ -1739,9 +1716,9 @@ rm "${OUTPUT}"
 #                                                                             #
 #*****************************************************************************#
 
-## Swarm sorts fasta output files by decreasing abundance
+## Swarm sorts amplicons in an OTU by decreasing abundance
 OUTPUT=$(mktemp)
-DESCRIPTION="swarm sorts fasta output files by decreasing abundance"
+DESCRIPTION="swarm sorts amplicons in an OTU by decreasing abundance"
 printf ">c_1\nAAAA\n>a_3\nAAAC\n>b_2\nAACC\n" | \
     "${SWARM}" > "${OUTPUT}" 2> /dev/null
 grep -q "^a_3 b_2 c_1$" "${OUTPUT}" && \
@@ -1749,15 +1726,16 @@ grep -q "^a_3 b_2 c_1$" "${OUTPUT}" && \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"  
 
-## Swarm sorts fasta output files by decreasing abundance
+## Swarm sorts fasta output by decreasing abundance
 OUTPUT=$(mktemp)
-DESCRIPTION="swarm sorts fasta output files by decreasing abundance"
+DESCRIPTION="swarm sorts fasta output by decreasing abundance"
 printf ">c_1\nAAAA\n>a_3\nGGGG\n>b_2\nTTTT\n" | \
     "${SWARM}" > "${OUTPUT}" 2> /dev/null
-[[ $(cat "${OUTPUT}") == $(printf "a_3\nb_2\nc_1") ]] && \
+[[ $(< "${OUTPUT}") == $(printf "a_3\nb_2\nc_1") ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"  
+
 
 #*****************************************************************************#
 #                                                                             #
