@@ -118,6 +118,14 @@ done
 #                                                                             #
 #*****************************************************************************#
 
+## Swarm accepts the options -t and --threads
+for OPTION in "-t" "--threads" ; do
+    DESCRIPTION="swarms accepts the option ${OPTION}"
+    "${SWARM}" "${OPTION}" 1 < "${ALL_IDENTICAL}" &> /dev/null && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+done
+
 ## Number of threads (--threads from 1 to 256)
 MIN=1
 MAX=256
@@ -164,6 +172,14 @@ DESCRIPTION="swarm aborts when --threads is not numerical"
 #                                                                             #
 #*****************************************************************************#
 
+## Swarm accepts the options -d and --differences
+for OPTION in "-d" "--differences" ; do
+    DESCRIPTION="swarms accepts the option ${OPTION}"
+    "${SWARM}" "${OPTION}" 1 < "${ALL_IDENTICAL}" &> /dev/null && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+done
+
 ## Number of differences (--differences from 0 to 255)
 MIN=0
 MAX=255
@@ -193,7 +209,7 @@ DESCRIPTION="swarm aborts when --difference is 256"
 
 ## Number of differences (number of differences is way too large)
 DESCRIPTION="swarm aborts when --difference is intmax_t (signed)"
-"${SWARM}" -d $(((1<<63)-1)) < "${ALL_IDENTICAL}" &> /dev/null && \
+"${SWARM}" -d $(((1 << 63) - 1)) < "${ALL_IDENTICAL}" &> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -210,29 +226,22 @@ DESCRIPTION="swarm aborts when --difference is not numerical"
 #                                                                             #
 #*****************************************************************************#
 
-## Initializing input that should break
-BREAKINGINPUT=$(mktemp)
-printf ">a_10\nACGT\n>b_9\nCGGT\n>c_1\nCCGT\n" > "${BREAKINGINPUT}" 
-
-## Swarm accepts --no-otu-breaking 
-DESCRIPTION="swarms accepts --no-otu-breaking "
-"${SWARM}" --no-otu-breaking < "${BREAKINGINPUT}" &> /dev/null && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-
-## Swarm accepts option -n 
-DESCRIPTION="swarm accepts option -n"
-"${SWARM}" -n < "${BREAKINGINPUT}" &> /dev/null && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
+## Swarm accepts the options -n and --no-otu-breaking
+for OPTION in "-n" "--no-otu-breaking" ; do
+    DESCRIPTION="swarms accepts the option ${OPTION}"
+    printf ">a_10\nACGT\n>b_9\nCGGT\n>c_1\nCCGT\n" | \
+        "${SWARM}" "${OPTION}" &> /dev/null && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+done
 
 ## Deactivate the built-in OTU refinement
 DESCRIPTION="deactivate OTU breaking"
-LINENUMBER=$("${SWARM}" -n "${BREAKINGINPUT}" 2> /dev/null | wc -l)
-[[ $LINENUMBER == 1 ]] && \
+LINENUMBER=$(printf ">a_10\nACGT\n>b_9\nCGGT\n>c_1\nCCGT\n" | \
+                    "${SWARM}" -n 2> /dev/null | wc -l)
+(( ${LINENUMBER} == 1 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${BREAKINGINPUT}"
 
 
 #*****************************************************************************#
@@ -244,21 +253,31 @@ rm "${BREAKINGINPUT}"
 FASTIDOUSINPUT=$(mktemp)
 printf ">a_10\nACGT\n>b_2\nAGCT\n" > "${FASTIDOUSINPUT}"
 
-## Swarm should run normally when the fastidious option is specified
-DESCRIPTION="swarm runs normally when the fastidious option is specified"
-"${SWARM}" -f < "${FASTIDOUSINPUT}" &> /dev/null && \
+## Swarm accepts the options -f and --fastidious
+for OPTION in "-f" "--fastidious" ; do
+    DESCRIPTION="swarms accepts the option ${OPTION}"
+    "${SWARM}" "${OPTION}" < "${FASTIDOUSINPUT}" &> /dev/null && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+done
+
+## Swarm performs a second clustering (aka fastidious)
+DESCRIPTION="swarm performs a second clustering (-b 3)"
+LINENUMBER=$("${SWARM}" -f "${FASTIDOUSINPUT}" 2> /dev/null | wc -l)
+(( ${LINENUMBER} == 1 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## Swarms actually performs a second clustering 
-DESCRIPTION="swarms actually performs a second clustering (-b 3)"
-LINENUMBER=$("${SWARM}" -f "${FASTIDIOUSINPUT}" 2> /dev/null | wc -l)
-[[ $LINENUMBER == 1 ]] && \
-    success "${DESCRIPTION}" || \
-	    
-        failure "${DESCRIPTION}"
-
+        
 ## Boundary -------------------------------------------------------------------
+
+## Swarm accepts the options -b and --boundary
+for OPTION in "-b" "--boundary" ; do
+    DESCRIPTION="swarms accepts the option ${OPTION}"
+    "${SWARM}" -f "${OPTION}" 3 < "${FASTIDOUSINPUT}" &> /dev/null && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+done
 
 ## Boundary (-b is empty)
 DESCRIPTION="swarm aborts when --boundary is empty"
@@ -293,15 +312,22 @@ for ((b=$MIN ; b<=$MAX ; b++)) ; do
         failure "swarm aborts when --boundary equals ${b}"
 done && success "${DESCRIPTION}"
 
-## boundary option accepts large integers
+## boundary option accepts large integers #1
 DESCRIPTION="swarm accepts large values for --boundary (2^32)"
 "${SWARM}" -f -b $(( 1 << 32 )) < "${FASTIDOUSINPUT}" &> /dev/null && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## boundary option accepts large integers
+## boundary option accepts large integers #2
 DESCRIPTION="swarm accepts large values for --boundary (2^64, signed)"
-"${SWARM}" -f -b $(( (1 << 63) - 1 )) < "${FASTIDOUSINPUT}" &> /dev/null && \
+"${SWARM}" -f -b $(((1 << 63) - 1)) < "${FASTIDOUSINPUT}" &> /dev/null && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## Boundary value is taken into account by the fastidious option (-b 2)
+DESCRIPTION="boundary value is taken into account by the fastidious option (-b 2)"
+LINENUMBER=$("${SWARM}" -f -b 2 < "${FASTIDOUSINPUT}" 2> /dev/null | wc -l)
+(( ${LINENUMBER} == 2 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -311,14 +337,16 @@ DESCRIPTION="swarm fails when the boundary option is specified without -f"
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
-## Boundary value is taken into account by the fastidious option (-b 2)
-DESCRIPTION="boundary value is taken into account by the fastidious option (-b 2)"
-LINENUMBER=$("${SWARM}" -f -b 2 "${FASTIDIOUSINPUT}" 2> /dev/null | wc -l)
-[[ $LINENUMBER == 2 ]] && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
 
 ## Ceiling --------------------------------------------------------------------
+
+## Swarm accepts the options -c and --ceiling
+for OPTION in "-c" "--ceiling" ; do
+    DESCRIPTION="swarms accepts the option ${OPTION}"
+    "${SWARM}" -f "${OPTION}" 10 < "${FASTIDOUSINPUT}" &> /dev/null && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+done
 
 ## Ceiling (-c is empty)
 DESCRIPTION="swarm aborts when --ceiling is empty"
@@ -353,13 +381,13 @@ for ((c=$MIN ; c<=$MAX ; c++)) ; do
         failure "swarm aborts when --ceiling equals ${c}"
 done && success "${DESCRIPTION}"
 
-## ceiling option accepts large integers
+## ceiling option accepts large integers #1
 DESCRIPTION="swarm accepts large values for --ceiling (2^32)"
 "${SWARM}" -f -c $(( 1 << 32 )) < "${FASTIDOUSINPUT}" &> /dev/null && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## ceiling option accepts large integers
+## ceiling option accepts large integers #2
 DESCRIPTION="swarm accepts large values for --ceiling (2^64, signed)"
 "${SWARM}" -f -c $(( (1 << 63) - 1 )) < "${FASTIDOUSINPUT}" &> /dev/null && \
     success "${DESCRIPTION}" || \
@@ -371,7 +399,16 @@ DESCRIPTION="swarm fails when the ceiling option is specified without -f"
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
+
 ## Bloom bits -----------------------------------------------------------------
+
+## Swarm accepts the options -y and --bloom-bits
+for OPTION in "-y" "--bloom-bits" ; do
+    DESCRIPTION="swarms accepts the option ${OPTION}"
+    "${SWARM}" -f "${OPTION}" 8 < "${FASTIDOUSINPUT}" &> /dev/null && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+done
 
 ## Bloom bits (-y is empty)
 DESCRIPTION="swarm aborts when --bloom-bits is empty"
@@ -407,7 +444,7 @@ for y in 0 1 ; do
         failure "swarm runs normally when --bloom-bits equals ${y}"
 done || success "${DESCRIPTION}"
 
-## Rejected values for the --bloom-bits option goes from 2 to 64
+## Rejected values for the --bloom-bits option goes from 65 to +infinite
 MIN=65
 MAX=255
 DESCRIPTION="swarm aborts when --bloom-bits is higher than 64"
@@ -432,55 +469,42 @@ rm "${FASTIDOUSINPUT}"
 
 ## ----------------------------------------------------------- append-abundance
 
-## Swarm accepts --append-abundance option
-DESCRIPTION="swarm accepts --append-abundance option"
-"${SWARM}" --append-abundance "${LOG}" < "${ALL_IDENTICAL}" &> /dev/null && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-
-## Swarm accepts -a option
-DESCRIPTION="swarm accepts -a option"
-"${SWARM}" -a "${LOG}" < "${ALL_IDENTICAL}" &> /dev/null && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
+## Swarm accepts the option -a and --append-abundance
+for OPTION in "-a" "--append-abundance" ; do
+    DESCRIPTION="swarms accepts the option ${OPTION}"
+    "${SWARM}" "${OPTION}" 2 < "${ALL_IDENTICAL}" &> /dev/null && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+done
 
 ## Swarm appends the abundance value set with -a
-INPUT=$(mktemp)
 OUTPUT=$(mktemp)
-printf ">b\nACGT\n" > "${INPUT}"
 DESCRIPTION="swarm append the abundance number set with -a"
-"${SWARM}" -a 2 -w "${OUTPUT}" < "${INPUT}" &> /dev/null
+printf ">b\nACGT\n" | "${SWARM}" -a 2 -w "${OUTPUT}" &> /dev/null
 SUMABUNDANCES=$(sed -n '/^>/ s/.*_//p' "${OUTPUT}")
-[[ "${SUMABUNDANCES}" -eq 2 ]] && \
+(( "${SUMABUNDANCES}" == 2 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${INPUT}"
 rm "${OUTPUT}"
 
 ## Swarm does not overwrite the abundance number with -a for swarm notation
-INPUT=$(mktemp)
 OUTPUT=$(mktemp)
-printf ">b_3\nACGT\n" > "${INPUT}"
 DESCRIPTION="swarm does not overwrite the abundance number with -a for vsearch notation"
-"${SWARM}" -a 2 -w "${OUTPUT}" < "${INPUT}" &> /dev/null
+printf ">b_3\nACGT\n" | "${SWARM}" -a 2 -w "${OUTPUT}" &> /dev/null
 SUMABUNDANCES=$(sed -n '/^>/ s/.*_//p' "${OUTPUT}")
-[[ "${SUMABUNDANCES}" -eq 3 ]] && \
+(( "${SUMABUNDANCES}" == 3 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${INPUT}"
 rm "${OUTPUT}"
 
 ## Swarm does not overwrite the abundance number with -a for usearch notation
-INPUT=$(mktemp)
 OUTPUT=$(mktemp)
-printf ">b;size=3\nACGT\n" > "${INPUT}"
 DESCRIPTION="swarm does not overwrite the abundance number with -a for usearch notation"
-"${SWARM}" -z -a 2 -w "${OUTPUT}" < "${INPUT}" &> /dev/null
+printf ">b;size=3\nACGT\n" | "${SWARM}" -z -a 2 -w "${OUTPUT}" &> /dev/null
 SUMABUNDANCES=$(awk -F "[;=]" '/^>/ {print $3}' "${OUTPUT}")
-[[ "${SUMABUNDANCES}" -eq 3 ]] && \
+(( "${SUMABUNDANCES}" == 3 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${INPUT}"
 rm "${OUTPUT}"
 
 ## Swarm append the abundance number set with -a for swarm notation
@@ -489,7 +513,7 @@ DESCRIPTION="swarm append the abundance number set with -a for vsearch notation"
 printf ">a_3\nACGT\n>b\nACGT\n" | \
     "${SWARM}" -a 2 -w "${OUTPUT}" &> /dev/null
 SUMABUNDANCES=$(sed -n '/^>/ s/.*_//p' "${OUTPUT}")
-[[ "${SUMABUNDANCES}" -eq 5 ]] && \
+(( "${SUMABUNDANCES}" == 5 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -500,29 +524,20 @@ DESCRIPTION="swarm append the abundance number set with -a for usearch notation"
 printf ">a;size=3\nACGT\n>b\nACGT\n" | \
     "${SWARM}" -z -a 2 -w "${OUTPUT}" &> /dev/null
 SUMABUNDANCES=$(awk -F "[;=]" '/^>/ {print $3}' "${OUTPUT}")
-[[ "${SUMABUNDANCES}" -eq 5 ]] && \
+(( "${SUMABUNDANCES}" == 5 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
 
-
-## Swarm accepts -a option
-DESCRIPTION="swarm accepts -a option"
-"${SWARM}" -a "${LOG}" < "${ALL_IDENTICAL}" &> /dev/null && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-
 ## Swarm appends the abundance value set with -a
-INPUT=$(mktemp)
 OUTPUT=$(mktemp)
-printf ">b\nACGT\n" > "${INPUT}"
 DESCRIPTION="swarm append the abundance number set with -a"
-"${SWARM}" -a 2 -w "${OUTPUT}" < "${INPUT}" &> /dev/null
+printf ">b\nACGT\n" | "${SWARM}" -a 2 -w "${OUTPUT}" &> /dev/null
 SUMABUNDANCES=$(sed -n '/^>/ s/.*_//p' "${OUTPUT}")
-[[ "${SUMABUNDANCES}" -eq 2 ]] && \
+(( "${SUMABUNDANCES}" == 2 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${INPUT}" "${OUTPUT}"
+rm "${OUTPUT}"
 
 ## Swarm does not overwrite the abundance number with -a for swarm notation
 INPUT=$(mktemp)
@@ -569,7 +584,6 @@ SUMABUNDANCES=$(awk -F "[;=]" '/^>/ {print $3}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
-
 
 ## --------------------------------------------------------- internal structure
 
