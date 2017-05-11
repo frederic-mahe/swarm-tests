@@ -75,9 +75,16 @@ echo -e ">aaa\0001aaa_1\nACGT\n" | \
 ## https://github.com/torognes/swarm/issues/3
 ##
 ## Sequence uniqueness is not checked by swarm (pre-dereplication is
-## stated as mandatory in the documentation)
+## stated as mandatory in the documentation).
+##
+## This is a mock-up for a possible warning message when duplicated
+## sequences are present.
 DESCRIPTION="issue 3 --- check for unique sequences"
-failure "${DESCRIPTION}"
+WARNING="warning: some sequences were identical"
+printf ">s1_1\nAA\n>s2_1\nAA\n" | \
+    "${SWARM}" 2>&1 | grep -q "^${WARNING}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 
 #*****************************************************************************#
@@ -88,8 +95,8 @@ failure "${DESCRIPTION}"
 
 ## https://github.com/torognes/swarm/issues/4
 ##
-## Swarm outputs sequences by decreasing abundance (and no additional
-## criteria to stabilize the sorting)
+## Swarm outputs identifiers by decreasing abundance (and no
+## additional criteria to stabilize the sorting)
 DESCRIPTION="issue 4 --- fasta entries are sorted by decreasing abundance"
 REPRESENTATIVES=$(mktemp)
 SEED="seq1"
@@ -217,8 +224,9 @@ echo -e ">a_10\nACGT\n>a_5\nACGT\n" | \
 DESCRIPTION="issue 13 --- uclust-file's 4th column is \"*\" for non-H lines"
 UCLUST=$(mktemp)
 "${SWARM}" -u "${UCLUST}" "${ALL_IDENTICAL}" &> /dev/null
-VALUE=$(awk -F "\t" '$1 !~ "H" {print $4}' "${UCLUST}" | sort -du)
-[[ "${VALUE}" == "*" ]] && success "${DESCRIPTION}" || failure "${DESCRIPTION}"
+awk '$1 !~ "H" && $4 != "*" {exit 1}' "${UCLUST}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 rm "${UCLUST}"
 
 
@@ -556,7 +564,7 @@ DESCRIPTION="issue 65 --- swarm complains if input sequences are not dereplicate
 
 ## https://github.com/torognes/swarm/issues/35
 ##
-## Deprecated paramater -a
+## Deprecated parameter -a
 
 
 #*****************************************************************************#
@@ -1524,8 +1532,24 @@ rm "${OUTPUT}"
 #*****************************************************************************#
 
 ## https://github.com/torognes/swarm/issues/95
-##  
-## not testable, fixed
+## 
+## issue 95 --- Alignments use a slightly too large gap extension penalty when d>1
+# (example provided by Robert Müller)
+# Consider the sequences CTATTGTTGTC and TCTATGTGTCT and swarm's default scoring
+# function, the correct optimal alignment is (I4M2D5MI in CIGAR format):
+#
+#                     -ctattgttgtc-
+#                     tctat--gtgtct
+#
+# with 5 differences and an alignment length of 13.
+OUTPUT=$(mktemp)
+DESCRIPTION="issue 95 --- default gap extension penalty is too large"
+printf ">s1_1\nCTATTGTTGTC\n>s2_1\nTCTATGTGTCT\n" | \
+    "${SWARM}" -d 5 -u "${OUTPUT}" &> /dev/null
+awk '/^H/ {exit $8 == "I4M2D5MI" ? 0 : 1}' "${OUTPUT}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
 
 
 #*****************************************************************************#
@@ -1535,8 +1559,24 @@ rm "${OUTPUT}"
 #*****************************************************************************#
 
 ## https://github.com/torognes/swarm/issues/96
-##  
-## not testable, fixed
+##
+## issue 96 --- errors in SIMD alignment code
+# (example provided by Robert Müller)
+# Consider the sequences GAT and TT and swarm's default scoring
+# function, the correct optimal alignment is (MIM in CIGAR format):
+#
+#                 t-t
+#                 gat
+#
+# with 2 differences, a score of 28 and an alignment length of 3.
+OUTPUT=$(mktemp)
+DESCRIPTION="issue 96 --- errors in SIMD alignment code"
+printf ">s1_1\nTT\n>s2_1\nGAT\n" | \
+    "${SWARM}" -d 2 -u "${OUTPUT}" &> /dev/null
+awk '/^H/ {exit $8 == "MIM" ? 0 : 1}' "${OUTPUT}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
 
 
 #*****************************************************************************#
@@ -1549,7 +1589,7 @@ rm "${OUTPUT}"
 ##  
 ## issue 98 --- writing seeds never above 100%
 OUTPUT=$(mktemp)
-DESCRIPTION="issue 98 --- writing seeds never above 100%"
+DESCRIPTION="issue 98 --- writing seeds never above 100 percent"
 printf ">s_1\nA\n" | "${SWARM}" -w /dev/null  2>&1 | \
     sed 's/\r/\n/' | \
     grep "Writing seeds" | \
@@ -1557,7 +1597,6 @@ printf ">s_1\nA\n" | "${SWARM}" -w /dev/null  2>&1 | \
     awk '{if ($3 > max) {max = $3}} END {exit (max > 100) ? 1 : 0}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-
 
 
 #*****************************************************************************#
@@ -1578,12 +1617,13 @@ printf ">s_1\nA\n" | "${SWARM}" -w /dev/null  2>&1 | \
 #*****************************************************************************#
 
 ## https://github.com/torognes/swarm/issues/100
-##  
+##
+## not testable
 
 
 #*****************************************************************************#
 #                                                                             #
-#         How to handle duplicated parameters or options ? (issue 101)        #
+#          How to handle duplicated parameters or options? (issue 101)        #
 #                                                                             #
 #*****************************************************************************#
 
@@ -1606,6 +1646,49 @@ DESCRIPTION="issue 101 --- fail if an unknown option is passed"
 "${SWARM}" --smurf < "${ALL_IDENTICAL}" &> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
+
+
+#*****************************************************************************#
+#                                                                             #
+#                   bug in abundance value parsing? (issue 102)               #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/102
+##
+## issue 102 --- bug in abundance value parsing?
+## swarm accepts abundance values equal to 2^32
+DESCRIPTION="issue 102 --- abundance values can be equal or greater than 2^32"
+printf ">s1_%d\nA\n" $(( 1 << 32 )) | \
+    "${SWARM}" &> /dev/null && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+
+#*****************************************************************************#
+#                                                                             #
+#     not all memory is freed when swarm exits with an error (issue 103)      #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/103
+##
+## not testable
+
+# printf ">s1\nA\n" | valgrind --leak-check=full --show-leak-kinds=all swarm
+
+
+#*****************************************************************************#
+#                                                                             #
+#           static analysis of swarm's C++ code (cppcheck) (issue 104)        #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/104
+##
+## not testable
+
+# cppcheck --enable=all swarm/ 1> /dev/null
 
 
 ## Clean
