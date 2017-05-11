@@ -52,6 +52,44 @@ DESCRIPTION="swarm runs normally when no option is specified (data in file)"
 
 #*****************************************************************************#
 #                                                                             #
+#                              Classical output                               #
+#                                                                             #
+#*****************************************************************************#
+
+## OTUs are correct
+DESCRIPTION="OTUs are correct"
+OUTPUT=$(printf ">s1_2\nAAAA\n>s2_1\nAAAA\n>s3_1\nCCCC\n" | \
+    "${SWARM}" 2> /dev/null)
+[[ "${OUTPUT}" == $(printf "s1_2 s2_1\ns3_1") ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## OTUs number is correct
+DESCRIPTION="OTUs number is correct"
+OUTPUT=$(printf ">s1_2\nAAAA\n>s2_1\nAAAA\n>s3_1\nCCCC\n" | "${SWARM}" 2> /dev/null)
+(( $(wc -l <<< "${OUTPUT}") == 2 )) && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## OTUs' seeds are the more abundants amplicons
+DESCRIPTION="OTUs' seeds are the more abundants amplicons"
+OUTPUT=$(printf ">s1_1\nAAAA\n>s2_2\nAAAA\n>s3_1\nAAAAA\n" | \
+    "${SWARM}" 2> /dev/null | awk 'NR==1 {print $1}')
+[[ "${OUTPUT}" == "s2_2" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## OTUs' amplicons are sorted in alphabetical order
+DESCRIPTION="OTUs' amplicons are sorted in alphabetical order"
+OUTPUT=$(printf ">a_1\nAAAA\n>c_1\nAAAA\n>b_1\nAAAA\n" | \
+    "${SWARM}" 2> /dev/null)
+[[ "${OUTPUT}" == "a_1 b_1 c_1" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+
+#*****************************************************************************#
+#                                                                             #
 #                             End of options (--)                             #
 #                                                                             #
 #*****************************************************************************#
@@ -482,7 +520,7 @@ OUTPUT=$(mktemp)
 DESCRIPTION="-a appends an abundance number to OTU members (-o output)"
 printf ">b\nACGT\n" | "${SWARM}" -a 2 -o "${OUTPUT}" &> /dev/null
 ABUNDANCE=$(sed -n 's/.*_//p' "${OUTPUT}")
-(( "${ABUNDANCE}" == 2 )) && \
+[[ "${ABUNDANCE}" == "2" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -1259,11 +1297,11 @@ OUTPUT=$(mktemp)
 printf ">a_3\nGGGG\n>b_3\nA\n>c_3\nA\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
 QUERY_LENGTH=$(awk '/^H/ {v = $3} END {print v}' "${OUTPUT}")
-[[ "${QUERY_LENGTH}" == "1" ]] && \
+(( "${QUERY_LENGTH}" == 1 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
-
+exit
 ## -u similarity percentage is correct in 4th column #1
 DESCRIPTION="-u similarity percentage is correct in 4th column #1"
 OUTPUT=$(mktemp)
