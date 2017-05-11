@@ -80,7 +80,7 @@ OUTPUT=$(printf ">s1_1\nAAAA\n>s2_2\nAAAA\n>s3_1\nAAAAA\n" | \
         failure "${DESCRIPTION}"
 
 ## OTUs' amplicons are sorted in alphabetical order
-DESCRIPTION="OTUs' amplicons are sorted in alphabetical order"
+DESCRIPTION="amplicons with the same abundance are sorted alphabetically"
 OUTPUT=$(printf ">a_1\nAAAA\n>c_1\nAAAA\n>b_1\nAAAA\n" | \
     "${SWARM}" 2> /dev/null)
 [[ "${OUTPUT}" == "a_1 b_1 c_1" ]] && \
