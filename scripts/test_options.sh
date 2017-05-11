@@ -1179,7 +1179,7 @@ DESCRIPTION="-u cluster number is correct in 2nd column #1"
 OUTPUT=$(mktemp)
 printf ">a_3\nGGGG\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
-CLUSTER_NUMBER=$(awk '/^C/ {print $2}' "${OUTPUT}")
+CLUSTER_NUMBER=$(awk '/^C/ {v = $2} END {print v}' "${OUTPUT}")
 (( "${CLUSTER_NUMBER}" == 0 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1201,7 +1201,7 @@ DESCRIPTION="-u cluster number is correct in 3rd column #1"
 OUTPUT=$(mktemp)
 printf ">a_3\nGGGG\n>b_3\nAAAA\n>c_3\nAAAC\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
-CLUSTER_SIZE=$(awk '/^C/ {if (NR == 3) {print $3}}' "${OUTPUT}")
+CLUSTER_SIZE=$(awk '/^C/ {v = $3} END {print v}' "${OUTPUT}")
 (( "${CLUSTER_SIZE}" == 2 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1212,8 +1212,9 @@ DESCRIPTION="-u cluster number is correct in 3rd column #2"
 OUTPUT=$(mktemp)
 printf ">a_3\nGGGG\n>b_3\nAAAA\n>c_3\nAAAC\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
-CLUSTER_SIZE=$(awk '/^C/ {if (NR == 1) {print $3}}' "${OUTPUT}")
-(( "${CLUSTER_SIZE}" == 1 )) && \
+CLUSTER_SIZE=$(grep "^C" "${OUTPUT}" | \
+               awk -F "\t" '{if (NR == 2) {print $2}}')
+[[ "${CLUSTER_SIZE}" == "1" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -1223,7 +1224,7 @@ DESCRIPTION="-u centroid length is correct in 3rd column #1"
 OUTPUT=$(mktemp)
 printf ">a_3\nGGGG\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
-CENTROID_LENGTH=$(awk '/^S/ {if (NR == 2) {print $3}}' "${OUTPUT}")
+CENTROID_LENGTH=$(awk '/^S/ {v = $3} END {print v}' "${OUTPUT}")
 (( "${CENTROID_LENGTH}" == 4 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTIONz}"
@@ -1234,7 +1235,7 @@ DESCRIPTION="-u centroid length is correct in 3rd column #2"
 OUTPUT=$(mktemp)
 printf ">a_3\nGGGG\n>b_3\nA\n>c_3\nC\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
-CENTROID_LENGTH=$(awk '/^S/ {if (NR == 4) {print $3}}' "${OUTPUT}")
+CENTROID_LENGTH=$(awk '/^S/ {v = $3} END {print v}' "${OUTPUT}")
 [[ "${CENTROID_LENGTH}" == "1" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1245,6 +1246,7 @@ DESCRIPTION="-u query length is correct in 3rd column #1"
 OUTPUT=$(mktemp)
 printf ">a_3\nGGGG\n>b_3\nAA\n>c_3\nAAA\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
+
 QUERY_LENGTH=$(awk '/^H/ {if (NR == 5) {print $3}}' "${OUTPUT}")
 [[ "${QUERY_LENGTH}" == "3" ]] && \
     success "${DESCRIPTION}" || \
@@ -1256,7 +1258,7 @@ DESCRIPTION="-u query length is correct in 3rd column #2"
 OUTPUT=$(mktemp)
 printf ">a_3\nGGGG\n>b_3\nA\n>c_3\nA\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
-QUERY_LENGTH=$(awk '/^H/ {if (NR == 5) {print $3}}' "${OUTPUT}")
+QUERY_LENGTH=$(awk '/^H/ {v = $3} END {print v}' "${OUTPUT}")
 [[ "${QUERY_LENGTH}" == "1" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1267,7 +1269,7 @@ DESCRIPTION="-u similarity percentage is correct in 4th column #1"
 OUTPUT=$(mktemp)
 printf ">a_3\nGGGG\n>b_3\nAAAA\n>c_3\nAAAC\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
-SIMILARITY_PERCENTAGE=$(awk '/^H/ {if (NR == 5) {print $4}}' "${OUTPUT}")
+SIMILARITY_PERCENTAGE=$(awk '/^H/ {v = $4} END {print v}' "${OUTPUT}")
 [[ "${SIMILARITY_PERCENTAGE}" == "75.0" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1278,7 +1280,7 @@ DESCRIPTION="-u similarity percentage is correct in 4th column #2"
 OUTPUT=$(mktemp)
 printf ">b_3\nAAAA\n>c_3\nAAAC\n>a_3\nAACC\n>d_3\nACCC\n>e_3\nCCCC\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
-SIMILARITY_PERCENTAGE=$(awk '/^H/ {if (NR == 6) {print $4}}' "${OUTPUT}")
+SIMILARITY_PERCENTAGE=$(awk '/^H/ {v = $4} END {print v}' "${OUTPUT}")
 [[ "${SIMILARITY_PERCENTAGE}" == "0.0" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1289,7 +1291,7 @@ DESCRIPTION="-u similarity percentage is correct in 4th column #3"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAAAAAA\n>b_3\nAAAAAAAC\n>c_3\nAAAAAACC\n>d_3\nAAAAACCC\n>e_3\nAAAACCCC\n>f_3\nAAACCCCC\n>g_3\nAACCCCCC\n>h_3\nACCCCCCC\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
-SIMILARITY_PERCENTAGE=$(awk '/^H/ {if (NR == 9) {print $4}}' "${OUTPUT}")
+SIMILARITY_PERCENTAGE=$(awk '/^H/ {v = $4} END {print v}' "${OUTPUT}")
 [[ "${SIMILARITY_PERCENTAGE}" == "12.5" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1300,7 +1302,8 @@ DESCRIPTION="-u similarity percentage is * in 4th column with S"
 OUTPUT=$(mktemp)
 printf ">a_3\nGGGG\n>b_3\nAAAA\n>c_3\nAAAC\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
-SIMILARITY_PERCENTAGE=$(awk '/^S/ {if (NR == 2) {print $4}}' "${OUTPUT}")
+SIMILARITY_PERCENTAGE=$(grep "^S" "${OUTPUT}" | \
+               awk -F "\t" '{if (NR == 1) {print $4}}')
 [[ "${SIMILARITY_PERCENTAGE}" == "*" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1311,7 +1314,7 @@ DESCRIPTION="-u match orientation is correct in 5th column with H"
 OUTPUT=$(mktemp)
 printf ">a_3\nGGGG\n>b_3\nAAAA\n>c_3\nAAAC\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
-MATCH_ORIENTATION=$(awk '/^H/ {if (NR == 5) {print $5}}' "${OUTPUT}")
+MATCH_ORIENTATION=$(awk '/^H/ {v = $5} END {print v}' "${OUTPUT}")
 [[ "${MATCH_ORIENTATION}" == "+" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1322,9 +1325,7 @@ DESCRIPTION="-u match orientation is correct in 5th column with S"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nAGCC\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
-MATCH_ORIENTATION=$(awk '/^S/ {if (NR == 2) {print $4}}' "${OUTPUT}")
-MATCH_ORIENTATION=$(grep "^S" "${OUTPUT}" | \
-                           awk -F "\t" '{if (NR == 1) {print $5}}')
+MATCH_ORIENTATION=$(awk '/^S/ {v = $5} END {print v}' "${OUTPUT}")
 [[ "${MATCH_ORIENTATION}" == "*" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1335,8 +1336,7 @@ DESCRIPTION="-u match orientation is correct in 5th column with C"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nAGCC\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
-MATCH_ORIENTATION=$(grep "^C" "${OUTPUT}" | \
-                           awk -F "\t" '{if (NR == 1) {print $5}}')
+MATCH_ORIENTATION=$(awk '/^C/ {v = $5} END {print v}' "${OUTPUT}")
 [[ "${MATCH_ORIENTATION}" == "*" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1347,7 +1347,7 @@ DESCRIPTION="-u 6th column is * with C"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nAGCC\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
-COLUMN_6=$(awk '/^C/ {print $6}' "${OUTPUT}")
+COLUMN_6=$(awk '/^C/ {v = $6} END {print v}' "${OUTPUT}")
 [[ "${COLUMN_6}" == "*" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1358,8 +1358,7 @@ DESCRIPTION="-u 6th column is * with S"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nAGCC\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
-COLUMN_6=$(grep "^S" "${OUTPUT}" | \
-                  awk -F "\t" '{if (NR == 1) {print $6}}')
+COLUMN_6=$(awk '/^S/ {v = $6} END {print v}' "${OUTPUT}")
 [[ "${COLUMN_6}" == "*" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1370,8 +1369,7 @@ DESCRIPTION="-u 6th column is 0 with H"
 OUTPUT=$(mktemp)
 printf ">b_3\nAAAA\n>c_3\nAAAC\n>c_3\nAACC\n>c_3\nAGCC\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
-COLUMN_6=$(grep "^H" "${OUTPUT}" | \
-                  awk -F "\t" '{if (NR == 1) {print $6}}')
+COLUMN_6=$(awk '/^H/ {v = $6} END {print v}' "${OUTPUT}")
 (( "${COLUMN_6}" == 0 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1382,8 +1380,7 @@ DESCRIPTION="-u 7th column is * with C"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nAGCC\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
-COLUMN_7=$(grep "^C" "${OUTPUT}" | \
-                  awk -F "\t" '{if (NR == 1) {print $7}}')
+COLUMN_7=$(awk '/^C/ {v = $7} END {print v}' "${OUTPUT}")
 [[ "${COLUMN_7}" == "*" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1406,9 +1403,8 @@ DESCRIPTION="-u 7th column is 0 with H"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nAGCC\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
-COLUMN_7=$(grep "^H" "${OUTPUT}" | \
-                  awk -F "\t" '{if (NR == 1) {print $7}}')
-(( "${COLUMN_7}" == 0 )) && \
+COLUMN_7=$(awk '/^H/ {v = $7} END {print v}' "${OUTPUT}")
+[[ "${COLUMN_7}" == "0" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -1418,8 +1414,7 @@ DESCRIPTION="-u CIGAR is * with S"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nAGCC\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
-CIGAR=$(grep "^S" "${OUTPUT}" | \
-               awk -F "\t" '{if (NR == 1) {print $8}}')
+CIGAR=$(awk '/^S/ {v = $8} END {print v}' "${OUTPUT}")
 [[ "${CIGAR}" == "*" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1430,8 +1425,7 @@ DESCRIPTION="-u CIGAR is * with C"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nAGCC\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
-CIGAR=$(grep "^C" "${OUTPUT}" | \
-               awk -F "\t" '{if (NR == 1) {print $8}}')
+CIGAR=$(awk '/^C/ {v = $8} END {print v}' "${OUTPUT}")
 [[ "${CIGAR}" == "*" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1442,8 +1436,7 @@ DESCRIPTION="-u CIGAR notation is correct in 8th column is with H #1"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nAAAC\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
-CIGAR=$(grep "^H" "${OUTPUT}" | \
-               awk -F "\t" '{if (NR == 1) {print $8}}')
+CIGAR=$(awk '/^H/ {v = $8} END {print v}' "${OUTPUT}")
 [[ "${CIGAR}" == "4M" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1454,8 +1447,7 @@ DESCRIPTION="-u CIGAR notation is correct in 8th column is with H #2"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nAAA\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
-CIGAR=$(grep "^H" "${OUTPUT}" | \
-               awk -F "\t" '{if (NR == 1) {print $8}}')
+CIGAR=$(awk '/^H/ {v = $8} END {print v}' "${OUTPUT}")
 [[ "${CIGAR}" == "D3M" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1466,8 +1458,7 @@ DESCRIPTION="-u CIGAR notation is correct in 8th column is with H #3"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nAAAAA\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
-CIGAR=$(grep "^H" "${OUTPUT}" | \
-               awk -F "\t" '{if (NR == 1) {print $8}}')
+CIGAR=$(awk '/^H/ {v = $8} END {print v}' "${OUTPUT}")
 [[ "${CIGAR}" == "4MI" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1478,8 +1469,7 @@ DESCRIPTION="-u CIGAR notation is correct in 8th column is with H #4"
 OUTPUT=$(mktemp)
 printf ">a_3\nACGT\n>b_3\nACGT\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
-CIGAR=$(grep "^H" "${OUTPUT}" | \
-               awk -F "\t" '{if (NR == 1) {print $8}}')
+CIGAR=$(awk '/^H/ {v = $8} END {print v}' "${OUTPUT}")
 [[ "${CIGAR}" == "=" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1490,8 +1480,7 @@ DESCRIPTION="-u CIGAR notation is correct in 8th column is with H using -d 5 #1"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nACGT\n" | \
     "${SWARM}" -d 5 -u "${OUTPUT}" &> /dev/null
-CIGAR=$(grep "^H" "${OUTPUT}" | \
-               awk -F "\t" '{if (NR == 1) {print $8}}')
+CIGAR=$(awk '/^H/ {v = $8} END {print v}' "${OUTPUT}")
 [[ "${CIGAR}" == "4M" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1502,8 +1491,7 @@ DESCRIPTION="-u CIGAR notation is correct in 8th column is with H using -d 5 #2"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nCG\n" | \
     "${SWARM}" -d 5 -u "${OUTPUT}" &> /dev/null
-CIGAR=$(grep "^H" "${OUTPUT}" | \
-               awk -F "\t" '{if (NR == 1) {print $8}}')
+CIGAR=$(awk '/^H/ {v = $8} END {print v}' "${OUTPUT}")
 [[ "${CIGAR}" == "2D2M" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1514,8 +1502,7 @@ DESCRIPTION="-u CIGAR notation is correct in 8th column is with H using -d 5 #3"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nACGTTT\n" | \
     "${SWARM}" -d 5 -u "${OUTPUT}" &> /dev/null
-CIGAR=$(grep "^H" "${OUTPUT}" | \
-               awk -F "\t" '{if (NR == 1) {print $8}}')
+CIGAR=$(awk '/^H/ {v = $8} END {print v}' "${OUTPUT}")
 [[ "${CIGAR}" == "4M2I" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1526,8 +1513,7 @@ DESCRIPTION="-u query sequence's label is correct in 9th column with H #1"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nAAAC\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
-QUERY_LABEL=$(grep "^H" "${OUTPUT}" | \
-                     awk -F "\t" '{if (NR == 1) {print $9}}')
+QUERY_LABEL=$(awk '/^H/ {v = $9} END {print v}' "${OUTPUT}")
 [[ "${QUERY_LABEL}" == "b_3" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1538,8 +1524,7 @@ DESCRIPTION="-u query sequence's label is correct in 9th column with H #2"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_1\nAACC\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
-QUERY_LABEL=$(grep "^H" "${OUTPUT}" | \
-                     awk -F "\t" '{if (NR == 2) {print $9}}')
+QUERY_LABEL=$(awk '/^H/ {v = $9} END {print v}' "${OUTPUT}")
 [[ "${QUERY_LABEL}" == "c_1" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1550,8 +1535,7 @@ DESCRIPTION="-u centroid sequence's label is correct in 9th column with S #1"
 OUTPUT=$(mktemp)
 printf ">a_2\nGGGG\n>b_3\nAAAA\n>c_2\nAAAC\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
-CENTROID_LABEL=$(grep "^S" "${OUTPUT}" | \
-                        awk -F "\t" '{if (NR == 2) {print $9}}')
+CENTROID_LABEL=$(awk '/^S/ {v = $9} END {print v}' "${OUTPUT}")
 [[ "${CENTROID_LABEL}" == "a_2" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1562,8 +1546,7 @@ DESCRIPTION="-u centroid sequence's label is correct in 9th column with S #2"
 OUTPUT=$(mktemp)
 printf ">a_2\nAAAA\n>b_3\nAAAC\n>c_1\nAACC\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
-CENTROID_LABEL=$(grep "^S" "${OUTPUT}" | \
-                        awk -F "\t" '{if (NR == 1) {print $9}}')
+CENTROID_LABEL=$(awk '/^S/ {v = $9} END {print v}' "${OUTPUT}")
 [[ "${CENTROID_LABEL}" == "b_3" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1574,8 +1557,7 @@ DESCRIPTION="-u centroid sequence's label is correct in 9th column with C #1"
 OUTPUT=$(mktemp)
 printf ">a_2\nGGGG\n>b_3\nAAAA\n>c_2\nAAAC\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
-CENTROID_LABEL=$(grep "^C" "${OUTPUT}" | \
-                        awk -F "\t" '{if (NR == 2) {print $9}}')
+CENTROID_LABEL=$(awk '/^C/ {v = $9} END {print v}' "${OUTPUT}")
 [[ "${CENTROID_LABEL}" == "a_2" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1586,8 +1568,7 @@ DESCRIPTION="-u centroid sequence's label is correct in 9th column with C #2"
 OUTPUT=$(mktemp)
 printf ">a_2\nAAAA\n>b_3\nAAAC\n>c_1\nAACC\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
-CENTROID_LABEL=$(grep "^C" "${OUTPUT}" | \
-                        awk -F "\t" '{if (NR == 1) {print $9}}')
+CENTROID_LABEL=$(awk '/^S/ {v = $9} END {print v}' "${OUTPUT}")
 [[ "${CENTROID_LABEL}" == "b_3" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1598,8 +1579,7 @@ DESCRIPTION="-u centroid sequence's label is correct in 10th column with H"
 OUTPUT=$(mktemp)
 printf ">a_2\nAAAA\n>b_3\nAAAC\n>c_1\nAACC\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
-CENTROID_LABEL=$(grep "^H" "${OUTPUT}" | \
-                        awk -F "\t" '{if (NR == 1) {print $10}}')
+CENTROID_LABEL=$(awk '/^H/ {v = $10} END {print v}' "${OUTPUT}")
 [[ "${CENTROID_LABEL}" == "b_3" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1610,8 +1590,7 @@ DESCRIPTION="-u 10th column is * with C"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nAGCC\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
-CENTROID_LABEL=$(grep "^C" "${OUTPUT}" | \
-                        awk -F "\t" '{if (NR == 1) {print $10}}')
+CENTROID_LABEL=$(awk '/^C/ {v = $10} END {print v}' "${OUTPUT}")
 [[ "${CENTROID_LABEL}" == "*" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1622,13 +1601,12 @@ DESCRIPTION="-u 10th column is * with S"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nAGCC\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
-CENTROID_LABEL=$(grep "^S" "${OUTPUT}" | \
-                        awk -F "\t" '{if (NR == 1) {print $10}}')
+CENTROID_LABEL=$(awk '/^S/ {v = $10} END {print v}' "${OUTPUT}")
 [[ "${CENTROID_LABEL}" == "*" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
-exit
+
 
 ## ---------------------------------------------------------------------- seeds
 
