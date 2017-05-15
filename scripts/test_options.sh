@@ -52,7 +52,7 @@ DESCRIPTION="swarm runs normally when no option is specified (data in file)"
 
 #*****************************************************************************#
 #                                                                             #
-#                              Classical output                               #
+#                             Normal output                                   #
 #                                                                             #
 #*****************************************************************************#
 
@@ -65,8 +65,9 @@ OUTPUT=$(printf ">s1_2\nAAAA\n>s2_1\nAAAA\n>s3_1\nCCCC\n" | \
         failure "${DESCRIPTION}"
 
 ## OTUs number is correct
-DESCRIPTION="OTUs number is correct"
-OUTPUT=$(printf ">s1_2\nAAAA\n>s2_1\nAAAA\n>s3_1\nCCCC\n" | "${SWARM}" 2> /dev/null)
+DESCRIPTION="number of OTUs is correct"
+OUTPUT=$(printf ">s1_2\nAAAA\n>s2_1\nAAAA\n>s3_1\nCCCC\n" | \
+                "${SWARM}" 2> /dev/null)
 (( $(wc -l <<< "${OUTPUT}") == 2 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -750,9 +751,6 @@ EXPECTED=$(sed -n '/^>/ s/>//p' "${ALL_IDENTICAL}" | tr "\n" " " | sed 's/ $//')
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
-
-## TODO: missing tests on the format (space separated, one line per
-## OTU, abundance notation)
 
 
 ## --------------------------------------------------------------------- mothur
