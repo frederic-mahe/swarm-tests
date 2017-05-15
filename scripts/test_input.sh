@@ -114,22 +114,22 @@ echo -e ">a_10\nA" | \
     "${SWARM}" -d 2 &> /dev/null && \
     success "${DESCRIPTION}" || failure "${DESCRIPTION}"
 
-## Define ASCII characters accepted in fasta headers
-DESCRIPTION="ascii characters 1-9, 11-12, 14-31, 33-127 allowed in fasta headers"
+## Define ASCII characters accepted in fasta identifiers
+DESCRIPTION="ascii characters 1-9, 11-12, 14-31, 33-127 allowed in fasta identifiers"
 for i in {1..9} 11 12 {14..31} {33..127} ; do
     OCTAL=$(printf "\%04o" ${i})
     echo -e ">aa${OCTAL}aa_1\nACGT\n" | \
         "${SWARM}" &> /dev/null || \
-        failure "ascii character ${i} allowed in fasta header"
+        failure "ascii character ${i} allowed in fasta identifiers"
 done && success "${DESCRIPTION}"
 
-## Define ASCII characters not accepted in fasta headers
+## Define ASCII characters not accepted in fasta identifiers
 #  0: NULL
 # 10: "\n"
 # 13: "\r"
 # 32: SPACE
 for i in 0 10 13 32 ; do
-    DESCRIPTION="ascii character ${i} is not allowed in fasta headers"
+    DESCRIPTION="ascii character ${i} is not allowed in fasta identifiers"
     OCTAL=$(printf "\%04o" ${i})
     echo -e ">aa${OCTAL}aa_1\nACGT\n" | \
         "${SWARM}" &> /dev/null && \
@@ -137,8 +137,30 @@ for i in 0 10 13 32 ; do
             success "${DESCRIPTION}"
 done 
 
-## non-ASCII characters accepted in fasta headers
-DESCRIPTION="non-ASCII characters accepted in fasta headers"
+## Define ASCII characters accepted in fasta headers
+#  0: NULL
+# 13: "\r"
+# 32: SPACE
+for i in 0 13 32 ; do
+    DESCRIPTION="ascii character ${i} is allowed in fasta header (outside identifier)"
+    OCTAL=$(printf "\%04o" ${i})
+    echo -e ">aa_1 ${OCTAL}padding\nACGT\n" | \
+        "${SWARM}" &> /dev/null && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+done 
+
+## ASCII character 10 (\n) is not allowed in fasta headers (outside identifier)
+# 10: "\n"
+DESCRIPTION="ascii character 10 is not allowed in fasta headers (outside identifier)"
+OCTAL=$(printf "\%04o" 10)
+echo -e ">aa_1 ${OCTAL}padding\nACGT\n" | \
+    "${SWARM}" &> /dev/null && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+## non-ASCII characters accepted in fasta identifiers
+DESCRIPTION="non-ASCII characters accepted in fasta identifiers"
 echo -e ">ø_1\nACGT\n" | \
     "${SWARM}"  &> /dev/null && \
     success "${DESCRIPTION}" || failure "${DESCRIPTION}"
