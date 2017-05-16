@@ -166,6 +166,10 @@ echo -e ">ø_1\nACGT\n" | \
     success "${DESCRIPTION}" || failure "${DESCRIPTION}"
 
 ## Define ASCII characters accepted in fasta sequences
+# 10: "\n"
+# 13: "\r"
+# and ACGTUacgtu
+# SPACE is not allowed
 for i in 0 10 13 65 67 71 84 85 97 99 103 116 117 ; do
     DESCRIPTION="ascii character ${i} is allowed in sequences"
     OCTAL=$(printf "\%04o" ${i})
@@ -179,7 +183,7 @@ done
 for i in {1..9} 11 12 {14..64} 66 {68..70} {72..83} {86..96} 98 {100..102} {104..115} {118..127} ; do
     DESCRIPTION="ascii character ${i} is not allowed in sequences"
     OCTAL=$(printf "\%04o" ${i})
-    echo -e ">aaaa_1\nAC${OCTAL}GT\n" | \
+    echo -e ">s_1\nAC${OCTAL}GT\n" | \
         "${SWARM}" &> /dev/null && \
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
