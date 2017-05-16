@@ -704,6 +704,7 @@ printf ">s_1\nA\n" | "${SWARM}" -f &> /dev/null && \
 
 ## https://github.com/torognes/swarm/issues/44
 ##
+## not testable
 
 
 #*****************************************************************************#
@@ -736,6 +737,7 @@ printf ">s_1\nA\n" | "${SWARM}" -f &> /dev/null && \
 
 ## https://github.com/torognes/swarm/issues/47
 ##
+## TODO
 
 
 #*****************************************************************************#
@@ -790,7 +792,7 @@ OBSERVED=$(printf ">s_1\nA\n>w_1\nC\n" | "${SWARM}" -d 0 2> /dev/null | wc -l)
 
 ## https://github.com/torognes/swarm/issues/51
 ##
-## issue 51 --- -w gives abudance notation style matches input #1
+## issue 51 --- -w gives abudance notation style matching the input #1
 OUTPUT=$(mktemp)
 DESCRIPTION="issue 51 --- -w gives abudance notation style matches input #1"
 EXPECTED=$(printf ">a_1\naaaa\n")
@@ -801,7 +803,7 @@ printf ">a_1\nAAAA\n" | \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
 
-## issue 51 --- -w gives abudance notation style matches input #2
+## issue 51 --- -w gives abudance notation style matching the input #2
 OUTPUT=$(mktemp)
 DESCRIPTION="issue 51 --- -w gives abudance notation style matches input #2"
 EXPECTED=$(printf ">a;size=1;\naaaa\n")
@@ -925,6 +927,7 @@ rm "${OUTPUT}"
 
 ## https://github.com/torognes/swarm/issues/55
 ##
+## TODO
 
 
 #*****************************************************************************#
@@ -1086,7 +1089,7 @@ rm "${OUTPUT}"
 
 ## https://github.com/torognes/swarm/issues/63
 ##  
-## not testable
+## not testable (see also issue 104)
 
 
 #*****************************************************************************#
@@ -1108,6 +1111,7 @@ rm "${OUTPUT}"
 
 ## https://github.com/torognes/swarm/issues/65
 ##
+## TODO
 
 
 #*****************************************************************************#
@@ -1164,6 +1168,7 @@ rm "${REPRESENTATIVES}"
 
 ## https://github.com/torognes/swarm/issues/68
 ##  
+## TODO
 
 
 #*****************************************************************************#
@@ -1207,7 +1212,7 @@ rm "${REPRESENTATIVES}"
 
 ## https://github.com/torognes/swarm/issues/72
 ##
-## Define ASCII characters not accepted in fasta headers
+## Define ASCII characters not accepted in fasta identifiers
 #  0: NULL
 # 10: "\n"
 # 13: "\r"
@@ -1342,7 +1347,12 @@ DESCRIPTION="issue 75 --- Pairwise alignment settings are printed if d > 1"
 #*****************************************************************************#
 
 ## https://github.com/torognes/swarm/issues/79
-##  
+##
+## issue 79 --- swarm deals with empty sequences
+DESCRIPTION="issue 79 --- swarm deals with empty sequences"
+printf ">s_1\n\n" | swarm &> /dev/null && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 
 #*****************************************************************************#
@@ -1387,7 +1397,15 @@ rm -f "${CLUSTERS_A}" "${CLUSTERS_B}"
 #*****************************************************************************#
 
 ## https://github.com/torognes/swarm/issues/82
-##  
+##
+## issue 82 --- output uppercase nucleotidic sequences
+OUTPUT=$(mktemp)
+DESCRIPTION="issue 82 --- output uppercase nucleotidic sequences (-w output)"
+printf ">s_1\nt\n" | swarm -w "${OUTPUT}" &> /dev/null
+awk 'NR == 2 {exit /^T$/ ? 0 : 1}' "${OUTPUT}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
 
 
 #*****************************************************************************#
@@ -1431,7 +1449,7 @@ rm -f "${CLUSTERS_A}" "${CLUSTERS_B}"
 
 ## https://github.com/torognes/swarm/issues/86
 ##  
-##
+## TODO
 
 
 #*****************************************************************************#
@@ -1453,7 +1471,7 @@ rm -f "${CLUSTERS_A}" "${CLUSTERS_B}"
 
 ## https://github.com/torognes/swarm/issues/88
 ##
-## 
+## TODO
 
 
 #*****************************************************************************#
@@ -1464,7 +1482,7 @@ rm -f "${CLUSTERS_A}" "${CLUSTERS_B}"
 
 ## https://github.com/torognes/swarm/issues/89
 ##  
-
+## TODO
 
 #*****************************************************************************#
 #                                                                             #
@@ -1473,7 +1491,8 @@ rm -f "${CLUSTERS_A}" "${CLUSTERS_B}"
 #*****************************************************************************#
 
 ## https://github.com/torognes/swarm/issues/90
-##  
+##
+## TODO
 
 
 #*****************************************************************************#
@@ -1483,7 +1502,8 @@ rm -f "${CLUSTERS_A}" "${CLUSTERS_B}"
 #*****************************************************************************#
 
 ## https://github.com/torognes/swarm/issues/91
-##  
+##
+## TODO
 
 
 #*****************************************************************************#
@@ -1493,7 +1513,8 @@ rm -f "${CLUSTERS_A}" "${CLUSTERS_B}"
 #*****************************************************************************#
 
 ## https://github.com/torognes/swarm/issues/92
-##  
+##
+## TODO
 
 
 #*****************************************************************************#
@@ -1590,11 +1611,12 @@ rm "${OUTPUT}"
 ## issue 98 --- writing seeds never above 100%
 OUTPUT=$(mktemp)
 DESCRIPTION="issue 98 --- writing seeds never above 100 percent"
-printf ">s_1\nA\n" | "${SWARM}" -w /dev/null  2>&1 | \
+printf ">s_1\nA\n" | \
+    "${SWARM}" -w /dev/null  2>&1 | \
     sed 's/\r/\n/' | \
     grep "Writing seeds" | \
     tr -d "%" | \
-    awk '{if ($3 > max) {max = $3}} END {exit (max > 100) ? 1 : 0}' && \
+    awk '$3 > 100 {exit 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
