@@ -382,13 +382,18 @@ rm "${USEARCH}"
 
 ## https://github.com/torognes/swarm/issues/23
 ##
-## Description is not precise enough to create a test. There are tests
-## covering the -s output in the file test_options.sh
+## Swarm can produce output files compatible with Mothur.
+for OPTION in "-r" "--mothur" ; do
+    DESCRIPTION="issue 23 --- swarms accepts the option ${OPTION}"
+    "${SWARM}" "${OPTION}" < "${ALL_IDENTICAL}" &> /dev/null && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+done
 
 
 #*****************************************************************************#
 #                                                                             #
-#        More informative error message for illegal characters (issue 24)     #
+#            Linearization awk code prints last line twice (issue 24)         #
 #                                                                             #
 #*****************************************************************************#
 
@@ -463,7 +468,8 @@ printf ">s_1\nA\n" | "${SWARM}" 2>&1 | \
 
 ## https://github.com/torognes/swarm/issues/29
 ##
-## cannot be tested from the command line.
+## implemented in swarm v1.2.8, default algorithm for d = 1
+
 
 #*****************************************************************************#
 #                                                                             #
@@ -472,7 +478,6 @@ printf ">s_1\nA\n" | "${SWARM}" 2>&1 | \
 #*****************************************************************************#
 
 ## https://github.com/torognes/swarm/issues/30
-##
 ##
 ## -i number of differences is correct while -d 2 (2 expected)
 OUTPUT=$(mktemp)
@@ -534,19 +539,6 @@ rm "${OUTPUT}"
 
 #*****************************************************************************#
 #                                                                             #
-#                                Dereplication                                #
-#                                                                             #
-#*****************************************************************************#
-
-## issue 65 --- swarm complains if input sequences are not dereplicated
-DESCRIPTION="issue 65 --- swarm complains if input sequences are not dereplicated"
-"${SWARM}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
-    failure "${DESCRIPTION}" || \
-        success "${DESCRIPTION}"
-
-
-#*****************************************************************************#
-#                                                                             #
 #              Bug in the -b option output (critical) (issue 34)              #
 #                                                                             #
 #*****************************************************************************#
@@ -583,7 +575,7 @@ printf ">s_1\na\n" | "${SWARM}" &> /dev/null && \
 
 #*****************************************************************************#
 #                                                                             #
-#Sequence headers with multiple underscore characters cause problems(issue 37)#
+#     Sequence headers with multiple underscores cause problems(issue 37)     #
 #                                                                             #
 #*****************************************************************************#
 
@@ -737,7 +729,7 @@ printf ">s_1\nA\n" | "${SWARM}" -f &> /dev/null && \
 
 ## https://github.com/torognes/swarm/issues/47
 ##
-## TODO
+## external to swarm, not testable.
 
 
 #*****************************************************************************#
@@ -834,7 +826,7 @@ rm "${OUTPUT}"
 
 ## https://github.com/torognes/swarm/issues/53
 ##
-## a sequence and all its microvariants should form one OTU
+## a sequence and all its microvariants should form only one OTU
 
 function microvariants() {
     local SEQ="${1}"
@@ -855,7 +847,7 @@ function microvariants() {
     done    
 }
 
-## produce a fasta set with the seed and its L1 microvariants
+## produce a fasta set with a seed and all its L1 microvariants
 DESCRIPTION="issue 53 --- swarm correctly computes all microvariants"
 OUTPUT=$(mktemp)
 SEQUENCE="ACGT"
@@ -868,7 +860,7 @@ microvariants ${SEQUENCE} | \
 rm "${OUTPUT}"
 
 
-## produce a fasta set with the seed, L2 microvariants and no L1 microvariants
+## produce a fasta set with a seed, all its L2 microvariants but no L1 microvariants
 DESCRIPTION="issue 53 --- fastidious links L2 microvariants and the seed"
 SEQUENCE="ACGT"
 OUTPUT=$(mktemp)
@@ -927,7 +919,71 @@ rm "${OUTPUT}"
 
 ## https://github.com/torognes/swarm/issues/55
 ##
-## TODO
+## It is only the internal-structure (-i) file and columns 6 and 7 of
+## the statistics file (-s) that are not updated.
+##
+## Updating the file --statistics-file seems difficult: the 6th and
+## 7th columns report the number of growth iterations and the length
+## of the longest, continuous, down-hill abundance path in the
+## OTU. Updating these columns would break that idea of continuity.
+##
+## So the output of the --internal-structure (-i) is the only thing
+## that would make sense updating.
+
+## The grafted amplicons should receive a number of differences of 2
+## (present output: "", expected output: a b 2 1 2).
+OUTPUT=$(mktemp)
+DESCRIPTION="issue 55 --- grafted amplicon receives a number of difference of 2"
+printf ">a_3\nAAAA\n>b_1\nAATT\n" | \
+    "${SWARM}" -f -i "${OUTPUT}" &> /dev/null
+NUMBER_OF_DIFFERENCES=$(awk '{print $3}' "${OUTPUT}")
+NUMBER_OF_DIFFERENCES=${NUMBER_OF_DIFFERENCES:=0} # set to zero if null
+(( "${NUMBER_OF_DIFFERENCES}" == 2 )) && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## Grafted amplicons receive the OTU number of the main OTU (in this
+## toy example, the 4th column should be always equal to 1)
+OUTPUT=$(mktemp)
+DESCRIPTION="issue 55 --- grafted amplicons receive the OTU number of the main OTU"
+printf ">a_3\nAAAA\n>b_1\nAAAT\n>c_1\nATTT\n>d_1\nTTTT\n" | \
+    "${SWARM}" -f -i "${OUTPUT}" &> /dev/null
+awk '$4 != 1 {exit 1}' "${OUTPUT}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## Number of differences between the grafted amplicon and the grafting point is 2
+##
+## the structure file should be:
+## a   b   1   1   1
+## a   c   2   1   2
+## c   d   1   1   3
+OUTPUT=$(mktemp)
+DESCRIPTION="issue 55 --- 2 differences between the grafted amplicon and the grafting point"
+printf ">a_3\nAAAA\n>b_1\nAAAT\n>c_1\nATTT\n>d_1\nTTTT\n" | \
+    "${SWARM}" -f -i "${OUTPUT}" &> /dev/null
+awk '$3 == 2 {s = "true"} END {exit s == "true" ? 0 : 1}' "${OUTPUT}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## The fifth column of the structure file should be equal to number of
+## steps from the seed to the amplicon.
+##
+## the structure file should be:
+## a   b   1   1   1
+## a   c   2   1   2
+## c   d   1   1   3
+OUTPUT=$(mktemp)
+DESCRIPTION="issue 55 --- 5th column is the number of steps from the seed to the amplicon"
+printf ">a_3\nAAAA\n>b_1\nAAAT\n>c_1\nATTT\n>d_1\nTTTT\n" | \
+    "${SWARM}" -f -i "${OUTPUT}" &> /dev/null
+awk '$5 > 1 {s = "true"} END {exit s == "true" ? 0 : 1}' "${OUTPUT}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
 
 
 #*****************************************************************************#
@@ -939,6 +995,8 @@ rm "${OUTPUT}"
 ## https://github.com/torognes/swarm/issues/56
 ##
 ## issue 56 --- -i number of differences is correct with -d 1
+##
+## with identical sequences we expect zero difference in column 3
 DESCRIPTION="issue 56 --- -i number of differences is correct with -d 1"
 OUTPUT=$(mktemp)
 printf ">s_1\nA\n>w_1\nA\n" | "${SWARM}" -d 1 -i "${OUTPUT}"  &> /dev/null
@@ -949,6 +1007,8 @@ OBSERVED=$(awk '{print $3}' "${OUTPUT}")
 rm "${OUTPUT}"
 
 ## issue 56 --- -i number of differences is correct with -d 2
+##
+## with identical sequences we expect zero difference in column 3
 DESCRIPTION="issue 56 --- -i number of differences is correct with -d 2"
 OUTPUT=$(mktemp)
 printf ">s_1\nA\n>w_1\nA\n" | "${SWARM}" -d 2 -i "${OUTPUT}"  &> /dev/null
@@ -1005,7 +1065,7 @@ printf ">q_1\nA\n>s\nA\n" | "${SWARM}" 2> "${OUTPUT}"
 rm "${OUTPUT}"
 
 ## issue 59 --- number of missing abundance  notation is correct in error message #2
-DESCRIPTION="issue 59 --- number of missing abundance  notation is correct in error message#2"
+DESCRIPTION="issue 59 --- number of missing abundance  notation is correct in error message #2"
 OUTPUT=$(mktemp)
 printf ">q\nA\n>s_1\nA\n>d\nA\n" | "${SWARM}" 2> "${OUTPUT}"
 [[ $(awk '/^Error/{print $7}' "${OUTPUT}") == "2" ]] && \
@@ -1111,7 +1171,11 @@ rm "${OUTPUT}"
 
 ## https://github.com/torognes/swarm/issues/65
 ##
-## TODO
+## issue 65 --- swarm complains if input sequences are not dereplicated
+DESCRIPTION="issue 65 --- swarm complains if input sequences are not dereplicated"
+"${SWARM}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
 
 
 #*****************************************************************************#
@@ -1315,7 +1379,11 @@ DESCRIPTION="issue 75 --- Pairwise alignment settings are printed if d > 1"
 
 ## https://github.com/torognes/swarm/issues/76
 ##  
-
+## Number of differences (--differences is 256)
+DESCRIPTION="issue 76 --- swarm aborts when --difference is 256"
+"${SWARM}" -d 256 < "${ALL_IDENTICAL}" &> /dev/null && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
 
 
 #*****************************************************************************#
@@ -1325,8 +1393,8 @@ DESCRIPTION="issue 75 --- Pairwise alignment settings are printed if d > 1"
 #*****************************************************************************#
 
 ## https://github.com/torognes/swarm/issues/77
-##  
-
+##
+## not specific enough, and covered by the tests in test_options.sh
 
 
 #*****************************************************************************#
@@ -1449,7 +1517,12 @@ rm "${OUTPUT}"
 
 ## https://github.com/torognes/swarm/issues/86
 ##  
-## TODO
+##
+## Swarm supports unseekable pipes
+DESCRIPTION="issue 86 --- swarm supports unseekable pipes"
+"${SWARM}" <(printf ">s_1\nT\n") &> /dev/null && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 
 #*****************************************************************************#
@@ -1471,7 +1544,7 @@ rm "${OUTPUT}"
 
 ## https://github.com/torognes/swarm/issues/88
 ##
-## TODO
+## won't be implemented
 
 
 #*****************************************************************************#
@@ -1482,7 +1555,8 @@ rm "${OUTPUT}"
 
 ## https://github.com/torognes/swarm/issues/89
 ##  
-## TODO
+## external feature
+
 
 #*****************************************************************************#
 #                                                                             #
@@ -1492,7 +1566,21 @@ rm "${OUTPUT}"
 
 ## https://github.com/torognes/swarm/issues/90
 ##
-## TODO
+## better error message to help to fix the problem
+DESCRIPTION="issue 90 --- better error message to help to fix the problem"
+CURRENT_MESSAGE=$(printf ">s\nT\n" | \
+                         "${SWARM}" 2>&1 | sed -n '/^Error/,/sequences.$/ p')
+EXPECTED_MESSAGE=$(printf "Error: Abundance annotations not found for 1 sequences, starting on line 1.\n"
+                   printf ">s\n"
+                   printf "Fasta headers must end with abundance annotations (_INT or ;size=INT). A Header\n"
+                   printf "is defined as the string comprised between the ">" symbol and the first space\n"
+                   printf "or the end of the line, whichever comes first. The -z option must be used if the\n"
+                   printf "abundance annotation is in the ;size=INT format. Abundance annotations can be\n"
+                   printf "produced by dereplicating the sequences.\n")
+
+[[ "${CURRENT_MESSAGE}" ==  "${EXPECTED_MESSAGE}" ]]  && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 
 #*****************************************************************************#
@@ -1503,7 +1591,7 @@ rm "${OUTPUT}"
 
 ## https://github.com/torognes/swarm/issues/91
 ##
-## TODO
+## won't be implemented
 
 
 #*****************************************************************************#
@@ -1514,7 +1602,7 @@ rm "${OUTPUT}"
 
 ## https://github.com/torognes/swarm/issues/92
 ##
-## TODO
+## problem with original poster's data.
 
 
 #*****************************************************************************#
@@ -1711,6 +1799,37 @@ printf ">s1_%d\nA\n" $(( 1 << 32 )) | \
 ## not testable
 
 # cppcheck --enable=all swarm/ 1> /dev/null
+
+
+#*****************************************************************************#
+#                                                                             #
+#         Swarm doesn't exit when run without any inputs (issue 105)          #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/105
+##
+## swarm waits when it receives no input data (no file, no pipe, no
+## redirection). That's normal. See issue 36.
+
+
+#*****************************************************************************#
+#                                                                             #
+#            bug in -w output when using the -a option (issue 106)            #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/106
+##
+## bug in -w output when using the -a option, amplicon identifier is
+## missing (see also issue 91)
+OUTPUT=$(mktemp)
+DESCRIPTION="issue 106 --- bug in -w output when using the -a option"
+printf ">s1\nT\n" | "${SWARM}" -a 1 -w "${OUTPUT}" &> /dev/null
+grep -q "s1_1" "${OUTPUT}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
 
 
 ## Clean
