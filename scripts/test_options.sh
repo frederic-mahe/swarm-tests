@@ -568,6 +568,60 @@ SUMABUNDANCES=$(awk -F "[;=]" '/^>/ {print $3}' "${OUTPUT}")
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
 
+## when using -a, check if the added abundance annotation appears in -o output
+OUTPUT=$(mktemp)
+DESCRIPTION="-a abundance annotation appears in -o output"
+printf ">s1\nA\n" | "${SWARM}" -a 1 -o "${OUTPUT}" &> /dev/null
+awk '{exit $1 == "s1_1" ? 0 : 1}' "${OUTPUT}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## when using -a, check if the added abundance annotation appears in -i output
+OUTPUT=$(mktemp)
+DESCRIPTION="-a abundance annotation appears in -i output"
+printf ">s1_1\nA\n>s2\nT\n" | "${SWARM}" -a 1 -i "${OUTPUT}" &> /dev/null
+awk '{exit $2 == "s2" ? 0 : 1}' "${OUTPUT}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## when using -a and -r, check if the added abundance annotation appears in -o output
+OUTPUT=$(mktemp)
+DESCRIPTION="-a abundance annotation appears in -o output when using -r"
+printf ">s1_1\nA\n>s2\nT\n" | "${SWARM}" -a 1 -r -o "${OUTPUT}" &> /dev/null
+grep -q "s2_1$" "${OUTPUT}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## when using -a, check if the added abundance annotation appears in -s output
+OUTPUT=$(mktemp)
+DESCRIPTION="-a abundance annotation appears in -s output"
+printf ">s1\nA\n>s2_1\nT\n" | "${SWARM}" -a 2 -s "${OUTPUT}" &> /dev/null
+awk '{exit $3 == "s1" ? 0 : 1}' "${OUTPUT}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## when using -a, check if the added abundance annotation appears in -u output
+OUTPUT=$(mktemp)
+DESCRIPTION="-a abundance annotation appears in -u output"
+printf ">s1\nT\n>s2_1\nT\n" | "${SWARM}" -a 2 -u "${OUTPUT}" &> /dev/null
+grep -q "s1_2" "${OUTPUT}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## when using -a, check if the added abundance annotation appears in -w output
+OUTPUT=$(mktemp)
+DESCRIPTION="-a abundance annotation appears in -w output"
+printf ">s1\nT\n" | "${SWARM}" -a 1 -w "${OUTPUT}" &> /dev/null
+grep -q "s1_1" "${OUTPUT}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
 
 ## --------------------------------------------------------- internal structure
 
@@ -590,6 +644,16 @@ OUTPUT=$(mktemp)
 DESCRIPTION="-i creates and fill given output file"
 "${SWARM}" --internal-structure "${OUTPUT}" < "${ALL_IDENTICAL}" &> /dev/null
 [[ -s "${OUTPUT}" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## -i columns 1 and 2 contain sequence names
+OUTPUT=$(mktemp)
+DESCRIPTION="-i columns 1 and 2 contain sequence names"
+printf ">a_1\nAAAA\n>b_1\nAAAA\n" | \
+    "${SWARM}" -i "${OUTPUT}" &> /dev/null
+awk '{exit ($1 == "a" && $2 == "b") ? 0 : 1}' "${OUTPUT}" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
