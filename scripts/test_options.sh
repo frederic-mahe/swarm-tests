@@ -122,7 +122,14 @@ DESCRIPTION="swarm reads from stdin when - is used"
 #*****************************************************************************#
 
 ## SSE2 instructions (first introduced in GGC 3.1)
-if $(grep -m 1 "flags" /proc/cpuinfo | grep -q sse2) ; then
+SSE2=""
+# on a linux system
+SSE2=$(grep -o -m 1 "sse2" /proc/cpuinfo 2> /dev/null)
+# or on a MacOS system
+[[ -z "${SSE2}" ]] && \
+    SSE2=$(sysctl -n machdep.cpu.features 2> /dev/null | grep -o "sse2")
+# if sse2 is present, check if swarm runs normally
+if [[ -n "${SSE2}" ]] ; then
     DESCRIPTION="swarm runs normally when SSE2 instructions are available"
     "${SWARM}" "${ALL_IDENTICAL}" &> /dev/null && \
         success "${DESCRIPTION}" || \
