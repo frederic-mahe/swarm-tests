@@ -211,6 +211,10 @@ DESCRIPTION="swarm aborts when --threads is not numerical"
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
+## It should be possible to check how many threads swarm is using
+## (with ps huH | grep -c "swarm") but I cannot get it to work
+## properly.
+
 
 #*****************************************************************************#
 #                                                                             #
