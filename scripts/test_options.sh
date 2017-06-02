@@ -425,7 +425,7 @@ DESCRIPTION="swarm aborts when --ceiling is 0"
 ## ceiling option accepts positive integers
 MIN=1
 MAX=255
-DESCRIPTION="swarm runs normally when --ceiling goes from ${MIN} to ${MAX}"
+DESCRIPTION="swarm runs normally when --ceiling goes from 3 to ${MAX}"
 for ((c=$MIN ; c<=$MAX ; c++)) ; do
     "${SWARM}" -f -c ${c} < "${FASTIDOUSINPUT}" &> /dev/null || \
         failure "swarm aborts when --ceiling equals ${c}"
@@ -1374,7 +1374,7 @@ QUERY_LENGTH=$(awk '/^H/ {v = $3} END {print v}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
-exit
+
 ## -u similarity percentage is correct in 4th column #1
 DESCRIPTION="-u similarity percentage is correct in 4th column #1"
 OUTPUT=$(mktemp)
@@ -1860,7 +1860,6 @@ gap-opening-penalty -g
 gap-extension-penalty -e
 EOF
 
-exit
 
 ## Clean
 rm "${ALL_IDENTICAL}"
