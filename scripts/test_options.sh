@@ -108,6 +108,12 @@ DESCRIPTION="swarm runs normally when -- marks the end of options"
 #                                                                             #
 #*****************************************************************************#
 
+## Accept to read from /dev/stdin
+DESCRIPTION="swarm reads from /dev/stdin"
+"${SWARM}" /dev/stdin < "${ALL_IDENTICAL}" &> /dev/null && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 ## Accept "-" as a placeholder for stdin
 DESCRIPTION="swarm reads from stdin when - is used"
 "${SWARM}" - < "${ALL_IDENTICAL}" &> /dev/null && \
