@@ -590,7 +590,7 @@ echo -e ">${IDENTIFIER}_3\nACGTACGT" | \
 grep -qE "[[:blank:]]${IDENTIFIER}[[:blank:]]" "${STATS}" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm -f "${STATS}"
+rm "${STATS}"
 
 
 #*****************************************************************************#
@@ -1444,7 +1444,7 @@ echo -e ">b_2\nTT\n>a_2\nAA\n>c_1\nAT\n" | \
 cmp -s "${CLUSTERS_A}" "${CLUSTERS_B}" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm -f "${CLUSTERS_A}" "${CLUSTERS_B}"
+rm "${CLUSTERS_A}" "${CLUSTERS_B}"
 
 
 #*****************************************************************************#
@@ -1713,7 +1713,7 @@ printf ">s_1\nA\n" | \
     awk '$3 > 100 {exit 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-
+rm "${OUTPUT}"
 
 #*****************************************************************************#
 #                                                                             #
