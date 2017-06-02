@@ -1570,13 +1570,19 @@ DESCRIPTION="issue 86 --- swarm supports unseekable pipes"
 DESCRIPTION="issue 90 --- better error message to help to fix the problem"
 CURRENT_MESSAGE=$(printf ">s\nT\n" | \
                          "${SWARM}" 2>&1 | sed -n '/^Error/,/sequences.$/ p')
-EXPECTED_MESSAGE=$(printf "Error: Abundance annotations not found for 1 sequences, starting on line 1.\n"
-                   printf ">s\n"
-                   printf "Fasta headers must end with abundance annotations (_INT or ;size=INT). A Header\n"
-                   printf "is defined as the string comprised between the ">" symbol and the first space\n"
-                   printf "or the end of the line, whichever comes first. The -z option must be used if the\n"
-                   printf "abundance annotation is in the ;size=INT format. Abundance annotations can be\n"
-                   printf "produced by dereplicating the sequences.\n")
+## read is a Bash built-in so it doesn't require calling an external
+## command such as cat. Putting quotes around the sentinal (EOF)
+## prevents the text from undergoing parameter expansion. The -d ''
+## causes it to read multiple lines (ignore newlines).
+read -d '' EXPECTED_MESSAGE <<"EOF"
+Error: Abundance annotations not found for 1 sequences, starting on line 1.
+>s
+Fasta headers must end with abundance annotations (_INT or ;size=INT). A Header
+is defined as the string comprised between the \">\" symbol and the first space
+or the end of the line, whichever comes first. The -z option must be used if the
+abundance annotation is in the ;size=INT format. Abundance annotations can be
+produced by dereplicating the sequences.
+EOF
 
 [[ "${CURRENT_MESSAGE}" ==  "${EXPECTED_MESSAGE}" ]]  && \
     success "${DESCRIPTION}" || \
