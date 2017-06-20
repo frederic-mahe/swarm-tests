@@ -253,7 +253,7 @@ DESCRIPTION="swarm aborts when --difference is empty"
 
 ## Number of differences (--differences is negative)
 DESCRIPTION="swarm aborts when --difference is -1"
-"${SWARM}" -d -1 < "${ALL_IDENTICAL}" 2> /dev/null && \
+"${SWARM}" -d \-1 < "${ALL_IDENTICAL}" 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -343,7 +343,7 @@ DESCRIPTION="swarm aborts when --boundary is empty"
 
 ## Boundary (-b is negative)
 DESCRIPTION="swarm aborts when --boundary is -1"
-"${SWARM}" -f -b -1 < "${FASTIDOUSINPUT}" &> /dev/null && \
+"${SWARM}" -f -b \-1 < "${FASTIDOUSINPUT}" &> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -412,7 +412,7 @@ DESCRIPTION="swarm aborts when --ceiling is empty"
 
 ## Ceiling (-c is negative)
 DESCRIPTION="swarm aborts when --ceiling is -1"
-"${SWARM}" -f -c -1 < "${FASTIDOUSINPUT}" &> /dev/null && \
+"${SWARM}" -f -c \-1 < "${FASTIDOUSINPUT}" &> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -474,7 +474,7 @@ DESCRIPTION="swarm aborts when --bloom-bits is empty"
 
 ## Bloom bits (-y is negative)
 DESCRIPTION="swarm aborts when --bloom-bits is -1"
-"${SWARM}" -f -y -1 < "${FASTIDOUSINPUT}" &> /dev/null && \
+"${SWARM}" -f -y \-1 < "${FASTIDOUSINPUT}" &> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -1824,7 +1824,7 @@ while read LONG SHORT ; do
 
     ## option is negative
     DESCRIPTION="swarm aborts when --${LONG} is -1"
-    "${SWARM}" -d 2 ${SHORT} -1 < "${ALL_IDENTICAL}" &> /dev/null && \
+    "${SWARM}" -d 2 ${SHORT} \-1 < "${ALL_IDENTICAL}" &> /dev/null && \
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
 
@@ -1834,7 +1834,7 @@ while read LONG SHORT ; do
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
 
-    ## option is negative (allowed for -m & -p, not for -g & -e)
+    ## option is null (allowed for -m & -p, not for -g & -e)
     if [[ "${SHORT}" == "-m" || "${SHORT}" == "-p" ]] ; then
         DESCRIPTION="swarm aborts when --${LONG} is null"
         "${SWARM}" -d 2 ${SHORT} 0 < "${ALL_IDENTICAL}" &> /dev/null && \
