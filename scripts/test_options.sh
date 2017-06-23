@@ -108,6 +108,12 @@ DESCRIPTION="swarm runs normally when -- marks the end of options"
 #                                                                             #
 #*****************************************************************************#
 
+## Accept to read from /dev/stdin
+DESCRIPTION="swarm reads from /dev/stdin"
+"${SWARM}" /dev/stdin < "${ALL_IDENTICAL}" &> /dev/null && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 ## Accept "-" as a placeholder for stdin
 DESCRIPTION="swarm reads from stdin when - is used"
 "${SWARM}" - < "${ALL_IDENTICAL}" &> /dev/null && \
@@ -122,7 +128,14 @@ DESCRIPTION="swarm reads from stdin when - is used"
 #*****************************************************************************#
 
 ## SSE2 instructions (first introduced in GGC 3.1)
-if $(grep -m 1 "flags" /proc/cpuinfo | grep -q sse2) ; then
+SSE2=""
+# on a linux system
+SSE2=$(grep -o -m 1 "sse2" /proc/cpuinfo 2> /dev/null)
+# or on a MacOS system
+[[ -z "${SSE2}" ]] && \
+    SSE2=$(sysctl -n machdep.cpu.features 2> /dev/null | grep -o "sse2")
+# if sse2 is present, check if swarm runs normally
+if [[ -n "${SSE2}" ]] ; then
     DESCRIPTION="swarm runs normally when SSE2 instructions are available"
     "${SWARM}" "${ALL_IDENTICAL}" &> /dev/null && \
         success "${DESCRIPTION}" || \
@@ -204,6 +217,10 @@ DESCRIPTION="swarm aborts when --threads is not numerical"
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
+## It should be possible to check how many threads swarm is using
+## (with ps huH | grep -c "swarm") but I cannot get it to work
+## properly.
+
 
 #*****************************************************************************#
 #                                                                             #
@@ -236,7 +253,7 @@ DESCRIPTION="swarm aborts when --difference is empty"
 
 ## Number of differences (--differences is negative)
 DESCRIPTION="swarm aborts when --difference is -1"
-"${SWARM}" -d -1 < "${ALL_IDENTICAL}" 2> /dev/null && \
+"${SWARM}" -d \-1 < "${ALL_IDENTICAL}" 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -326,7 +343,7 @@ DESCRIPTION="swarm aborts when --boundary is empty"
 
 ## Boundary (-b is negative)
 DESCRIPTION="swarm aborts when --boundary is -1"
-"${SWARM}" -f -b -1 < "${FASTIDOUSINPUT}" &> /dev/null && \
+"${SWARM}" -f -b \-1 < "${FASTIDOUSINPUT}" &> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -395,7 +412,7 @@ DESCRIPTION="swarm aborts when --ceiling is empty"
 
 ## Ceiling (-c is negative)
 DESCRIPTION="swarm aborts when --ceiling is -1"
-"${SWARM}" -f -c -1 < "${FASTIDOUSINPUT}" &> /dev/null && \
+"${SWARM}" -f -c \-1 < "${FASTIDOUSINPUT}" &> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -414,7 +431,7 @@ DESCRIPTION="swarm aborts when --ceiling is 0"
 ## ceiling option accepts positive integers
 MIN=1
 MAX=255
-DESCRIPTION="swarm runs normally when --ceiling goes from ${MIN} to ${MAX}"
+DESCRIPTION="swarm runs normally when --ceiling goes from 3 to ${MAX}"
 for ((c=$MIN ; c<=$MAX ; c++)) ; do
     "${SWARM}" -f -c ${c} < "${FASTIDOUSINPUT}" &> /dev/null || \
         failure "swarm aborts when --ceiling equals ${c}"
@@ -457,7 +474,7 @@ DESCRIPTION="swarm aborts when --bloom-bits is empty"
 
 ## Bloom bits (-y is negative)
 DESCRIPTION="swarm aborts when --bloom-bits is -1"
-"${SWARM}" -f -y -1 < "${FASTIDOUSINPUT}" &> /dev/null && \
+"${SWARM}" -f -y \-1 < "${FASTIDOUSINPUT}" &> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -1363,7 +1380,7 @@ QUERY_LENGTH=$(awk '/^H/ {v = $3} END {print v}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
-exit
+
 ## -u similarity percentage is correct in 4th column #1
 DESCRIPTION="-u similarity percentage is correct in 4th column #1"
 OUTPUT=$(mktemp)
@@ -1807,7 +1824,7 @@ while read LONG SHORT ; do
 
     ## option is negative
     DESCRIPTION="swarm aborts when --${LONG} is -1"
-    "${SWARM}" -d 2 ${SHORT} -1 < "${ALL_IDENTICAL}" &> /dev/null && \
+    "${SWARM}" -d 2 ${SHORT} \-1 < "${ALL_IDENTICAL}" &> /dev/null && \
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
 
@@ -1817,7 +1834,7 @@ while read LONG SHORT ; do
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
 
-    ## option is negative (allowed for -m & -p, not for -g & -e)
+    ## option is null (allowed for -m & -p, not for -g & -e)
     if [[ "${SHORT}" == "-m" || "${SHORT}" == "-p" ]] ; then
         DESCRIPTION="swarm aborts when --${LONG} is null"
         "${SWARM}" -d 2 ${SHORT} 0 < "${ALL_IDENTICAL}" &> /dev/null && \
@@ -1849,7 +1866,6 @@ gap-opening-penalty -g
 gap-extension-penalty -e
 EOF
 
-exit
 
 ## Clean
 rm "${ALL_IDENTICAL}"
