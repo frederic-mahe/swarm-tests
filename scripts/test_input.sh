@@ -122,6 +122,7 @@ for i in {1..9} 11 12 {14..31} {33..127} ; do
         "${SWARM}" &> /dev/null || \
         failure "ascii character ${i} allowed in fasta identifiers"
 done && success "${DESCRIPTION}"
+unset OCTAL
 
 ## Define ASCII characters not accepted in fasta identifiers
 #  0: NULL
@@ -136,6 +137,7 @@ for i in 0 10 13 32 ; do
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
 done 
+unset OCTAL
 
 ## Define ASCII characters accepted in fasta headers
 #  0: NULL
@@ -149,6 +151,7 @@ for i in 0 13 32 ; do
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done 
+unset OCTAL
 
 ## ASCII character 10 (\n) is not allowed in fasta headers (outside identifier)
 # 10: "\n"
@@ -158,6 +161,7 @@ echo -e ">aa_1 ${OCTAL}padding\nACGT\n" | \
     "${SWARM}" &> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
+unset OCTAL
 
 ## non-ASCII characters accepted in fasta identifiers
 DESCRIPTION="non-ASCII characters accepted in fasta identifiers"
@@ -178,6 +182,7 @@ for i in 0 10 13 65 67 71 84 85 97 99 103 116 117 ; do
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
+unset OCTAL
 
 ## Define ASCII characters not accepted in fasta sequences
 for i in {1..9} 11 12 {14..64} 66 {68..70} {72..83} {86..96} 98 {100..102} {104..115} {118..127} ; do
@@ -188,6 +193,7 @@ for i in {1..9} 11 12 {14..64} 66 {68..70} {72..83} {86..96} 98 {100..102} {104.
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
 done
+unset OCTAL
 
 ## Swarm aborts if fasta identifiers are not unique
 DESCRIPTION="swarm aborts if fasta headers are not unique"
@@ -205,6 +211,7 @@ grep -qE "[[:blank:]]${IDENTIFIER}[[:blank:]]" "${STATS}" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm -f "${STATS}"
+unset IDENTIFIER
 
 ## Fasta header must contain an abundance value after being truncated
 DESCRIPTION="swarm aborts if fasta headers lacks abundance value"
