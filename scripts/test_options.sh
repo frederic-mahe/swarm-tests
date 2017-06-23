@@ -147,6 +147,7 @@ else
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
 fi
+unset SSE2
 
 
 #*****************************************************************************#
@@ -221,6 +222,8 @@ DESCRIPTION="swarm aborts when --threads is not numerical"
 ## (with ps huH | grep -c "swarm") but I cannot get it to work
 ## properly.
 
+unset MIN MAX
+
 
 #*****************************************************************************#
 #                                                                             #
@@ -275,6 +278,8 @@ DESCRIPTION="swarm aborts when --difference is not numerical"
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
+unset MIN MAX
+
 
 #*****************************************************************************#
 #                                                                             #
@@ -298,6 +303,7 @@ LINENUMBER=$(printf ">a_10\nACGT\n>b_9\nCGGT\n>c_1\nCCGT\n" | \
 (( ${LINENUMBER} == 1 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
+unset LINENUMBER
 
 
 #*****************************************************************************#
@@ -323,7 +329,7 @@ LINENUMBER=$("${SWARM}" -f "${FASTIDOUSINPUT}" 2> /dev/null | wc -l)
 (( ${LINENUMBER} == 1 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-
+unset LINENUMBER
 
 ## Boundary -------------------------------------------------------------------
 
@@ -367,6 +373,7 @@ for ((b=$MIN ; b<=$MAX ; b++)) ; do
     "${SWARM}" -f -b ${b} < "${FASTIDOUSINPUT}" &> /dev/null || \
         failure "swarm aborts when --boundary equals ${b}"
 done && success "${DESCRIPTION}"
+unset MIN MAX
 
 ## boundary option accepts large integers #1
 DESCRIPTION="swarm accepts large values for --boundary (2^32)"
@@ -386,6 +393,7 @@ LINENUMBER=$("${SWARM}" -f -b 2 < "${FASTIDOUSINPUT}" 2> /dev/null | wc -l)
 (( ${LINENUMBER} == 2 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
+unset LINENUMBER
 
 ## Passing the --boundary option without the fastidious option should fail
 DESCRIPTION="swarm fails when the boundary option is specified without -f"
@@ -436,6 +444,7 @@ for ((c=$MIN ; c<=$MAX ; c++)) ; do
     "${SWARM}" -f -c ${c} < "${FASTIDOUSINPUT}" &> /dev/null || \
         failure "swarm aborts when --ceiling equals ${c}"
 done && success "${DESCRIPTION}"
+unset MIN MAX
 
 ## ceiling option accepts large integers #1
 DESCRIPTION="swarm accepts large values for --ceiling (2^32)"
@@ -492,6 +501,7 @@ for ((y=$MIN ; y<=$MAX ; y++)) ; do
     "${SWARM}" -f -y ${y} < "${FASTIDOUSINPUT}" &> /dev/null || \
         failure "swarm aborts when --bloom-bits equals ${y}"
 done && success "${DESCRIPTION}"
+unset MIN MAX
 
 ## Rejected values for the --bloom-bits option are < 2
 DESCRIPTION="swarm aborts when --bloom-bits is lower than 2"
@@ -508,6 +518,7 @@ for ((y=$MIN ; y<=$MAX ; y++)) ; do
     "${SWARM}" -f -y ${y} < "${FASTIDOUSINPUT}" &> /dev/null && \
         failure "swarm runs normally when --bloom-bits equals ${y}"
 done || success "${DESCRIPTION}"
+unset MIN MAX
 
 ## Passing the --bloom-bits option without the fastidious option should fail
 DESCRIPTION="swarm fails when the --bloom-bits option is specified without -f"
@@ -542,6 +553,7 @@ ABUNDANCE=$(sed -n 's/.*_//p' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset ABUNDANCE
 
 ## Swarm append the abundance number set with -a for swarm notation
 OUTPUT=$(mktemp)
@@ -553,6 +565,7 @@ SUMABUNDANCES=$(sed -n '/^>/ s/.*_//p' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset SUMABUNDANCE
 
 ## Swarm append the abundance number set with -a for usearch notation
 OUTPUT=$(mktemp)
@@ -564,6 +577,7 @@ SUMABUNDANCES=$(awk -F "[;=]" '/^>/ {print $3}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset SUMABUNDANCE
 
 ## Swarm does not overwrite the abundance number with -a for swarm notation
 OUTPUT=$(mktemp)
@@ -574,6 +588,7 @@ SUMABUNDANCES=$(sed -n '/^>/ s/.*_//p' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset SUMABUNDANCE
 
 ## Swarm does not overwrite the abundance number with -a for usearch notation
 OUTPUT=$(mktemp)
@@ -584,6 +599,7 @@ SUMABUNDANCES=$(awk -F "[;=]" '/^>/ {print $3}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset SUMABUNDANCE
 
 ## when using -a, check if the added abundance annotation appears in -o output
 OUTPUT=$(mktemp)
@@ -685,6 +701,7 @@ NUMBER_OF_DIFFERENCES=$(awk -F "\t" '{print $3}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset NUMBER_OF_DIFFERENCES
 
 ## -i number of differences is correct when -d 2 (2 expected)
 OUTPUT=$(mktemp)
@@ -696,6 +713,7 @@ NUMBER_OF_DIFFERENCES=$(awk -F "\t" '{print $3}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset NUMBER_OF_DIFFERENCES
 
 ## -i number of differences is correct while -d 2 (1 expected)
 OUTPUT=$(mktemp)
@@ -707,6 +725,7 @@ NUMBER_OF_DIFFERENCES=$(awk -F "\t" '{print $3}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset NUMBER_OF_DIFFERENCES
 
 ## -i number of the OTU is correct #1
 OUTPUT=$(mktemp)
@@ -718,6 +737,7 @@ NUMBER_OF_OTUs=$(awk -F "\t" '{print $4}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset NUMBER_OF_OTUs
 
 ## -i number of the OTU is correct #2
 OUTPUT=$(mktemp)
@@ -729,6 +749,7 @@ NUMBER_OF_OTUs=$(awk '{n = $4} END {print n}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset NUMBER_OF_OTUs
 
 ## -i number of steps is correct (1 expected)
 OUTPUT=$(mktemp)
@@ -740,6 +761,7 @@ NUMBER_OF_STEPS=$(awk -F "\t" '{print $5}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset NUMBER_OF_STEPS
 
 ## -i number of steps is correct (3 expected)
 OUTPUT=$(mktemp)
@@ -751,6 +773,7 @@ NUMBER_OF_STEPS=$(awk -F "\t" '{print $5}' "${OUTPUT}" | sed '3q;d' )
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset NUMBER_OF_STEPS
 
 ## -i number of steps is correct while -d 2 (1 expected)
 OUTPUT=$(mktemp)
@@ -762,6 +785,7 @@ NUMBER_OF_STEPS=$(awk -F "\t" '{print $5}' "${OUTPUT}" )
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset NUMBER_OF_STEPS
 
 ## -i number of steps is correct while -d 2 (2 expected)
 OUTPUT=$(mktemp)
@@ -773,6 +797,7 @@ NUMBER_OF_STEPS=$(awk -F "\t" 'NR == 2 {print $5}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset NUMBER_OF_STEPS
 
 
 ## ------------------------------------------------------------------------ log
@@ -832,6 +857,7 @@ EXPECTED=$(sed -n '/^>/ s/>//p' "${ALL_IDENTICAL}" | tr "\n" " " | sed 's/ $//')
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset EXPECTED
 
 
 ## --------------------------------------------------------------------- mothur
@@ -853,6 +879,7 @@ FIRST_ROW=$(awk -F "\t" '{print $1}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset FIRST_ROW
 
 ## -r first row is correct with -d 2
 DESCRIPTION="-r first row is correct with -d 2"
@@ -863,6 +890,7 @@ FIRST_ROW=$(awk -F "\t" '{print $1}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset FIRST_ROW
 
 ## -r number of OTUs is correct (1 expected)
 DESCRIPTION="-r number of OTUs is correct (1 expected)"
@@ -873,6 +901,7 @@ NUMBER_OF_OTUs=$(awk -F "\t" '{print $2}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset NUMBER_OF_OTUs
 
 ## -r number of OTUs is correct (2 expected)
 DESCRIPTION="-r number of OTUs is correct (2 expected)"
@@ -884,6 +913,7 @@ NUMBER_OF_OTUs=$(awk -F "\t" '{print $2}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset NUMBER_OF_OTUs
 
 ## -r number of fields is correct (4 fields expected)
 DESCRIPTION="-r number of fields is correct (4 fields expected)"
@@ -895,6 +925,7 @@ NUMBER_OF_FIELDS=$(awk -F "\t" '{print NF}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset NUMBER_OF_FIELDS
 
 ## -r composition of OTUs is correct #1
 DESCRIPTION="-r composition of OTUs is correct #1"
@@ -906,6 +937,7 @@ OTU=$(awk -F "\t" '{print $3}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset OTU
 
 ## -r composition of OTUs is correct #2
 DESCRIPTION="-r composition of OTUs is correct #2"
@@ -928,6 +960,7 @@ OTU=$(awk -F "\t" '{print $3}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset OTU
 
 ## -r composition of OTUs is correct with -a 2 #1
 DESCRIPTION="-r composition of OTUs is correct with -a 2 #1"
@@ -939,6 +972,7 @@ OTU=$(awk -F "\t" '{print $3}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset OTU
 
 ## -r composition of OTUs is correct with -a 2 #2
 DESCRIPTION="-r composition of OTUs is correct with -a 2 #2"
@@ -950,6 +984,7 @@ OTU=$(awk -F "\t" '{print $3}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset OTU
 
 ## -r composition of OTUs is correct with -z
 DESCRIPTION="-r composition of OTUs is correct with -z"
@@ -961,6 +996,7 @@ OTU=$(awk -F "\t" '{print $3}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset OTU
 
 
 ## ------------------------------------------------------------ statistics-file
@@ -997,6 +1033,7 @@ UNIQUE_AMPLICONS=$(awk -F "\t" '{print $1}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset UNIQUE_AMPLICONS
 
 ## Number of unique amplicons is correct with -s (2 expected)
 DESCRIPTION="-s number of unique amplicons is correct (2 expected)"
@@ -1008,6 +1045,7 @@ UNIQUE_AMPLICONS=$(awk -F "\t" '{print $1}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset UNIQUE_AMPLICONS
 
 ## Number of unique amplicons is still correct with -s (2 expected)
 DESCRIPTION="-s number of unique amplicons is still correct (2 expected)"
@@ -1019,6 +1057,7 @@ UNIQUE_AMPLICONS=$(awk -F "\t" 'NR == 1 {print $1}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset UNIQUE_AMPLICONS
 
 ## Total abundance of amplicons is correct with -s (1 expected)
 DESCRIPTION="-s total abundance of amplicons is correct (1 expected)"
@@ -1030,6 +1069,7 @@ TOTAL_ABUNDANCE=$(awk -F "\t" '{print $2}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset TOTAL_ABUNDANCE
 
 ## Total abundance of amplicons is correct with -s (5 expected)
 DESCRIPTION="-s total abundance of amplicons is correct (5 expected)"
@@ -1041,6 +1081,7 @@ TOTAL_ABUNDANCE=$(awk -F "\t" 'NR == 1 {print $2}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset TOTAL_ABUNDANCE
 
 ## Total abundance of amplicons is still correct with -s (5 expected)
 DESCRIPTION="-s total abundance of amplicons is still correct (5 expected)"
@@ -1052,6 +1093,7 @@ TOTAL_ABUNDANCE=$(awk -F "\t" 'NR == 1 {print $2}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset TOTAL_ABUNDANCE
 
 ## Id of initial seed is correct with -s
 DESCRIPTION="-s ID of initial seed is correct"
@@ -1063,6 +1105,7 @@ SEED_ID=$(awk -F "\t" 'NR == 1 {print $3}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset SEED_ID
 
 ## Id of initial seed is still correct with -s
 DESCRIPTION="-s ID of initial seed is still correct"
@@ -1074,6 +1117,7 @@ SEED_ID=$(awk -F "\t" 'NR == 2 {print $3}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset SEED_ID
 
 ## Abundance of initial seed is correct with -s
 DESCRIPTION="-s abundance of initial seed is correct"
@@ -1085,6 +1129,7 @@ SEED_ABUNDANCE=$(awk -F "\t" 'NR == 1 {print $4}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset SEED_ABUNDANCE
 
 ## Abundance of initial seed is still correct with -s
 DESCRIPTION="-s abundance of initial seed is still correct"
@@ -1096,6 +1141,7 @@ SEED_ABUNDANCE=$(awk -F "\t" 'NR == 2 {print $4}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset SEED_ABUNDANCE
 
 ## Number of amplicons with an abundance of 1 is correct with -s (0 exp)
 DESCRIPTION="-s number of amplicons with an abundance of 1 is correct (0 expected)"
@@ -1107,6 +1153,7 @@ NUMBER_OF_AMPLICONS=$(awk -F "\t" 'NR == 1 {print $5}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset NUMBER_OF_AMPLICONS
 
 ## Number of amplicons with an abundance of 1 is correct with -s (1 exp)
 DESCRIPTION="-s number of amplicons with an abundance of 1 is correct (1 expected)"
@@ -1118,6 +1165,7 @@ NUMBER_OF_AMPLICONS=$(awk -F "\t" 'NR == 2 {print $5}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset NUMBER_OF_AMPLICONS
 
 ## Number of iterations is correct with -s (0 expected)
 DESCRIPTION="-s number of iterations is correct (0 expected)"
@@ -1129,6 +1177,7 @@ NUMBER_OF_ITERATIONS=$(awk -F "\t" 'NR == 1 {print $6}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset NUMBER_OF_ITERATIONS
 
 ## Number of iterations is correct with -s -d 2 (1 expected)
 DESCRIPTION="-s number of iterations is correct (1 expected)"
@@ -1140,6 +1189,7 @@ NUMBER_OF_ITERATIONS=$(awk -F "\t" 'NR == 1 {print $6}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset NUMBER_OF_ITERATIONS
 
 ## Number of iterations is correct with -s -d 2 (2 expected)
 DESCRIPTION="-s number of iterations is correct (2 expected)"
@@ -1151,6 +1201,7 @@ NUMBER_OF_ITERATIONS=$(awk -F "\t" 'NR == 1 {print $6}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset NUMBER_OF_ITERATIONS
 
 ## Theorical radius is correct with -s (0 expected)
 DESCRIPTION="-s theorical maximum radius is correct (0 expected)"
@@ -1162,6 +1213,7 @@ THEORICAL_RADIUS=$(awk -F "\t" 'NR == 1 {print $7}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset THEORICAL_RADIUS
 
 ## Theorical radius is correct with -s (2 expected)
 DESCRIPTION="-s theorical maximum radius is correct (2 expected)"
@@ -1173,6 +1225,7 @@ THEORICAL_RADIUS=$(awk -F "\t" 'NR == 1 {print $7}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset THEORICAL_RADIUS
 
 ## Theorical radius is correct with -s -d 2 (2 expected)
 DESCRIPTION="-s theorical maximum radius is correct -d 2 (2 expected)"
@@ -1184,6 +1237,7 @@ THEORICAL_RADIUS=$(awk -F "\t" 'NR == 1 {print $7}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset THEORICAL_RADIUS
 
 ## Theorical radius != actuel radius  with -s -d 2
 DESCRIPTION="-s theorical radius != actuel radius -d 2"
@@ -1195,6 +1249,7 @@ THEORICAL_RADIUS=$(awk -F "\t" 'NR == 1 {print $7}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset THEORICAL_RADIUS
 
 
 ## ---------------------------------------------------------------- uclust-file
@@ -1235,6 +1290,7 @@ NUMBER_OF_HITS=$(grep -c "^H" "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset NUMBER_OF_HITS
 
 ## -u number of hits is correct in 1st column #2
 DESCRIPTION="-u number of hits is correct in st column #2"
@@ -1246,6 +1302,7 @@ NUMBER_OF_HITS=$(grep -c "^H" "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset NUMBER_OF_HITS
 
 ## -u number of centroids is correct in 1st column #1
 DESCRIPTION="-u number of centroids is correct in 1st column #1"
@@ -1257,6 +1314,7 @@ NUMBER_OF_CENTROIDS=$(grep -c "^S" "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset NUMBER_OF_CENTROIDS
 
 ## -u number of centroids is correct in 1st column #2
 DESCRIPTION="-u number of centroids is correct in 1st column #2"
@@ -1268,6 +1326,7 @@ NUMBER_OF_CENTROIDS=$(grep -c "^S" "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset NUMBER_OF_CENTROIDS
 
 ## -u number of cluster records is correct in 1st column #1
 DESCRIPTION="-u number of cluster records is correct in 1st column #1"
@@ -1279,6 +1338,7 @@ NUMBER_OF_CLUSTERS=$(grep -c "^C" "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset NUMBER_OF_CLUSTERS
 
 ## -u number of cluster records is correct in 1st column #2
 DESCRIPTION="-u number of cluster records is correct in 1st column #2"
@@ -1290,6 +1350,7 @@ NUMBER_OF_CLUSTERS=$(grep -c "^C" "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset NUMBER_OF_CLUSTERS
 
 ## -u cluster number is correct in 2nd column #1
 DESCRIPTION="-u cluster number is correct in 2nd column #1"
@@ -1301,6 +1362,7 @@ CLUSTER_NUMBER=$(awk '/^C/ {v = $2} END {print v}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset CLUSTER_NUMBER
 
 ## -u cluster number is correct in 2nd column #2
 DESCRIPTION="-u cluster number is correct in 2nd column #2"
@@ -1312,6 +1374,7 @@ CLUSTER_NUMBER=$(awk '/^C/ {v = $2} END {print v}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset CLUSTER_NUMBER
 
 ## -u cluster size is correct in 3rd column #1
 DESCRIPTION="-u cluster number is correct in 3rd column #1"
@@ -1323,6 +1386,7 @@ CLUSTER_SIZE=$(awk '/^C/ {v = $3} END {print v}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset CLUSTER_SIZE
 
 ## -u cluster size is correct in 3rd column #2
 DESCRIPTION="-u cluster number is correct in 3rd column #2"
@@ -1335,6 +1399,7 @@ CLUSTER_SIZE=$(grep "^C" "${OUTPUT}" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset CLUSTER_SIZE
 
 ## -u centroid length is correct in 3rd column #1
 DESCRIPTION="-u centroid length is correct in 3rd column #1"
@@ -1346,6 +1411,7 @@ CENTROID_LENGTH=$(awk '/^S/ {v = $3} END {print v}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTIONz}"
 rm "${OUTPUT}"
+unset CENTROIS_LENGTH
 
 ## -u centroid length is correct in 3rd column #2
 DESCRIPTION="-u centroid length is correct in 3rd column #2"
@@ -1357,18 +1423,19 @@ CENTROID_LENGTH=$(awk '/^S/ {v = $3} END {print v}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset CENTROIS_LENGTH
 
 ## -u query length is correct in 3rd column #1
 DESCRIPTION="-u query length is correct in 3rd column #1"
 OUTPUT=$(mktemp)
 printf ">a_3\nGGGG\n>b_3\nAA\n>c_3\nAAA\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
-
 QUERY_LENGTH=$(awk '/^H/ {if (NR == 5) {print $3}}' "${OUTPUT}")
 [[ "${QUERY_LENGTH}" == "3" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset QUERY_LENGTH
 
 ## -u query length is correct in 3rd column #2
 DESCRIPTION="-u query length is correct in 3rd column #2"
@@ -1380,6 +1447,7 @@ QUERY_LENGTH=$(awk '/^H/ {v = $3} END {print v}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset QUERY_LENGTH
 
 ## -u similarity percentage is correct in 4th column #1
 DESCRIPTION="-u similarity percentage is correct in 4th column #1"
@@ -1391,6 +1459,7 @@ SIMILARITY_PERCENTAGE=$(awk '/^H/ {v = $4} END {print v}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset SIMILARITY_PERCENTAGE
 
 ## -u similarity percentage is correct in 4th column #2
 DESCRIPTION="-u similarity percentage is correct in 4th column #2"
@@ -1402,6 +1471,7 @@ SIMILARITY_PERCENTAGE=$(awk '/^H/ {v = $4} END {print v}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset SIMILARITY_PERCENTAGE
 
 ## -u similarity percentage is correct in 4th column #3
 DESCRIPTION="-u similarity percentage is correct in 4th column #3"
@@ -1413,6 +1483,7 @@ SIMILARITY_PERCENTAGE=$(awk '/^H/ {v = $4} END {print v}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset SIMILARITY_PERCENTAGE
 
 ## -u similarity percentage is * in 4th column with S
 DESCRIPTION="-u similarity percentage is * in 4th column with S"
@@ -1425,6 +1496,7 @@ SIMILARITY_PERCENTAGE=$(grep "^S" "${OUTPUT}" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset SIMILARITY_PERCENTAGE
 
 ## -u match orientation is correct in 5th column with H
 DESCRIPTION="-u match orientation is correct in 5th column with H"
@@ -1436,6 +1508,7 @@ MATCH_ORIENTATION=$(awk '/^H/ {v = $5} END {print v}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset MATCH_ORIENTATION
 
 ## -u match orientation is * in 5th column with S
 DESCRIPTION="-u match orientation is correct in 5th column with S"
@@ -1447,6 +1520,7 @@ MATCH_ORIENTATION=$(awk '/^S/ {v = $5} END {print v}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset MATCH_ORIENTATION
 
 ## -u match orientation is * in 5th column with C
 DESCRIPTION="-u match orientation is correct in 5th column with C"
@@ -1458,6 +1532,7 @@ MATCH_ORIENTATION=$(awk '/^C/ {v = $5} END {print v}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset MATCH_ORIENTATION
 
 ## -u 6th column is * with C
 DESCRIPTION="-u 6th column is * with C"
@@ -1469,6 +1544,7 @@ COLUMN_6=$(awk '/^C/ {v = $6} END {print v}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset COLUMN_6
 
 ## -u 6th column is * with S
 DESCRIPTION="-u 6th column is * with S"
@@ -1480,6 +1556,7 @@ COLUMN_6=$(awk '/^S/ {v = $6} END {print v}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset COLUMN_6
 
 ## -u 6th column is 0 with H
 DESCRIPTION="-u 6th column is 0 with H"
@@ -1491,6 +1568,7 @@ COLUMN_6=$(awk '/^H/ {v = $6} END {print v}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset COLUMN_6
 
 ## -u 7th column is * with C
 DESCRIPTION="-u 7th column is * with C"
@@ -1502,6 +1580,7 @@ COLUMN_7=$(awk '/^C/ {v = $7} END {print v}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset COLUMN_7
 
 ## -u 7th column is * with S
 DESCRIPTION="-u 7th column is * with S"
@@ -1514,6 +1593,7 @@ COLUMN_7=$(grep "^S" "${OUTPUT}" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset COLUMN_7
 
 ## -u 7th column is 0 with H
 DESCRIPTION="-u 7th column is 0 with H"
@@ -1525,6 +1605,7 @@ COLUMN_7=$(awk '/^H/ {v = $7} END {print v}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset COLUMN_7
 
 ## -u CIGAR is * with S
 DESCRIPTION="-u CIGAR is * with S"
@@ -1536,6 +1617,7 @@ CIGAR=$(awk '/^S/ {v = $8} END {print v}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset CIGAR
 
 ## -u CIGAR is * with C
 DESCRIPTION="-u CIGAR is * with C"
@@ -1547,6 +1629,7 @@ CIGAR=$(awk '/^C/ {v = $8} END {print v}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset CIGAR
 
 ## -u CIGAR notation is correct in 8th column is with H #1
 DESCRIPTION="-u CIGAR notation is correct in 8th column is with H #1"
@@ -1558,6 +1641,7 @@ CIGAR=$(awk '/^H/ {v = $8} END {print v}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset CIGAR
 
 ## -u CIGAR notation is correct in 8th column is with H #2
 DESCRIPTION="-u CIGAR notation is correct in 8th column is with H #2"
@@ -1569,6 +1653,7 @@ CIGAR=$(awk '/^H/ {v = $8} END {print v}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset CIGAR
 
 ## -u CIGAR notation is correct in 8th column is with H #3
 DESCRIPTION="-u CIGAR notation is correct in 8th column is with H #3"
@@ -1580,6 +1665,7 @@ CIGAR=$(awk '/^H/ {v = $8} END {print v}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset CIGAR
 
 ## -u CIGAR notation is correct in 8th column is with H #4
 DESCRIPTION="-u CIGAR notation is correct in 8th column is with H #4"
@@ -1591,6 +1677,7 @@ CIGAR=$(awk '/^H/ {v = $8} END {print v}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset CIGAR
 
 ## -u CIGAR notation is correct in 8th column is with H using -d 5 #1
 DESCRIPTION="-u CIGAR notation is correct in 8th column is with H using -d 5 #1"
@@ -1602,6 +1689,7 @@ CIGAR=$(awk '/^H/ {v = $8} END {print v}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset CIGAR
 
 ## -u CIGAR notation is correct in 8th column is with H using -d 5 #2
 DESCRIPTION="-u CIGAR notation is correct in 8th column is with H using -d 5 #2"
@@ -1613,6 +1701,7 @@ CIGAR=$(awk '/^H/ {v = $8} END {print v}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset CIGAR
 
 ## -u CIGAR notation is correct in 8th column is with H using -d 5 #3
 DESCRIPTION="-u CIGAR notation is correct in 8th column is with H using -d 5 #3"
@@ -1624,6 +1713,7 @@ CIGAR=$(awk '/^H/ {v = $8} END {print v}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset CIGAR
 
 ## -u query sequence's label is correct in 9th column with H #1
 DESCRIPTION="-u query sequence's label is correct in 9th column with H #1"
@@ -1635,6 +1725,7 @@ QUERY_LABEL=$(awk '/^H/ {v = $9} END {print v}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset QUERY_LABEL
 
 ## -u query sequence's label is correct in 9th column with H #2
 DESCRIPTION="-u query sequence's label is correct in 9th column with H #2"
@@ -1646,6 +1737,7 @@ QUERY_LABEL=$(awk '/^H/ {v = $9} END {print v}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset QUERY_LABEL
 
 ## -u centroid sequence's label is correct in 9th column with S #1
 DESCRIPTION="-u centroid sequence's label is correct in 9th column with S #1"
@@ -1657,6 +1749,7 @@ CENTROID_LABEL=$(awk '/^S/ {v = $9} END {print v}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset CENTROID_LABEL
 
 ## -u centroid sequence's label is correct in 9th column with S #2
 DESCRIPTION="-u centroid sequence's label is correct in 9th column with S #2"
@@ -1668,6 +1761,7 @@ CENTROID_LABEL=$(awk '/^S/ {v = $9} END {print v}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset CENTROID_LABEL
 
 ## -u centroid sequence's label is correct in 9th column with C #1
 DESCRIPTION="-u centroid sequence's label is correct in 9th column with C #1"
@@ -1679,6 +1773,7 @@ CENTROID_LABEL=$(awk '/^C/ {v = $9} END {print v}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset CENTROID_LABEL
 
 ## -u centroid sequence's label is correct in 9th column with C #2
 DESCRIPTION="-u centroid sequence's label is correct in 9th column with C #2"
@@ -1690,6 +1785,7 @@ CENTROID_LABEL=$(awk '/^S/ {v = $9} END {print v}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset CENTROID_LABEL
 
 ## -u centroid sequence's label is correct in 10th column with H
 DESCRIPTION="-u centroid sequence's label is correct in 10th column with H"
@@ -1701,6 +1797,7 @@ CENTROID_LABEL=$(awk '/^H/ {v = $10} END {print v}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset CENTROID_LABEL
 
 ## -u 10th column is * with C
 DESCRIPTION="-u 10th column is * with C"
@@ -1712,6 +1809,7 @@ CENTROID_LABEL=$(awk '/^C/ {v = $10} END {print v}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset CENTROID_LABEL
 
 ## -u 10th column is * with S
 DESCRIPTION="-u 10th column is * with S"
@@ -1723,6 +1821,7 @@ CENTROID_LABEL=$(awk '/^S/ {v = $10} END {print v}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset CENTROID_LABEL
 
 
 ## ---------------------------------------------------------------------- seeds
@@ -1763,6 +1862,7 @@ printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset EXPECTED
 
 ## -w can sum up large abundance values (2 * (2^32 + 1))
 OUTPUT=$(mktemp)
@@ -1774,6 +1874,7 @@ printf ">s1_%d\nA\n>s2_%d\nT\n" $(( (1 << 32) + 1)) $(( (1 << 32) + 1)) | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset EXPECTED
 
 
 #*****************************************************************************#
