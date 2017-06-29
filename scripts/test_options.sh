@@ -1242,7 +1242,7 @@ unset THEORICAL_RADIUS
 ## Theorical radius != actuel radius  with -s -d 2
 DESCRIPTION="-s theorical radius != actuel radius -d 2"
 OUTPUT=$(mktemp)
-printf ">a_3\nAAAAA\n>b_3\nAAACC\n>c_2\nACCCC\n>c_2\nACCAC\n" | \
+printf ">a_3\nAAAAA\n>b_3\nAAACC\n>c_2\nACCCC\n>d_2\nACCAC\n" | \
     "${SWARM}" -d 2 -s "${OUTPUT}" &> /dev/null
 THEORICAL_RADIUS=$(awk -F "\t" 'NR == 1 {print $7}' "${OUTPUT}")
 (( "${THEORICAL_RADIUS}" == 5 )) && \
@@ -1561,7 +1561,7 @@ unset COLUMN_6
 ## -u 6th column is 0 with H
 DESCRIPTION="-u 6th column is 0 with H"
 OUTPUT=$(mktemp)
-printf ">b_3\nAAAA\n>c_3\nAAAC\n>c_3\nAACC\n>c_3\nAGCC\n" | \
+printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nAGCC\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
 COLUMN_6=$(awk '/^H/ {v = $6} END {print v}' "${OUTPUT}")
 (( "${COLUMN_6}" == 0 )) && \
