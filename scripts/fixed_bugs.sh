@@ -1569,7 +1569,7 @@ DESCRIPTION="issue 86 --- swarm supports unseekable pipes"
 ## better error message to help to fix the problem
 DESCRIPTION="issue 90 --- better error message to help to fix the problem"
 CURRENT_MESSAGE=$(printf ">s\nT\n" | \
-                         "${SWARM}" 2>&1 | sed -n '/^Error/,/sequences.$/ p')
+                         "${SWARM}" 2>&1 | sed -n '/^Error/,/first.$/ p')
 ## read is a Bash built-in so it doesn't require calling an external
 ## command such as cat. Putting quotes around the sentinal (EOF)
 ## prevents the text from undergoing parameter expansion. The -d ''
