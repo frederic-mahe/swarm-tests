@@ -1577,11 +1577,11 @@ CURRENT_MESSAGE=$(printf ">s\nT\n" | \
 read -d '' EXPECTED_MESSAGE <<"EOF"
 Error: Abundance annotations not found for 1 sequences, starting on line 1.
 >s
-Fasta headers must end with abundance annotations (_INT or ;size=INT). A Header
-is defined as the string comprised between the \">\" symbol and the first space
-or the end of the line, whichever comes first. The -z option must be used if the
-abundance annotation is in the ;size=INT format. Abundance annotations can be
-produced by dereplicating the sequences.
+Fasta headers must end with abundance annotations (_INT or ;size=INT).
+The -z option must be used if the abundance annotation is in the latter format.
+Abundance annotations can be produced by dereplicating the sequences.
+The header is defined as the string comprised between the \">\" symbol
+and the first space or the end of the line, whichever comes first.
 EOF
 
 [[ "${CURRENT_MESSAGE}" ==  "${EXPECTED_MESSAGE}" ]]  && \
