@@ -1790,8 +1790,8 @@ printf ">s1_%d\nA\n" $(( 1 << 32 )) | \
 ## https://github.com/torognes/swarm/issues/103
 ##
 ## not testable
-
-# printf ">s1\nA\n" | valgrind --leak-check=full --show-leak-kinds=all swarm
+##
+## printf ">s1\nA\n" | valgrind --leak-check=full --show-leak-kinds=all swarm
 
 
 #*****************************************************************************#
@@ -1803,8 +1803,8 @@ printf ">s1_%d\nA\n" $(( 1 << 32 )) | \
 ## https://github.com/torognes/swarm/issues/104
 ##
 ## not testable
-
-# cppcheck --enable=all swarm/ 1> /dev/null
+##
+## cppcheck --enable=all swarm/ 1> /dev/null
 
 
 #*****************************************************************************#
@@ -1836,6 +1836,20 @@ grep -q "s1_1" "${OUTPUT}" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+
+
+#*****************************************************************************#
+#                                                                             #
+#                  Port Swarm to other platforms (issue 107)                  #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/107
+##
+## Perhaps we should port Swarm to Linux on POWER8 and Windows on
+## x86_64 as we have done for vsearch?
+##
+## not testable
 
 
 ## Clean
