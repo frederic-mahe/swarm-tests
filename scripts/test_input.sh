@@ -92,9 +92,9 @@ DESCRIPTION="swarm reads from a process substitution (unseekable)"
 
 ## Test empty sequence
 DESCRIPTION="swarm handles empty sequences"
-echo -e ">a_10\n" | \
+printf ">a_10\n\n" | \
     "${SWARM}" &> /dev/null && \
-    success "${DESCRIPTION}" || failure "${DESCRIPTION}"
+    failure "${DESCRIPTION}" || success "${DESCRIPTION}"
 
 ## Test empty header
 DESCRIPTION="swarm aborts on empty fasta headers"
