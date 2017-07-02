@@ -1419,8 +1419,8 @@ DESCRIPTION="issue 76 --- swarm aborts when --difference is 256"
 ## issue 79 --- swarm deals with empty sequences
 DESCRIPTION="issue 79 --- swarm deals with empty sequences"
 printf ">s_1\n\n" | swarm &> /dev/null && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
 
 
 #*****************************************************************************#
