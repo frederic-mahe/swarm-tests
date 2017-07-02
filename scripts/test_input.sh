@@ -104,7 +104,7 @@ echo -e ">;size=10\nACGT\n" | \
 
 ## Clustering with only one sequence is accepted
 DESCRIPTION="clustering with only one sequence is accepted"
-echo -e ">a_10\nACGNT\n" | \
+printf ">a_10\nACGT\n" | \
     "${SWARM}" &> /dev/null && \
     success "${DESCRIPTION}" || failure "${DESCRIPTION}"
 
