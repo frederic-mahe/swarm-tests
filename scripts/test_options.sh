@@ -446,17 +446,17 @@ for ((c=$MIN ; c<=$MAX ; c++)) ; do
 done && success "${DESCRIPTION}"
 unset MIN MAX
 
-## ceiling option accepts large integers #1
-DESCRIPTION="swarm accepts large values for --ceiling (2^32)"
-"${SWARM}" -f -c $(( 1 << 32 )) < "${FASTIDOUSINPUT}" &> /dev/null && \
+## ceiling option accepts large integers
+DESCRIPTION="swarm accepts large values for --ceiling (up to 2^30)"
+"${SWARM}" -f -c $(( 1 << 30 )) < "${FASTIDOUSINPUT}" &> /dev/null && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## ceiling option accepts large integers #2
-DESCRIPTION="swarm accepts large values for --ceiling (2^64, signed)"
-"${SWARM}" -f -c $(( (1 << 63) - 1 )) < "${FASTIDOUSINPUT}" &> /dev/null && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
+## ceiling option rejects very large integers
+DESCRIPTION="swarm rejects very large values for --ceiling (up to 2^32)"
+"${SWARM}" -f -c $(( 1 << 32 )) < "${FASTIDOUSINPUT}" &> /dev/null && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
 
 ## Passing the --ceiling option without the fastidious option should fail
 DESCRIPTION="swarm fails when the ceiling option is specified without -f"
