@@ -73,9 +73,8 @@ DESCRIPTION="swarm accepts inputs from named pipes"
 mkfifo fifoTestInput123
 "${SWARM}" fifoTestInput123 &> /dev/null && \
     success "${DESCRIPTION}" || \
-	failure "${DESCRIPTION}" &
-## We won't printf anything in fifo because using fifo makes swarm fail.
-## It would block the script.
+	    failure "${DESCRIPTION}" &
+printf ">s_1\nA\n" > fifoTestInput123
 rm fifoTestInput123
 
 ## swarm reads from a process substitution (anonymous pipe)
