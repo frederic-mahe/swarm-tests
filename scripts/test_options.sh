@@ -1461,16 +1461,18 @@ SIMILARITY_PERCENTAGE=$(awk '/^H/ {v = $4} END {print v}' "${OUTPUT}")
 rm "${OUTPUT}"
 unset SIMILARITY_PERCENTAGE
 
-## -u similarity percentage is correct in 4th column #2
+## Sequence a and sequence e should be grouped inside the same OTU,
+## with a similarity of 0.0 between a and e. Note that sequences are
+## now automatically sorted by fasta identifier to break abundance
+## ties.
 DESCRIPTION="-u similarity percentage is correct in 4th column #2"
-OUTPUT=$(mktemp)
-printf ">b_3\nAAAA\n>c_3\nAAAC\n>a_3\nAACC\n>d_3\nACCC\n>e_3\nCCCC\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
-SIMILARITY_PERCENTAGE=$(awk '/^H/ {v = $4} END {print v}' "${OUTPUT}")
+SIMILARITY_PERCENTAGE=$(\
+    printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nACCC\n>e_3\nCCCC\n" | \
+        "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+        awk '/^H/ {v = $4} END {print v}')
 [[ "${SIMILARITY_PERCENTAGE}" == "0.0" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
 unset SIMILARITY_PERCENTAGE
 
 ## -u similarity percentage is correct in 4th column #3
