@@ -79,7 +79,7 @@ rm fifoTestInput123
 
 ## swarm reads from a process substitution (anonymous pipe)
 DESCRIPTION="swarm reads from a process substitution (unseekable)"
-"${SWARM}" <(echo -e ">a_1\nACGT\n") &> /dev/null && \
+"${SWARM}" <(printf ">a_1\nACGT\n") &> /dev/null && \
     success "${DESCRIPTION}" || failure "${DESCRIPTION}"
 
 
@@ -97,7 +97,7 @@ printf ">a_10\n\n" | \
 
 ## Test empty header
 DESCRIPTION="swarm aborts on empty fasta headers"
-echo -e ">;size=10\nACGT\n" | \
+printf ">;size=10\nACGT\n" | \
     "${SWARM}" -z &> /dev/null && \
     failure "${DESCRIPTION}" || success "${DESCRIPTION}"
 
@@ -109,7 +109,7 @@ printf ">a_10\nACGT\n" | \
 
 ## Clustering sequences of length 1 should work with d > 1 too (shorter than kmers)
 DESCRIPTION="clustering a sequence shorter than kmer length is accepted"
-echo -e ">a_10\nA" | \
+printf ">a_10\nA\n" | \
     "${SWARM}" -d 2 &> /dev/null && \
     success "${DESCRIPTION}" || failure "${DESCRIPTION}"
 
@@ -164,7 +164,7 @@ unset OCTAL
 
 ## non-ASCII characters accepted in fasta identifiers
 DESCRIPTION="non-ASCII characters accepted in fasta identifiers"
-echo -e ">ø_1\nACGT\n" | \
+printf ">ø_1\nACGT\n" | \
     "${SWARM}"  &> /dev/null && \
     success "${DESCRIPTION}" || failure "${DESCRIPTION}"
 
@@ -196,7 +196,7 @@ unset OCTAL
 
 ## Swarm aborts if fasta identifiers are not unique
 DESCRIPTION="swarm aborts if fasta headers are not unique"
-echo -e ">a_10\nACGT\n>a_10\nAAGT\n" | \
+printf ">a_10\nACGT\n>a_10\nAAGT\n" | \
     "${SWARM}" &> /dev/null && \
     failure "${DESCRIPTION}" || success "${DESCRIPTION}"
 
@@ -204,7 +204,7 @@ echo -e ">a_10\nACGT\n>a_10\nAAGT\n" | \
 DESCRIPTION="fasta headers can contain more than one underscore symbol"
 STATS=$(mktemp)
 IDENTIFIER="a_2_2"
-echo -e ">${IDENTIFIER}_3\nACGTACGT" | \
+printf ">%s_3\nACGTACGT\n" "${IDENTIFIER}" | \
     "${SWARM}" -s "${STATS}" &> /dev/null
 grep -qE "[[:blank:]]${IDENTIFIER}[[:blank:]]" "${STATS}" && \
     success "${DESCRIPTION}" || \
@@ -214,25 +214,25 @@ unset IDENTIFIER
 
 ## Fasta header must contain an abundance value after being truncated
 DESCRIPTION="swarm aborts if fasta headers lacks abundance value"
-echo -e ">a a_1\nACGT" | \
+printf ">a a_1\nACGT\n" | \
     "${SWARM}" 2> /dev/null && \
     failure "${DESCRIPTION}" || success "${DESCRIPTION}"
 
 ## swarm aborts if abundance value is not a number
 DESCRIPTION="swarm aborts if abundance value is not a number"
-echo -e ">a_n\nACGT" | \
+printf ">a_n\nACGT\n" | \
     "${SWARM}" 2> /dev/null && \
     failure "${DESCRIPTION}" || success "${DESCRIPTION}"
 
 ## swarm aborts if abundance value is zero
 DESCRIPTION="swarm aborts if abundance value is zero"
-echo -e ">a_0\nACGT" | \
+printf ">a_0\nACGT\n" | \
     "${SWARM}" 2> /dev/null && \
     failure "${DESCRIPTION}" || success "${DESCRIPTION}"
 
 ## swarm aborts if abundance value is negative
 DESCRIPTION="swarm aborts if abundance value is negative"
-echo -e ">a_-1\nACGT" | \
+printf ">a_-1\nACGT\n" | \
     "${SWARM}" 2> /dev/null && \
     failure "${DESCRIPTION}" || success "${DESCRIPTION}"
 
