@@ -21,7 +21,7 @@ success () {
 
 ## Create a test file with 10 identical sequences (different headers)
 ALL_IDENTICAL=$(mktemp)
-for ((i=1 ; i<=10 ; i++)) ; do
+for ((i=0 ; i<=9 ; i++)) ; do
     printf ">%s%d_1\nACGT\n" "seq" ${i}
 done > "${ALL_IDENTICAL}"
 
