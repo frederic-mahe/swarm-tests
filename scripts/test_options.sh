@@ -441,7 +441,8 @@ MIN=1
 MAX=255
 DESCRIPTION="swarm runs normally when --ceiling goes from 3 to ${MAX}"
 for ((c=$MIN ; c<=$MAX ; c++)) ; do
-    "${SWARM}" -f -c ${c} < "${FASTIDOUSINPUT}" &> /dev/null || \
+    printf ">a_10\nACGT\n>b_2\nAGCT\n" | \
+        "${SWARM}" -f -c ${c} &> /dev/null || \
         failure "swarm aborts when --ceiling equals ${c}"
 done && success "${DESCRIPTION}"
 unset MIN MAX
