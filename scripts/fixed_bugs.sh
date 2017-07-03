@@ -48,7 +48,7 @@ echo -e ">seq1_3\nACGTACGT\n>seq2_1\nACGTTCGT" | \
 RADIUS=$(awk -F "\t" '{print $7}' "${STATISTICS}")
 [[ "${RADIUS}" -eq 1 ]] && success "${DESCRIPTION}" || failure "${DESCRIPTION}"
 rm "${STATISTICS}"
-
+unset RADIUS
 
 #*****************************************************************************#
 #                                                                             #
@@ -80,12 +80,12 @@ echo -e ">aaa\0001aaa_1\nACGT\n" | \
 ## This is a mock-up for a possible warning message when duplicated
 ## sequences are present.
 DESCRIPTION="issue 3 --- check for unique sequences"
-WARNING="warning: some sequences were identical"
+WARNING="WARNING: 1 duplicated sequences detected."
 printf ">s1_1\nAA\n>s2_1\nAA\n" | \
     "${SWARM}" 2>&1 | grep -q "^${WARNING}" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-
+unset WARNING
 
 #*****************************************************************************#
 #                                                                             #
@@ -106,6 +106,7 @@ head -n 1 "${REPRESENTATIVES}" | grep -q "^>${SEED}_11$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${REPRESENTATIVES}"
+unset SEED
 
 
 #*****************************************************************************#
@@ -347,6 +348,7 @@ echo -e ">aaaa_1\nAC${OCTAL}GT\n" | \
     grep -qE "Error: Illegal character \'.\' in sequence on line [0-9]+" && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
+unset OCTAL
 
 
 #*****************************************************************************#
@@ -430,6 +432,7 @@ grep -q "swarm_${D}" "${OUTPUT}" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset D
 
 
 #*****************************************************************************#
@@ -489,6 +492,7 @@ SORTED_OUTPUT=$(awk -F "\t" '{print $3}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset SORTED_OUTPUT
 
 
 #*****************************************************************************#
@@ -535,6 +539,7 @@ printf ">a_5\nAA\n>d_1\nGC\n>b_2\nAC\n>c_1\nGA\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset EXPECTED
 
 
 #*****************************************************************************#
@@ -591,6 +596,7 @@ grep -qE "[[:blank:]]${IDENTIFIER}[[:blank:]]" "${STATS}" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${STATS}"
+unset IDENTIFIER
 
 
 #*****************************************************************************#
@@ -629,6 +635,7 @@ LINENUMBER=$(printf ">a_10\nACGT\n>b_9\nCGGT\n>c_1\nCCGT\n" | \
 (( "${LINENUMBER}" == 2 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
+unset LINENUMBER
 
 
 #*****************************************************************************#
@@ -649,6 +656,7 @@ SORTED_OUTPUT=$(awk -F "\t" '{print $4}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset SORTED_OUTPUT
 
 ## issue 41 --- -i number of the OTU is correct #2
 OUTPUT=$(mktemp)
@@ -660,6 +668,7 @@ SORTED_OUTPUT=$(awk '{n = $4} END {print n}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset SORTED_OUTPUT
 
 
 #*****************************************************************************#
@@ -752,6 +761,7 @@ OBSERVED=$(printf ">s_1\nA\n>w_1\nC\n" | "${SWARM}" -d 0 2> /dev/null | wc -l)
 (( "${OBSERVED}" == 2 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
+unset OBSERVED
 
 
 #*****************************************************************************#
@@ -784,27 +794,29 @@ OBSERVED=$(printf ">s_1\nA\n>w_1\nC\n" | "${SWARM}" -d 0 2> /dev/null | wc -l)
 
 ## https://github.com/torognes/swarm/issues/51
 ##
-## issue 51 --- -w gives abudance notation style matching the input #1
+## issue 51 --- -w gives abundance notation style matching the input #1
 OUTPUT=$(mktemp)
-DESCRIPTION="issue 51 --- -w gives abudance notation style matches input #1"
-EXPECTED=$(printf ">a_1\naaaa\n")
+DESCRIPTION="issue 51 --- -w outputs abundance notation style matching the input #1"
+EXPECTED=$(printf ">a_1\nAAAA\n")
 printf ">a_1\nAAAA\n" | \
     "${SWARM}" -w "${OUTPUT}" &> /dev/null
 [[ "$(< "${OUTPUT}")" == "${EXPECTED}" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset EXPECTED
 
-## issue 51 --- -w gives abudance notation style matching the input #2
+## issue 51 --- -w gives abundance notation style matching the input #2
 OUTPUT=$(mktemp)
-DESCRIPTION="issue 51 --- -w gives abudance notation style matches input #2"
-EXPECTED=$(printf ">a;size=1;\naaaa\n")
+DESCRIPTION="issue 51 --- -w outputs abundance notation style matching the input #2"
+EXPECTED=$(printf ">a;size=1;\nAAAA\n")
 printf ">a;size=1;\nAAAA\n" | \
     "${SWARM}" -w "${OUTPUT}" -z &> /dev/null
 [[ "$(< "${OUTPUT}")" == "${EXPECTED}" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset EXPECTED
 
 
 #*****************************************************************************#
@@ -858,6 +870,7 @@ microvariants ${SEQUENCE} | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset SEQUENCE
 
 
 ## produce a fasta set with a seed, all its L2 microvariants but no L1 microvariants
@@ -877,7 +890,7 @@ comm -23 <(echo "${MICROVARIANTS_L2}") <(echo "${MICROVARIANTS_L1}") | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
-
+unset SEQUENCE MICROVARIANTS_L1 MICROVARIANTS_L2
 
 ## perform an independent test for each L2 microvariant
 DESCRIPTION="issue 53 --- fastidious links each L2 microvariant and the seed"
@@ -898,6 +911,7 @@ comm -23 <(echo "${MICROVARIANTS_L2}") <(echo "${MICROVARIANTS_L1}") | \
                 failure "${DESCRIPTION}"
     done && success "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset SEQUENCE MICROVARIANTS_L1 MICROVARIANTS_L2
 
 
 #*****************************************************************************#
@@ -942,6 +956,7 @@ NUMBER_OF_DIFFERENCES=${NUMBER_OF_DIFFERENCES:=0} # set to zero if null
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset NUMBER_OF_DIFFERENCES
 
 ## Grafted amplicons receive the OTU number of the main OTU (in this
 ## toy example, the 4th column should be always equal to 1)
@@ -1005,6 +1020,7 @@ OBSERVED=$(awk '{print $3}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset OBSERVED
 
 ## issue 56 --- -i number of differences is correct with -d 2
 ##
@@ -1017,6 +1033,7 @@ OBSERVED=$(awk '{print $3}' "${OUTPUT}")
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+unset OBSERVED
 
 
 #*****************************************************************************#
@@ -1172,10 +1189,29 @@ rm "${OUTPUT}"
 ## https://github.com/torognes/swarm/issues/65
 ##
 ## issue 65 --- swarm complains if input sequences are not dereplicated
-DESCRIPTION="issue 65 --- swarm complains if input sequences are not dereplicated"
-"${SWARM}" < "${ALL_IDENTICAL}" > /dev/null 2> /dev/null && \
+DESCRIPTION="issue 65 --- swarm complains if input sequences are duplicated (d=2)"
+WARNING="WARNING: 1 duplicated sequences detected."
+printf ">s1;size=1\nAA\n>s2;size=2\nAA\n" | \
+    "${SWARM}" -z -d 2 2>&1 | grep -q "^${WARNING}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+unset WARNING
+
+DESCRIPTION="issue 65 --- swarm complains if input sequences are duplicated (d=1)"
+WARNING="WARNING: 1 duplicated sequences detected."
+printf ">s1;size=1\nAA\n>s2;size=2\nAA\n" | \
+    "${SWARM}" -z -d 1 2>&1 | grep -q "^${WARNING}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+unset WARNING
+
+DESCRIPTION="issue 65 --- swarm does not complain if input sequences are duplicated (d=0)"
+WARNING="WARNING: 1 duplicated sequences detected."
+printf ">s1;size=1\nAA\n>s2;size=2\nAA\n" | \
+    "${SWARM}" -z -d 0 2>&1 | grep -q "^${WARNING}" && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
+unset WARNING
 
 
 #*****************************************************************************#
@@ -1209,6 +1245,7 @@ for i in {1..3} ; do
             failure "${DESCRIPTION}"
 done
 rm "${REPRESENTATIVES}"
+unset SEED
 
 ## The sequence of the representatives is the sequence of the seed
 REPRESENTATIVES=$(mktemp)
@@ -1289,6 +1326,7 @@ for i in 0 10 13 32 ; do
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
 done
+unset OCTAL
 
 ## some ascii characters are accepted *if* present at the end of the header
 #  0: NULL
@@ -1303,6 +1341,7 @@ for i in 0 10 13 32 ; do
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
+unset OCTAL
 
 
 #*****************************************************************************#
@@ -1320,6 +1359,7 @@ for OPTION in "-h" "--help" "-v" "--version" ; do
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
+unset OPTION
 
 
 #*****************************************************************************#
@@ -1348,6 +1388,7 @@ for ((d=1 ; d<=$MAX_D ; d++)) ; do
         (( ${OTUs} == 1 )) || failure "clustering fails for d=${d} and t=${t}"
     done
 done && success "${DESCRIPTION}"
+unset MAX_D MAX_T d t OTUs 
 
 
 #*****************************************************************************#
@@ -1587,6 +1628,7 @@ EOF
 [[ "${CURRENT_MESSAGE}" ==  "${EXPECTED_MESSAGE}" ]]  && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
+unset CURRENT_MESSAGE EXPECTED_MESSAGE
 
 
 #*****************************************************************************#
