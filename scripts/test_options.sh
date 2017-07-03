@@ -430,14 +430,17 @@ DESCRIPTION="swarm aborts when --ceiling is not numerical"
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
-## Ceiling (-c == 0)
-DESCRIPTION="swarm aborts when --ceiling is 0"
-"${SWARM}" -f -c 0 < "${FASTIDOUSINPUT}" &> /dev/null && \
-    failure "${DESCRIPTION}" || \
-        success "${DESCRIPTION}"
+## Ceiling should fail when 0 <= c < 3
+for ((c=0 ; c<3; c++)) ; do
+    DESCRIPTION="swarm aborts when --ceiling is ${c}"
+    "${SWARM}" -f -c ${c} < "${FASTIDOUSINPUT}" &> /dev/null && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+done
+unset c
 
 ## ceiling option accepts positive integers
-MIN=1
+MIN=3
 MAX=255
 DESCRIPTION="swarm runs normally when --ceiling goes from 3 to ${MAX}"
 for ((c=$MIN ; c<=$MAX ; c++)) ; do
@@ -445,7 +448,7 @@ for ((c=$MIN ; c<=$MAX ; c++)) ; do
         "${SWARM}" -f -c ${c} &> /dev/null || \
         failure "swarm aborts when --ceiling equals ${c}"
 done && success "${DESCRIPTION}"
-unset MIN MAX
+unset MIN MAX c
 
 ## ceiling option accepts large integers
 DESCRIPTION="swarm accepts large values for --ceiling (up to 2^30)"
