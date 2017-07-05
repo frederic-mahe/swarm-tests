@@ -969,10 +969,10 @@ unset OTU
 ## -r composition of OTUs is correct with -a 2 #1
 DESCRIPTION="-r composition of OTUs is correct with -a 2 #1"
 OUTPUT=$(mktemp)
-printf ">a_5\nAAAA\n>b_\nAAAC\n>c_\nACCC\n" | \
+printf ">a_5\nAAAA\n>b\nAAAC\n>c\nACCC\n" | \
     "${SWARM}" -r -a 2 > "${OUTPUT}" 2> /dev/null
 OTU=$(awk -F "\t" '{print $3}' "${OUTPUT}")
-[[ "${OTU}" == "a_5,b_" ]] && \
+[[ "${OTU}" == "a_5,b_2" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -981,10 +981,10 @@ unset OTU
 ## -r composition of OTUs is correct with -a 2 #2
 DESCRIPTION="-r composition of OTUs is correct with -a 2 #2"
 OUTPUT=$(mktemp)
-printf ">a_5\nAAAA\n>b_\nACCC\n>c_\nAAAC\n" | \
+printf ">a_5\nAAAA\n>b\nACCC\n>c\nAAAC\n" | \
     "${SWARM}" -r -a 2 > "${OUTPUT}" 2> /dev/null
 OTU=$(awk -F "\t" '{print $3}' "${OUTPUT}")
-[[ "${OTU}" == "a_5,c_" ]] && \
+[[ "${OTU}" == "a_5,c_2" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
@@ -1002,6 +1002,29 @@ OTU=$(awk -F "\t" '{print $3}' "${OUTPUT}")
 rm "${OUTPUT}"
 unset OTU
 
+## -r composition of OTUs is correct with -z -a 2 #1
+DESCRIPTION="-r composition of OTUs is correct with -z -a 2 #1"
+OUTPUT=$(mktemp)
+printf ">a;size=5;\nAAAA\n>b\nAAAC\n>c\nACCC\n" | \
+    "${SWARM}" -z -r -a 2 > "${OUTPUT}" 2> /dev/null
+OTU=$(awk -F "\t" '{print $3}' "${OUTPUT}")
+[[ "${OTU}" == "a;size=5;,b;size=2;" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+unset OTU
+
+## -r composition of OTUs is correct with -z -a 2 #2
+DESCRIPTION="-r composition of OTUs is correct with -z -a 2 #2"
+OUTPUT=$(mktemp)
+printf ">a;size=5\nAAAA\n>b\nACCC\n>c\nAAAC\n" | \
+    "${SWARM}" -z -r -a 2 > "${OUTPUT}" 2> /dev/null
+OTU=$(awk -F "\t" '{print $3}' "${OUTPUT}")
+[[ "${OTU}" == "a;size=5,c;size=2;" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+unset OTU
 
 ## ------------------------------------------------------------ statistics-file
 
