@@ -973,7 +973,7 @@ rm "${OUTPUT}"
 ##
 ## the structure file should be:
 ## a   b   1   1   1
-## a   c   2   1   2
+## b   c   2   1   2
 ## c   d   1   1   3
 OUTPUT=$(mktemp)
 DESCRIPTION="issue 55 --- 2 differences between the grafted amplicon and the grafting point"
@@ -989,7 +989,7 @@ rm "${OUTPUT}"
 ##
 ## the structure file should be:
 ## a   b   1   1   1
-## a   c   2   1   2
+## b   c   2   1   2
 ## c   d   1   1   3
 OUTPUT=$(mktemp)
 DESCRIPTION="issue 55 --- 5th column is the number of steps from the seed to the amplicon"
