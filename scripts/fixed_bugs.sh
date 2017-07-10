@@ -1858,7 +1858,13 @@ printf ">s1_%d\nA\n" $(( 1 << 32 )) | \
 ## https://github.com/torognes/swarm/issues/105
 ##
 ## swarm waits when it receives no input data (no file, no pipe, no
-## redirection). That's normal. See issue 36.
+## redirection). That's normal. See also issue 36.
+DESCRIPTION="issue 105 --- when no filename is given, swarm says it is waiting for data on stdin"
+printf ">s1_1\nA\n" | \
+    "${SWARM}" > /dev/null 2>&1 | \
+    grep -q "^waiting for data" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 
 #*****************************************************************************#
