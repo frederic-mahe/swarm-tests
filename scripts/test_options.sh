@@ -803,6 +803,26 @@ NUMBER_OF_STEPS=$(awk -F "\t" 'NR == 2 {print $5}' "${OUTPUT}")
 rm "${OUTPUT}"
 unset NUMBER_OF_STEPS
 
+## -i -f OTU numbering is updated (2nd line, col. 4 should be 1)
+DESCRIPTION="-i -f OTU numbering is updated"
+OUTPUT=$(mktemp)
+printf ">a_3\nAAAA\n>b_1\nAAAT\n>c_1\nATTT\n>d_1\nTTTT\n" | \
+    "${SWARM}" -f -i "${OUTPUT}" &> /dev/null
+awk 'NR == 2 {exit $4 == 1 ? 0 : 1}' "${OUTPUT}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
+## -i -f OTU numbering is contiguous (no gap) (3rd line, col. 4 should be 2)
+DESCRIPTION="-i -f OTU numbering is contiguous (no gap)"
+OUTPUT=$(mktemp)
+printf ">a_3\nAAAA\n>b_1\nAAAT\n>c_1\nATTT\n>d_1\nTTTT\n>e_1\nGGGG\n>f_1\nGGGA\n" | \
+    "${SWARM}" -f -i "${OUTPUT}" &> /dev/null
+awk 'NR == 4 {exit $4 == 2 ? 0 : 1}' "${OUTPUT}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
 
 ## ------------------------------------------------------------------------ log
 
@@ -1488,10 +1508,10 @@ SIMILARITY_PERCENTAGE=$(awk '/^H/ {v = $4} END {print v}' "${OUTPUT}")
 rm "${OUTPUT}"
 unset SIMILARITY_PERCENTAGE
 
-## Sequence a and sequence e should be grouped inside the same OTU,
-## with a similarity of 0.0 between a and e. Note that sequences are
-## now automatically sorted by fasta identifier to break abundance
-## ties.
+## Sequence "a" and sequence "e" should be grouped inside the same
+## OTU, with a similarity of 0.0 between "a" and "e". Note that
+## sequences are now automatically sorted by fasta identifier to break
+## abundance ties.
 DESCRIPTION="-u similarity percentage is correct in 4th column #2"
 SIMILARITY_PERCENTAGE=$(\
     printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nACCC\n>e_3\nCCCC\n" | \
@@ -1851,6 +1871,18 @@ CENTROID_LABEL=$(awk '/^S/ {v = $10} END {print v}' "${OUTPUT}")
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
 unset CENTROID_LABEL
+
+## -u -f OTU numbering is contiguous (no gap)
+DESCRIPTION="-u -f OTU numbering is contiguous (no gap)"
+OUTPUT=$(mktemp)
+printf ">a_3\nAAAA\n>b_1\nAAAT\n>c_1\nATTT\n>d_1\nTTTT\n>e_1\nGGGG\n" | \
+    "${SWARM}" -f -u "${OUTPUT}" &> /dev/null
+OTU_NUMBER=$(awk '/^C/ {v = $2} END {print v}' "${OUTPUT}")
+(( "${OTU_NUMBER}" == 1 )) && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+unset OTU_NUMBER
 
 
 ## ---------------------------------------------------------------------- seeds
