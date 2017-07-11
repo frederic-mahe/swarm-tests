@@ -804,6 +804,9 @@ rm "${OUTPUT}"
 unset NUMBER_OF_STEPS
 
 ## -i -f OTU numbering is updated (2nd line, col. 4 should be 1)
+# a	b	1	1	1
+# b	c	2	1	2
+# c	d	1	1	1
 DESCRIPTION="-i -f OTU numbering is updated"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_1\nAAAT\n>c_1\nATTT\n>d_1\nTTTT\n" | \
@@ -813,7 +816,11 @@ awk 'NR == 2 {exit $4 == 1 ? 0 : 1}' "${OUTPUT}" && \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
 
-## -i -f OTU numbering is contiguous (no gap) (3rd line, col. 4 should be 2)
+## -i -f OTU numbering is contiguous (no gap) (4th line, col. 4 should be 2)
+# a	b	1	1	1
+# b	c	2	1	2
+# c	d	1	1	1
+# e	f	1	2	1
 DESCRIPTION="-i -f OTU numbering is contiguous (no gap)"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_1\nAAAT\n>c_1\nATTT\n>d_1\nTTTT\n>e_1\nGGGG\n>f_1\nGGGA\n" | \
