@@ -830,6 +830,28 @@ awk 'NR == 4 {exit $4 == 2 ? 0 : 1}' "${OUTPUT}" && \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
 
+## -i -f number of steps between grafted amplicon and its new seed is
+## not updated (3rd line, col. 5 is set to 1)
+##
+## If you run fastidious with boundary 4 you will first get a and b
+## clustered with a as the seed and then c and d clustered with c as
+## the seed. In the fastidious phase b will be connected to d, and the
+## number of steps between the amplicon d and its new seed is not
+## updated. Here is the expected resulting structure:
+##
+## a	b	1	1	1
+## b	d	2	1	2
+## c	d	1	1	1
+##
+DESCRIPTION="-i -f number of steps between grafted amplicon and its new seed is not updated"
+OUTPUT=$(mktemp)
+printf ">a_3\nAAAA\n>b_1\nAAAT\n>c_2\nTTTT\n>d_1\nATTT\n" | \
+    "${SWARM}" -f -b 4 -i "${OUTPUT}" &> /dev/null
+awk 'NR == 3 {exit $5 == 1 ? 0 : 1}' "${OUTPUT}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${OUTPUT}"
+
 
 ## ------------------------------------------------------------------------ log
 
