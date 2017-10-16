@@ -1346,7 +1346,7 @@ printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
-## Swarm -u creates and fills file given in argument
+## Swarm -u creates and fills file given as argument
 OUTPUT=$(mktemp)
 DESCRIPTION="-u creates and fills file given in argument"
 printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
@@ -1357,7 +1357,7 @@ printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
 rm "${OUTPUT}"  
 
 ## -u number of hits is correct in 1st column #1
-DESCRIPTION="-u number of hits is correct in st column #1"
+DESCRIPTION="-u number of hits is correct in the first column #1"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nAAAC\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
@@ -1369,7 +1369,7 @@ rm "${OUTPUT}"
 unset NUMBER_OF_HITS
 
 ## -u number of hits is correct in 1st column #2
-DESCRIPTION="-u number of hits is correct in st column #2"
+DESCRIPTION="-u number of hits is correct in the first column #2"
 OUTPUT=$(mktemp)
 printf ">a_3\nGGGG\n>b_3\nAAAA\n>c_3\nAAAC\n>d_3\nAACC\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
@@ -1381,7 +1381,7 @@ rm "${OUTPUT}"
 unset NUMBER_OF_HITS
 
 ## -u number of centroids is correct in 1st column #1
-DESCRIPTION="-u number of centroids is correct in 1st column #1"
+DESCRIPTION="-u number of centroids is correct in the first column #1"
 OUTPUT=$(mktemp)
 printf ">a_3\nGGGG\n>b_3\nAAAA\n>c_3\nAAAC\n>d_3\nAACC\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
@@ -1393,7 +1393,7 @@ rm "${OUTPUT}"
 unset NUMBER_OF_CENTROIDS
 
 ## -u number of centroids is correct in 1st column #2
-DESCRIPTION="-u number of centroids is correct in 1st column #2"
+DESCRIPTION="-u number of centroids is correct in the first column #2"
 OUTPUT=$(mktemp)
 printf ">a_3\nGGGG\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
@@ -1404,8 +1404,8 @@ NUMBER_OF_CENTROIDS=$(grep -c "^S" "${OUTPUT}")
 rm "${OUTPUT}"
 unset NUMBER_OF_CENTROIDS
 
-## -u number of cluster records is correct in 1st column #1
-DESCRIPTION="-u number of cluster records is correct in 1st column #1"
+## -u number of cluster records is correct in the first column #1
+DESCRIPTION="-u number of cluster records is correct in the first column #1"
 OUTPUT=$(mktemp)
 printf ">a_3\nGGGG\n>b_3\nAAAA\n>c_3\nAAAC\n>d_3\nAACC\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
@@ -1416,8 +1416,8 @@ NUMBER_OF_CLUSTERS=$(grep -c "^C" "${OUTPUT}")
 rm "${OUTPUT}"
 unset NUMBER_OF_CLUSTERS
 
-## -u number of cluster records is correct in 1st column #2
-DESCRIPTION="-u number of cluster records is correct in 1st column #2"
+## -u number of cluster records is correct in the first column #2
+DESCRIPTION="-u number of cluster records is correct in the first column #2"
 OUTPUT=$(mktemp)
 printf ">a_3\nGGGG\n" | \
     "${SWARM}" -u "${OUTPUT}" &> /dev/null
