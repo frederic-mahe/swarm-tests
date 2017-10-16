@@ -1859,12 +1859,14 @@ printf ">s1_%d\nA\n" $(( 1 << 32 )) | \
 ##
 ## swarm waits when it receives no input data (no file, no pipe, no
 ## redirection). That's normal. See also issue 36.
+OUTPUT=$(mktemp)
 DESCRIPTION="issue 105 --- when no filename is given, swarm says it is waiting for data on stdin"
-printf ">s1_1\nA\n" | \
-    "${SWARM}" > /dev/null 2>&1 | \
-    grep -q "^waiting for data" && \
+(cmdpid=${BASHPID}
+ (sleep 1 ; kill -PIPE ${cmdpid} &> /dev/null) & "${SWARM}" 2> "${OUTPUT}")
+grep -q "^Waiting" "${OUTPUT}" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
+rm "${OUTPUT}"
 
 
 #*****************************************************************************#
