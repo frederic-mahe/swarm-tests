@@ -1900,6 +1900,32 @@ rm "${OUTPUT}"
 ## not testable
 
 
+#*****************************************************************************#
+#                                                                             #
+#                 Wrong cluster id in the uc output (issue 108)               #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/108
+##
+## Swarm shows the wrong cluster number on the H lines of UC files
+## when using fastidious mode. The number shown is the original
+## cluster number, before the fastidious grafting (it should be zero).
+##
+## C	0	4	*	*	*	*	*	a_1	*
+## S	0	4	*	*	*	*	*	a_1	*
+## H	1	4	75.0	+	0	0	4M	c_1	a_1
+## H	1	4	50.0	+	0	0	4M	d_1	a_1
+## H	1	4	25.0	+	0	0	4M	b_2	a_1
+
+DESCRIPTION="issue 108 --- when using the fastidious option, swarm reports the wrong cluster number in the UC output"
+printf ">a_1\nTGGA\n>b_2\nTTTT\n>c_1\nTTGA\n>d_1\nCTGA\n" | \
+        "${SWARM}" -f -o /dev/null -u - 2> /dev/null | \
+        awk '$2 != 0 {exit 1}' && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
+
 ## Clean
 rm "${ALL_IDENTICAL}"
 
