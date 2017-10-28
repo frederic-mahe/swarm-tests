@@ -1928,6 +1928,47 @@ printf ">a_1\nTGGA\n>b_2\nTTTT\n>c_1\nTTGA\n>d_1\nCTGA\n" | \
             failure "${DESCRIPTION}"
 
 
+#*****************************************************************************#
+#                                                                             #
+#       segmentation fault error when using swarm with -d 1 (issue 109)       #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/109
+##
+## Swarm stores the sequences matching a seed in an array. This array
+## is allocated once and then kept until the program is finished. But
+## it can grow if necessary.
+##
+## Usually the size of this array is initialized to 7l+4 where l is
+## the length of the longest amplicon in the dataset, since this is
+## the maximum number of subseeds that can occur with a single change
+## (subst, del, ins). Normally this is enough, unless the dataset is
+## not dereplicated. In that case, there could be many more matches
+## than expected.
+##
+## There is a check in swarm to see if the array is too small to hold
+## all the matches. If the array is too small, it is doubled one
+## time. That's the cause of the segmentation fault.
+##
+## The solution is to double the size of the array as many times as
+## necessary to hold all the matching sequences.
+##
+## In the toy example below, all sequences are identical and of length
+## 1 (equivalent of a undereplicated dataset). Previous versions of
+## swarm would create an array of that could hold 7l+4 matching
+## sequences. That array could be doubled once, and having one more
+## match would trigger a segmentation fault. That means we need 24
+## input sequences of length 1 to trigger the bug: 1 seed + 2 * (7 +
+## 4) + 1 excess match = 1 + 22 + 1 = 24
+
+DESCRIPTION="issue 109 --- segmentation fault error with undereplicated dataset #1"
+for ((i=1 ; i<=24 ; i++)) ; do
+    printf ">s%d_1\nA\n" ${i}
+done | "${SWARM}" &> /dev/null && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
 ## Clean
 rm "${ALL_IDENTICAL}"
 
