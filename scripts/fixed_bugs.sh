@@ -1962,7 +1962,16 @@ printf ">a_1\nTGGA\n>b_2\nTTTT\n>c_1\nTTGA\n>d_1\nCTGA\n" | \
 ## input sequences of length 1 to trigger the bug: 1 seed + 2 * (7 +
 ## 4) + 1 excess match = 1 + 22 + 1 = 24
 
+## This test should pass on swarm 2.2.0
 DESCRIPTION="issue 109 --- segmentation fault error with undereplicated dataset #1"
+for ((i=1 ; i<=23 ; i++)) ; do
+    printf ">s%d_1\nA\n" ${i}
+done | "${SWARM}" &> /dev/null && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
+## This test should fail on swarm 2.2.0 and pass on more recent versions
+DESCRIPTION="issue 109 --- segmentation fault error with undereplicated dataset #2"
 for ((i=1 ; i<=24 ; i++)) ; do
     printf ">s%d_1\nA\n" ${i}
 done | "${SWARM}" &> /dev/null && \
