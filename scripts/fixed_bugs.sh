@@ -1978,6 +1978,20 @@ done | "${SWARM}" &> /dev/null && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 
+
+#*****************************************************************************#
+#                                                                             #
+#           Swarm does not start clustering in rare cases (issue 110)         #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/110
+
+## In rare conditions, a deadlock can appear between two threads. The
+## solution was to add a waiting step to guarantee that all worker
+## threads are done before going to the next step.
+
+
 ## Clean
 rm "${ALL_IDENTICAL}"
 
