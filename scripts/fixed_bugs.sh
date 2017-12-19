@@ -1992,6 +1992,17 @@ done | "${SWARM}" &> /dev/null && \
 ## threads are done before going to the next step.
 
 
+#*****************************************************************************#
+#                                                                             #
+#             Can you update bioconda with latest? (issue 111)                #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/111
+
+## Bioconda is an external project. Colin Brislawn took care of it.
+
+
 ## Clean
 rm "${ALL_IDENTICAL}"
 
