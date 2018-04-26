@@ -2003,6 +2003,28 @@ done | "${SWARM}" &> /dev/null && \
 ## Bioconda is an external project. Colin Brislawn took care of it.
 
 
+#*****************************************************************************#
+#                                                                             #
+#           Compilation warnings with the new GCC 8.0 (issue 112)             #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/112
+
+## Solved by replacing strcopy with memcopy
+
+
+#*****************************************************************************#
+#                                                                             #
+#             Compatibility with old GCC versions? (issue 113)                #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/113
+
+## Solved by replacing -Wpedantic with -pedantic (GCC < 4.8)
+
+
 ## Clean
 rm "${ALL_IDENTICAL}"
 
