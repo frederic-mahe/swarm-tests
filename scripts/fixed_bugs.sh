@@ -34,6 +34,58 @@ DESCRIPTION="check if swarm is in the PATH"
 
 #*****************************************************************************#
 #                                                                             #
+#     Swarm sorts subseeds by abundance before searching for sub-subseeds     #
+#                                                                             #
+#*****************************************************************************#
+
+## issue reported outside GitHub
+##
+## Swarm sorts subseeds by abundance, and then by aphabetical order
+## before searching for sub-subseeds
+
+# input: subseeds already sorted by abundance and by alphabetical order
+DESCRIPTION="non-github issue 1 --- no subseed sorting when input is already sorted"
+printf ">s_3\nA\n>s1_2\nAT\n>s2_1\nTA\n>s3_1\nATA\n" | \
+    "${SWARM}" 2> /dev/null | \
+    grep -q "^s_3 s1_2 s2_1 s3_1$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+# input: subseeds not sorted by abundance and not sorted by alphabetical order
+DESCRIPTION="non-github issue 1 --- subseed sorting by abundance (input is shuffled)"
+printf ">s_3\nA\n>s2_1\nAT\n>s1_2\nTA\n>s3_1\nATA\n" | \
+    "${SWARM}" 2> /dev/null | \
+    grep -q "^s_3 s1_2 s2_1 s3_1$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+# input: subseeds not sorted by abundance and sorted by alphabetical order
+DESCRIPTION="non-github issue 1 --- subseed sorting by abundance (input is alpha-sorted)"
+printf ">s_3\nA\n>s1_1\nAT\n>s2_2\nTA\n>s3_1\nATA\n" | \
+    "${SWARM}" 2> /dev/null | \
+    grep -q "^s_3 s2_2 s1_1 s3_1$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+# input: subseeds have the same abundance and are sorted by alphabetical order
+DESCRIPTION="non-github issue 1 --- subseed sorting by header's alphabetical order (input is alpha-sorted)"
+printf ">s_3\nA\n>s1_1\nAT\n>s2_1\nTA\n>s3_1\nATA\n" | \
+    "${SWARM}" 2> /dev/null | \
+    grep -q "^s_3 s1_1 s2_1 s3_1$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+# input: subseeds have the same abundance and are not sorted by alphabetical order
+DESCRIPTION="non-github issue 1 --- subseed sorting by header's alphabetical order (input is shuffled)"
+printf ">s_3\nA\n>s2_1\nAT\n>s1_1\nTA\n>s3_1\nATA\n" | \
+    "${SWARM}" 2> /dev/null | \
+    grep -q "^s_3 s1_1 s2_1 s3_1$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+
+#*****************************************************************************#
+#                                                                             #
 #       Swarm radius values should be available via an option (issue 1)       #
 #                                                                             #
 #*****************************************************************************#
