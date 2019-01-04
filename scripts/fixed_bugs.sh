@@ -2077,6 +2077,17 @@ done | "${SWARM}" &> /dev/null && \
 ## Solved by replacing -Wpedantic with -pedantic (GCC < 4.8)
 
 
+#*****************************************************************************#
+#                                                                             #
+#                Problem with fasta header? (issue 116)                       #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/116
+
+## The problem was in vsearch (https://github.com/torognes/vsearch/issues/338)
+
+
 ## Clean
 rm "${ALL_IDENTICAL}"
 
