@@ -25,10 +25,13 @@ for ((i=0 ; i<=9 ; i++)) ; do
     printf ">%s%d_1\nACGT\n" "seq" ${i}
 done > "${ALL_IDENTICAL}"
 
-## Is swarm installed?
+## use the first swarm binary in $PATH by default, unless user wants
+## to test another binary
 SWARM=$(which swarm)
-DESCRIPTION="check if swarm is in the PATH"
-[[ "${SWARM}" ]] && success "${DESCRIPTION}" || failure "${DESCRIPTION}"
+[[ "${1}" ]] && SWARM="${1}"
+
+DESCRIPTION="check if swarm is executable"
+[[ -x "${SWARM}" ]] && success "${DESCRIPTION}" || failure "${DESCRIPTION}"
 
 
 #*****************************************************************************#
