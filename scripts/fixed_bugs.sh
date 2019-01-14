@@ -2082,6 +2082,28 @@ done | "${SWARM}" &> /dev/null && \
 
 #*****************************************************************************#
 #                                                                             #
+#                      improve groff code (issue 114)                         #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/114
+
+## not testable
+
+
+#*****************************************************************************#
+#                                                                             #
+#      Potential vulnerabilities identified by Flawfinder (issue 115)         #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/115
+
+## not testable
+
+
+#*****************************************************************************#
+#                                                                             #
 #                Problem with fasta header? (issue 116)                       #
 #                                                                             #
 #*****************************************************************************#
@@ -2089,6 +2111,54 @@ done | "${SWARM}" &> /dev/null && \
 ## https://github.com/torognes/swarm/issues/116
 
 ## The problem was in vsearch (https://github.com/torognes/vsearch/issues/338)
+
+
+#*****************************************************************************#
+#                                                                             #
+#                       swarm output file (issue 118)                         #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/118
+
+## not testable
+
+
+#*****************************************************************************#
+#                                                                             #
+#                      ikos static analyzer (issue 119)                       #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/119
+
+## not testable
+
+
+#*****************************************************************************#
+#                                                                             #
+#      Benign buffer overflow when parsing fasta sequences (issue 120)        #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/120
+
+## not testable
+
+
+#*****************************************************************************#
+#                                                                             #
+#           segmentation faults with the zobrist branch (issue 121)           #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/121
+
+## no problem when the input contains 3 sequences or more
+DESCRIPTION="issue 121 --- segmentation fault when there are only 1 or 2 input sequences"
+"${SWARM}" <(printf ">s1_1\nA\n>s2_1\nA\n") &> /dev/null && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
 
 
 ## Clean
