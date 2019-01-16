@@ -885,6 +885,7 @@ DESCRIPTION="-l writes on standard error, except for errors"
         failure "${DESCRIPTION}"
 rm "${ERRORINPUT}"
 
+
 ## ---------------------------------------------------------------- output-file
 
 ## Swarm accepts the options -o and --output-file
@@ -1968,6 +1969,100 @@ printf ">s1_%d\nA\n>s2_%d\nT\n" $(( (1 << 32) + 1)) $(( (1 << 32) + 1)) | \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
 unset EXPECTED
+
+
+## ---------------------------------------------------------- usearch-abundance
+
+# what are the output files impacted by the -z option?
+## reminder: >header[[:blank:]]   and   header = label_[1-9][0-9]*$
+
+## output created by the -i option is not modified by the option -z
+DESCRIPTION="in -i ouput, -z has no visible effect (-i reports only labels)"
+printf ">s1;size=1;\nA\n>s2;size=1;\nA\n" | \
+    "${SWARM}" -z -o /dev/null -i - 2> /dev/null | \
+    grep -qE "^s1[[:blank:]]s2[[:blank:]]" && \
+    success "${DESCRIPTION}" || \
+    failure "${DESCRIPTION}"
+
+## output created by the -l option is not modified by the option -z
+DESCRIPTION="in -l ouput, -z has no visible effect"
+printf ">s;size=1;\nA\n" | \
+    "${SWARM}" -z -o /dev/null -l - 2> /dev/null | \
+    grep -E ";size=[0-9]+" && \
+    failure "${DESCRIPTION}" || \
+    success "${DESCRIPTION}"
+
+## output created by the -o option is not modified by the option -z
+DESCRIPTION="in -o ouput, -z has no direct effect"
+printf ">s;size=1;\nA\n" | \
+    "${SWARM}" -z -o - 2> /dev/null | \
+    grep -q "^s;size=1;$" && \
+    success "${DESCRIPTION}" || \
+    failure "${DESCRIPTION}"
+
+## output created by the -o option is not modified by the option -z
+DESCRIPTION="in -o ouput, -z has no direct effect (-o reports headers)"
+printf ">s;size=1\nA\n" | \
+    "${SWARM}" -z -o - 2> /dev/null | \
+    grep -q "^s;size=1$" && \
+    success "${DESCRIPTION}" || \
+    failure "${DESCRIPTION}"
+
+## output created by the -r option is not modified by the option -z
+DESCRIPTION="in -r ouput, -z has no direct effect"
+printf ">s1;size=1;\nA\n>s2;size=1;\nC\n" | \
+    "${SWARM}" -z -r -o - 2> /dev/null | \
+    grep -q "s1;size=1;,s2;size=1;$" && \
+    success "${DESCRIPTION}" || \
+    failure "${DESCRIPTION}"
+
+## output created by the -r option is not modified by the option -z
+DESCRIPTION="in -r ouput, -z has no direct effect (-r reports headers)"
+printf ">s1;size=1\nA\n>s2;size=1\nC\n" | \
+    "${SWARM}" -z -r -o - 2> /dev/null | \
+    grep -q "s1;size=1,s2;size=1$" && \
+    success "${DESCRIPTION}" || \
+    failure "${DESCRIPTION}"
+
+## output created by the -s option is not modified by the option -z
+DESCRIPTION="in -s ouput, -z has no direct effect (-s reports labels)"
+printf ">s;size=1;\nA\n" | \
+    "${SWARM}" -z -o /dev/null -s - 2> /dev/null | \
+    grep -qE "[[:blank:]]s[[:blank:]]" && \
+    success "${DESCRIPTION}" || \
+    failure "${DESCRIPTION}"
+
+## output created by the -u option is not modified by the option -z
+DESCRIPTION="in -u ouput, -z has no direct effect"
+printf ">s;size=1;\nA\n" | \
+    "${SWARM}" -z -o /dev/null -u - 2> /dev/null | \
+    grep -qE "[[:blank:]]s;size=1;[[:blank:]]" && \
+    success "${DESCRIPTION}" || \
+    failure "${DESCRIPTION}"
+
+## output created by the -u option is not modified by the option -z
+DESCRIPTION="in -u ouput, -z has no direct effect (-s reports headers)"
+printf ">s;size=1\nA\n" | \
+    "${SWARM}" -z -o /dev/null -u - 2> /dev/null | \
+    grep -qE "[[:blank:]]s;size=1[[:blank:]]" && \
+    success "${DESCRIPTION}" || \
+    failure "${DESCRIPTION}"
+
+## in the output created by the -w option, -z modifies the header format
+DESCRIPTION="in -w ouput, -z modifies the header format"
+printf ">s;size=1;\nA\n" | \
+    "${SWARM}" -z -o /dev/null -w - 2> /dev/null | \
+    grep -q "^>s;size=1;$" && \
+    success "${DESCRIPTION}" || \
+    failure "${DESCRIPTION}"
+
+## a semi-colon is added if it is not in the input
+DESCRIPTION="in -w ouput, -z adds a terminal ';' to sequence headers"
+printf ">s;size=1\nA\n" | \
+    "${SWARM}" -z -o /dev/null -w - 2> /dev/null | \
+    grep -q "^>s;size=1;$" && \
+    success "${DESCRIPTION}" || \
+    failure "${DESCRIPTION}"
 
 
 #*****************************************************************************#
