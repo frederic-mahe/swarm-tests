@@ -2163,6 +2163,36 @@ DESCRIPTION="issue 121 --- segmentation fault when there are only 1 or 2 input s
 
 #*****************************************************************************#
 #                                                                             #
+#                  small tasks around swarm 3.0 (issue 122)                   #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/122
+
+## not testable
+
+
+#*****************************************************************************#
+#                                                                             #
+#          memory-allocation error in swarm 3 fastidious (issue 123)          #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/123
+
+## memory was not allocated correctly for sequences shorter than 6 nt
+if which valgrind > /dev/null ; then
+    DESCRIPTION="issue 123 --- no memory allocation error for short sequences"
+    valgrind \
+        "${SWARM}" -f -o /dev/null <(printf ">s1_10\nAA\n>s2_1\nCC\n") 2>&1 | \
+        grep -q "ERROR SUMMARY: 0 errors" && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+fi
+
+
+#*****************************************************************************#
+#                                                                             #
 #          small memory leak when using the --log option (issue 124)          #
 #                                                                             #
 #*****************************************************************************#
