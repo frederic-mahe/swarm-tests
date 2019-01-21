@@ -17,4 +17,9 @@ tests. To test a new version of swarm, simply launch:
 ```sh
 bash run_all_tests.sh
 ```
-(bash version 4 or higher required)
+
+Requirements:
+- bash version 4 or higher,
+
+Optionally:
+- [valgrind](http://valgrind.org/).
