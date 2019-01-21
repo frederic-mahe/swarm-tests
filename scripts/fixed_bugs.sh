@@ -2161,6 +2161,32 @@ DESCRIPTION="issue 121 --- segmentation fault when there are only 1 or 2 input s
             failure "${DESCRIPTION}"
 
 
+#*****************************************************************************#
+#                                                                             #
+#          small memory leak when using the --log option (issue 124)          #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/124
+
+## the log file was not closed properly
+if which valgrind > /dev/null ; then
+    DESCRIPTION="issue 124 --- no memory leak when --log is not use"
+    valgrind \
+        "${SWARM}" -o /dev/null <(printf ">s1_10\nAA\n>s2_1\nCC\n") 2>&1 | \
+        grep -q "in use at exit: 0 bytes" && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+    DESCRIPTION="issue 124 --- no memory leak when using the --log option"
+    valgrind \
+        "${SWARM}" -o /dev/null -l /dev/null \
+        <(printf ">s1_10\nAA\n>s2_1\nCC\n") 2>&1 | \
+        grep -q "in use at exit: 0 bytes" && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+fi
+
+
 ## Clean
 rm "${ALL_IDENTICAL}"
 
