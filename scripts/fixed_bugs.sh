@@ -957,7 +957,7 @@ comm -23 <(echo "${MICROVARIANTS_L2}") <(echo "${MICROVARIANTS_L1}") | \
     while read MICROVARIANT_L2 ; do
         printf ">seed_10\n%s\n>m_1\n%s\n" ${SEQUENCE} ${MICROVARIANT_L2} | \
             "${SWARM}" -d 1 -f -o - 2> /dev/null | \
-        awk 'END {exit NR == 1 ? 0 : 1}' && \
+        awk 'END {exit NR == 1 ? 0 : 1}' || \
             failure "${DESCRIPTION}"
     done && success "${DESCRIPTION}"
 unset SEQUENCE MICROVARIANTS_L1 MICROVARIANTS_L2
