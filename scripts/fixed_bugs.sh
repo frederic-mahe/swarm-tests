@@ -925,7 +925,8 @@ microvariants "ACGT" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## produce a fasta set with a seed, all its L2 microvariants but no L1 microvariants
+## produce a fasta set with a seed, all its L2 microvariants but no L1
+## microvariants (output should contain only one cluster)
 DESCRIPTION="issue 53 --- fastidious links L2 microvariants and the seed"
 SEQUENCE="ACGT"
 MICROVARIANTS_L1=$(microvariants ${SEQUENCE} | sort -du | grep -v "^${SEQUENCE}$")
@@ -945,7 +946,6 @@ unset SEQUENCE MICROVARIANTS_L1 MICROVARIANTS_L2
 ## perform an independent test for each L2 microvariant
 DESCRIPTION="issue 53 --- fastidious links each L2 microvariant and the seed"
 SEQUENCE="ACGT"
-OUTPUT=$(mktemp)
 ## produce L1 and L2 microvariants
 MICROVARIANTS_L1=$(microvariants ${SEQUENCE} | sort -du | grep -v "^${SEQUENCE}$")
 MICROVARIANTS_L2=$(while read MICROVARIANT ; do
@@ -956,11 +956,10 @@ MICROVARIANTS_L2=$(while read MICROVARIANT ; do
 comm -23 <(echo "${MICROVARIANTS_L2}") <(echo "${MICROVARIANTS_L1}") | \
     while read MICROVARIANT_L2 ; do
         printf ">seed_10\n%s\n>m_1\n%s\n" ${SEQUENCE} ${MICROVARIANT_L2} | \
-            "${SWARM}" -d 1 -f -o "${OUTPUT}" 2> /dev/null
-        (( $(wc -l < "${OUTPUT}") == 1 )) || \
-                failure "${DESCRIPTION}"
+            "${SWARM}" -d 1 -f -o - 2> /dev/null | \
+        awk 'END {exit NR == 1 ? 0 : 1}' && \
+            failure "${DESCRIPTION}"
     done && success "${DESCRIPTION}"
-rm "${OUTPUT}"
 unset SEQUENCE MICROVARIANTS_L1 MICROVARIANTS_L2
 
 
