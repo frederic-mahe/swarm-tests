@@ -928,20 +928,18 @@ microvariants "ACGT" | \
 ## produce a fasta set with a seed, all its L2 microvariants but no L1 microvariants
 DESCRIPTION="issue 53 --- fastidious links L2 microvariants and the seed"
 SEQUENCE="ACGT"
-OUTPUT=$(mktemp)
 MICROVARIANTS_L1=$(microvariants ${SEQUENCE} | sort -du | grep -v "^${SEQUENCE}$")
 MICROVARIANTS_L2=$(while read MICROVARIANT ; do
                        microvariants ${MICROVARIANT}
                    done <<< "${MICROVARIANTS_L1}" | \
                        sort -du | grep -v "^${SEQUENCE}$")
 (printf ">seed_1\n%s\n" ${SEQUENCE}
-comm -23 <(echo "${MICROVARIANTS_L2}") <(echo "${MICROVARIANTS_L1}") | \
-    awk '{print ">s"NR"_1\n"$1}') | \
-    "${SWARM}" -d 1 -f -o "${OUTPUT}" 2> /dev/null
-(( $(wc -l < "${OUTPUT}") == 1 )) && \
+ comm -23 <(echo "${MICROVARIANTS_L2}") <(echo "${MICROVARIANTS_L1}") | \
+     awk '{print ">s"NR"_1\n"$1}') | \
+    "${SWARM}" -d 1 -f -o - 2> /dev/null | \
+    awk 'END {exit NR == 1 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
 unset SEQUENCE MICROVARIANTS_L1 MICROVARIANTS_L2
 
 ## perform an independent test for each L2 microvariant
