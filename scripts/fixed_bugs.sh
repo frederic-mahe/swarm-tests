@@ -2217,6 +2217,29 @@ if which valgrind > /dev/null ; then
 fi
 
 
+#*****************************************************************************#
+#                                                                             #
+#       incomplete creation of microvariants in swarm 3.0 (issue 125)         #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/125
+
+## swarm 3.0 stops on duplicated sequences, where swarm 2.0 used to
+## dereplicate silently. Besides that, there is a bug in swarm 3.0
+## when counting the duplicated sequences. For an input with n times
+## the same sequence, swarm should indicate (n - 1) duplicates. So,
+## for an input with 4 times the same sequence, swarm should indicate
+## 3 duplicates (not 6):
+DESCRIPTION="issue 125 --- report the correct number of duplicated sequences"
+"${SWARM}" \
+    -o /dev/null \
+    <(printf ">a_1\nA\n>b_1\nA\n>c_1\nA\n>d_1\nA\n") 2>&1 | \
+    grep -q "^WARNING: 3 duplicated sequences detected.$" && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
+
 ## Clean
 rm "${ALL_IDENTICAL}"
 
