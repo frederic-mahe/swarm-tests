@@ -915,18 +915,15 @@ function microvariants() {
 }
 
 ## produce a fasta set with a seed and all its L1 microvariants
+## (output should contain only one cluster)
 DESCRIPTION="issue 53 --- swarm correctly computes all microvariants"
-OUTPUT=$(mktemp)
-SEQUENCE="ACGT"
-microvariants ${SEQUENCE} | \
+microvariants "ACGT" | \
+    sort -du | \
     awk '{print ">s"NR"_1\n"$1}' | \
-    "${SWARM}" -o "${OUTPUT}" 2> /dev/null
-(( $(wc -l < "${OUTPUT}") == 1 )) && \
+    "${SWARM}" -o - 2> /dev/null | \
+    awk 'END {exit NR == 1 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset SEQUENCE
-
 
 ## produce a fasta set with a seed, all its L2 microvariants but no L1 microvariants
 DESCRIPTION="issue 53 --- fastidious links L2 microvariants and the seed"
