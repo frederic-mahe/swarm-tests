@@ -2234,6 +2234,31 @@ DESCRIPTION="issue 125 --- report the correct number of duplicated sequences"
             failure "${DESCRIPTION}"
 
 
+#*****************************************************************************#
+#                                                                             #
+#       minor unfreed memory allocation (all swarm versions) (issue 126)      #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/126
+
+## when using the options -v, -h or -i, parsing command line arguments
+## triggers one memory allocation (heap). That memory allocation is
+## not freed by swarm before exiting (it is freed by the operating
+## system though).
+if which valgrind > /dev/null ; then
+    DESCRIPTION="issue 126 --- all memory allocations are freed"
+    valgrind \
+        "${SWARM}" \
+        -o /dev/null \
+        -l /dev/null \
+        -i /dev/null <(printf ">s_1\nA\n") 2>&1 | \
+        grep -q "in use at exit: 0 bytes" && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+fi
+
+
 ## Clean
 rm "${ALL_IDENTICAL}"
 
