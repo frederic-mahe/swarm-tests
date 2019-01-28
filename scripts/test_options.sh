@@ -433,19 +433,24 @@ DESCRIPTION="swarm aborts when --ceiling is not numerical"
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
-## Ceiling should fail when 0 <= c < 3
-for ((c=0 ; c<3; c++)) ; do
+## Ceiling should fail when 0 <= c < 8
+for ((c=0 ; c<8; c++)) ; do
     DESCRIPTION="swarm aborts when --ceiling is ${c}"
     "${SWARM}" -f -c ${c} < "${FASTIDOUSINPUT}" &> /dev/null && \
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
 done
-unset c
+
+## Bloom filter needs at least 8 MB, even for a minimal example
+DESCRIPTION="swarm fastidious needs at least 8 MB for the Bloom filter"
+"${SWARM}" -f -c 8 <(printf ">s1_3\nAA\n>s2_1\nCC\n") &> /dev/null && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 ## ceiling option accepts positive integers
-MIN=3
+MIN=8
 MAX=255
-DESCRIPTION="swarm runs normally when --ceiling goes from 3 to ${MAX}"
+DESCRIPTION="swarm runs normally when --ceiling goes from 8 to ${MAX}"
 for ((c=$MIN ; c<=$MAX ; c++)) ; do
     printf ">a_10\nACGT\n>b_2\nAGCT\n" | \
         "${SWARM}" -f -c ${c} &> /dev/null || \
