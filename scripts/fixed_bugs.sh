@@ -1734,14 +1734,12 @@ rm "${OUTPUT}"
 #                     tctat--gtgtct
 #
 # with 5 differences and an alignment length of 13.
-OUTPUT=$(mktemp)
 DESCRIPTION="issue 95 --- default gap extension penalty is too large"
 printf ">s1_1\nCTATTGTTGTC\n>s2_1\nTCTATGTGTCT\n" | \
-    "${SWARM}" -d 5 -u "${OUTPUT}" &> /dev/null
-awk '/^H/ {exit $8 == "I4M2D5MI" ? 0 : 1}' "${OUTPUT}" && \
+    "${SWARM}" -d 5 -o /dev/null -u - 2> /dev/null |
+    awk '/^H/ {exit $8 == "I4M2D5MI" ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
 
 
 #*****************************************************************************#
