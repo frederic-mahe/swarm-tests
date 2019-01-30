@@ -435,7 +435,8 @@ done
 ## Swarm can produce output files compatible with Mothur.
 for OPTION in "-r" "--mothur" ; do
     DESCRIPTION="issue 23 --- swarms accepts the option ${OPTION}"
-    "${SWARM}" "${OPTION}" < "${ALL_IDENTICAL}" &> /dev/null && \
+    printf ">s_1\nA\n" | \
+        "${SWARM}" "${OPTION}" &> /dev/null && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
