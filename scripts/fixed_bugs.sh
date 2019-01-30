@@ -97,13 +97,12 @@ printf ">s_3\nA\n>s2_1\nAT\n>s1_1\nTA\n>s3_1\nATA\n" | \
 ##
 ## Swarm radius values are available in the statistics file (-s), 7th column.
 DESCRIPTION="issue 1 --- theoretical radii of OTUs is available with -s"
-STATISTICS=$(mktemp)
-echo -e ">seq1_3\nACGTACGT\n>seq2_1\nACGTTCGT" | \
-    "${SWARM}" -d 1 -s "${STATISTICS}" &> /dev/null
-RADIUS=$(awk -F "\t" '{print $7}' "${STATISTICS}")
-[[ "${RADIUS}" -eq 1 ]] && success "${DESCRIPTION}" || failure "${DESCRIPTION}"
-rm "${STATISTICS}"
-unset RADIUS
+printf ">s1_3\nA\n>s2_1\nT\n" | \
+    swarm -d 1 -o /dev/null -s - 2> /dev/null | \
+    awk '{exit $7 == 1 ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 
 #*****************************************************************************#
 #                                                                             #
