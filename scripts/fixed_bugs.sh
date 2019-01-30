@@ -474,14 +474,11 @@ done
 ##
 ## -r reports the d value
 DESCRIPTION="issue 26 --- -r reports the d value"
-OUTPUT=$(mktemp)
-D=2
-printf ">a_5\nAAAA\n" | "${SWARM}" -d "${D}" -r > "${OUTPUT}" 2> /dev/null
-grep -q "swarm_${D}" "${OUTPUT}" && \
+printf ">s_5\nA\n" | \
+    "${SWARM}" -d 2 -r -o - 2> /dev/null | \
+    grep -q "swarm_2" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset D
 
 
 #*****************************************************************************#
