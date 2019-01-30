@@ -409,20 +409,19 @@ unset OCTAL
 ## https://github.com/torognes/swarm/issues/22
 ##
 ## support for usearch amplicon-abundance notation style
-USEARCH=$(mktemp)
 for OPTION in "-z" "--usearch-abundance" ; do
-    for STYLE in '/^>/ s/_/;size=/' '/^>/ s/_/;size=/ ; /^>/ s/$/;/' ; do
-	    sed "${STYLE}" "${ALL_IDENTICAL}" > "${USEARCH}"
-	    if [[ "${STYLE}" == '/^>/ s/_/;size=/' ]] ; then	    
-	        DESCRIPTION="issue 22 --- support for usearch abundance ending with semicolon (${OPTION})"
-	    else
-	        DESCRIPTION="issue 22 --- support for usearch abundance ending without semicolon (${OPTION})"
-	    fi
-	    "${SWARM}" "${OPTION}" "${USEARCH}" &> /dev/null && \
-	        success "${DESCRIPTION}" || failure "${DESCRIPTION}"
-    done
+    DESCRIPTION="issue 22 --- support for usearch abundance ending with semicolon (${OPTION})"
+    printf ">s;size=1;\nA\n" | \
+	    "${SWARM}" "${OPTION}" &> /dev/null && \
+	    success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
+    DESCRIPTION="issue 22 --- support for usearch abundance ending without semicolon (${OPTION})"
+    printf ">s;size=1\nA\n" | \
+	    "${SWARM}" "${OPTION}" &> /dev/null && \
+	    success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
 done
-rm "${USEARCH}"
 
 
 #*****************************************************************************#
