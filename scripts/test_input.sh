@@ -205,15 +205,11 @@ printf ">a_10\nACGT\n>a_10\nAAGT\n" | \
 
 ## Fasta headers can contain more than one underscore symbol
 DESCRIPTION="fasta headers can contain more than one underscore symbol"
-STATS=$(mktemp)
-IDENTIFIER="a_2_2"
-printf ">%s_3\nACGTACGT\n" "${IDENTIFIER}" | \
-    "${SWARM}" -s "${STATS}" &> /dev/null
-grep -qE "[[:blank:]]${IDENTIFIER}[[:blank:]]" "${STATS}" && \
+printf ">a_2_2_3\nA\n" | \
+    "${SWARM}" -o /dev/null -s - 2> /dev/null | \
+    awk '{exit $3 == "a_2_2" ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm -f "${STATS}"
-unset IDENTIFIER
 
 ## Fasta header must contain an abundance value after being truncated
 DESCRIPTION="swarm aborts if fasta headers lacks abundance value"
