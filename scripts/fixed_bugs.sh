@@ -20,12 +20,6 @@ success () {
     printf "${GREEN}PASS${NO_COLOR}: ${1}\n"
 }
 
-## Create a test file with 10 identical sequences (different headers)
-ALL_IDENTICAL=$(mktemp)
-for ((i=1 ; i<=10 ; i++)) ; do
-    printf ">%s%d_1\nACGT\n" "seq" ${i}
-done > "${ALL_IDENTICAL}"
-
 ## use the first swarm binary in $PATH by default, unless user wants
 ## to test another binary
 SWARM=$(which swarm)
@@ -1427,15 +1421,17 @@ unset MAX_D MAX_T d t OTUs
 
 ## Pairwise alignment settings are not printed if d = 1 (issue #75)
 DESCRIPTION="issue 75 --- Pairwise alignment settings are not printed if d = 1"
-"${SWARM}" -d 1 < "${ALL_IDENTICAL}" 2>&1 | \
-    grep --quiet "^Scores:\|Gap penalties:\|Converted costs:" && \
+printf ">s_1\nA\n" | \
+    "${SWARM}" -d 1 2>&1 | \
+    grep -q "^Scores:\|Gap penalties:\|Converted costs:" && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Pairwise alignment settings are printed if d > 1 (issue #75)
 DESCRIPTION="issue 75 --- Pairwise alignment settings are printed if d > 1"
-"${SWARM}" -d 2 < "${ALL_IDENTICAL}" 2>&1 | \
-    grep --quiet "^Scores:\|Gap penalties:\|Converted costs:" && \
+printf ">s_1\nA\n" | \
+    "${SWARM}" -d 2 2>&1 | \
+    grep -q "^Scores:\|Gap penalties:\|Converted costs:" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -1450,7 +1446,8 @@ DESCRIPTION="issue 75 --- Pairwise alignment settings are printed if d > 1"
 ##  
 ## Number of differences (--differences is 256)
 DESCRIPTION="issue 76 --- swarm aborts when --difference is 256"
-"${SWARM}" -d 256 < "${ALL_IDENTICAL}" &> /dev/null && \
+printf ">s_1\nA\n" | \
+    "${SWARM}" -d 256 &> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -2228,9 +2225,6 @@ if which valgrind > /dev/null ; then
             failure "${DESCRIPTION}"
 fi
 
-
-## Clean
-rm "${ALL_IDENTICAL}"
 
 exit 0
 
