@@ -1547,13 +1547,12 @@ rm "${CLUSTERS_A}" "${CLUSTERS_B}"
 ## https://github.com/torognes/swarm/issues/82
 ##
 ## issue 82 --- output uppercase nucleotidic sequences
-OUTPUT=$(mktemp)
 DESCRIPTION="issue 82 --- output uppercase nucleotidic sequences (-w output)"
-printf ">s_1\nt\n" | swarm -w "${OUTPUT}" &> /dev/null
-awk 'NR == 2 {exit /^T$/ ? 0 : 1}' "${OUTPUT}" && \
+printf ">s_1\nt\n" | \
+    swarm -o /dev/null -w - 2> /dev/null | \
+    awk 'NR == 2 {exit /^T$/ ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
 
 
 #*****************************************************************************#
