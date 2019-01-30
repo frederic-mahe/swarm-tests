@@ -277,12 +277,11 @@ printf ">s_10\nA\n>s_5\nT\n" | \
 ## to http://www.drive5.com/usearch/manual/ucout.html, identity
 ## percentage should only be given for H-records)
 DESCRIPTION="issue 13 --- uclust-file's 4th column is \"*\" for non-H lines"
-UCLUST=$(mktemp)
-"${SWARM}" -u "${UCLUST}" "${ALL_IDENTICAL}" &> /dev/null
-awk '$1 !~ "H" && $4 != "*" {exit 1}' "${UCLUST}" && \
+printf ">s1_2\nA\n>s2_1\nT\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk '$1 !~ "H" && $4 != "*" {exit 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${UCLUST}"
 
 
 #*****************************************************************************#
