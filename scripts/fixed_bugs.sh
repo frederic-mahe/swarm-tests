@@ -1764,14 +1764,12 @@ rm "${OUTPUT}"
 #                 gat
 #
 # with 2 differences, a score of 28 and an alignment length of 3.
-OUTPUT=$(mktemp)
 DESCRIPTION="issue 96 --- errors in SIMD alignment code"
 printf ">s1_1\nTT\n>s2_1\nGAT\n" | \
-    "${SWARM}" -d 2 -u "${OUTPUT}" &> /dev/null
-awk '/^H/ {exit $8 == "MIM" ? 0 : 1}' "${OUTPUT}" && \
+    "${SWARM}" -d 2 -o /dev/null -u - &> /dev/null | \
+    awk '/^H/ {exit $8 == "MIM" ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
 
 
 #*****************************************************************************#
