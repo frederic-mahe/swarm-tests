@@ -220,10 +220,11 @@ printf ">s1_2\nA\n>s2_1\nT\n" | \
 ##
 ## Output detailed statistics for each swarm (option -s)
 DESCRIPTION="issue 9 --- produce a statistics file with -s"
-STATS=$(mktemp)
-"${SWARM}" -s "${STATS}" "${ALL_IDENTICAL}" &> /dev/null
-[[ -s "${STATS}" ]] && success "${DESCRIPTION}" || failure "${DESCRIPTION}"
-rm "${STATS}"
+printf ">s_2\nA\n" | \
+    "${SWARM}" -o /dev/null -s - 2> /dev/null | \
+    grep -q "." && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 
 #*****************************************************************************#
@@ -236,9 +237,10 @@ rm "${STATS}"
 ##
 ## Check for unique headers and report error if duplicates are found
 DESCRIPTION="issue 10 --- check for unique headers"
-echo -e ">a_10\nACGT\n>a_5\nACGT\n" | \
+printf ">s_10\nA\n>s_5\nT\n" | \
     "${SWARM}" &> /dev/null && \
-    failure "${DESCRIPTION}" || success "${DESCRIPTION}"
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
 
 
 #*****************************************************************************#
