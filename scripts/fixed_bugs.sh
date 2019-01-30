@@ -1922,13 +1922,12 @@ rm "${OUTPUT}"
 ##
 ## bug in -w output when using the -a option, amplicon identifier is
 ## missing (see also issue 91)
-OUTPUT=$(mktemp)
 DESCRIPTION="issue 106 --- bug in -w output when using the -a option"
-printf ">s1\nT\n" | "${SWARM}" -a 1 -w "${OUTPUT}" &> /dev/null
-grep -q "s1_1" "${OUTPUT}" && \
+printf ">s\nT\n" | \
+    "${SWARM}" -a 1 -o /dev/null -w - 2> /dev/null | \
+    grep -q "s_1" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
 
 
 #*****************************************************************************#
