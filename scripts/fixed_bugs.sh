@@ -1776,17 +1776,15 @@ printf ">s1_1\nTT\n>s2_1\nGAT\n" | \
 ## https://github.com/torognes/swarm/issues/98
 ##  
 ## issue 98 --- writing seeds never above 100%
-OUTPUT=$(mktemp)
 DESCRIPTION="issue 98 --- writing seeds never above 100 percent"
 printf ">s_1\nA\n" | \
-    "${SWARM}" -w /dev/null  2>&1 | \
+    "${SWARM}" -w /dev/null 2>&1 | \
     sed 's/\r/\n/' | \
     grep "Writing seeds" | \
     tr -d "%" | \
     awk '$3 > 100 {exit 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
 
 
 #*****************************************************************************#
