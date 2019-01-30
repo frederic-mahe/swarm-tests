@@ -1407,11 +1407,13 @@ MAX_T=30
 DESCRIPTION="issue 74 --- run normally with short undereplicated sequences"
 for ((d=1 ; d<=$MAX_D ; d++)) ; do
     for ((t=1 ; t<=$MAX_T ; t++)) ; do
-        OTUs=$("${SWARM}" \
-                   -d ${d} \
-                   -t ${t} < ${ALL_IDENTICAL} 2> /dev/null | \
-                      wc -l)
-        (( ${OTUs} == 1 )) || failure "clustering fails for d=${d} and t=${t}"
+        printf ">s_1\nA\n" | \
+            "${SWARM}" \
+                -d ${d} \
+                -t ${t} 2> /dev/null | \
+            wc -l | \
+            grep -q "^1$" || \
+            failure "clustering fails for d=${d} and t=${t}"
     done
 done && success "${DESCRIPTION}"
 unset MAX_D MAX_T d t OTUs 
