@@ -1793,6 +1793,7 @@ printf ">s_1\nA\n" | \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
 
+
 #*****************************************************************************#
 #                                                                             #
 #                GCC warnings when using `-Wextra` (issue 99)                 #
@@ -1825,19 +1826,22 @@ rm "${OUTPUT}"
 ##
 ## issue 101 --- fail if an option is passed twice #1
 DESCRIPTION="issue 101 --- fail if an option is passed twice #1"
-"${SWARM}" -d 2 -d 2 < "${ALL_IDENTICAL}" &> /dev/null && \
+printf ">s_1\nA\n" | \
+    "${SWARM}" -d 2 -d 2 &> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## issue 101 --- fail if an option is passed twice #2
 DESCRIPTION="issue 101 --- fail if an option is passed twice #2"
-"${SWARM}" -v -v < "${ALL_IDENTICAL}" &> /dev/null && \
+printf ">s_1\nA\n" | \
+    "${SWARM}" -v -v &> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## issue 101 --- fail if an unknown option is passed
 DESCRIPTION="issue 101 --- fail if an unknown option is passed"
-"${SWARM}" --smurf < "${ALL_IDENTICAL}" &> /dev/null && \
+printf ">s_1\nA\n" | \
+    "${SWARM}" --smurf &> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
