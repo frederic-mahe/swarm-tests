@@ -298,22 +298,18 @@ printf ">s1_2\nA\n>s2_1\nT\n" | \
 ## generation number multipled by /d/. In the examples below, the
 ## expected sum is 4 differences (2 + 2), or 3 differences (2 + 1).
 DESCRIPTION="issue 14 --- radius is at most a multiple of d (radius <= g * d)"
-OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_2\nAACC\n>c_1\nCCCC\n" | \
-    "${SWARM}" -d 2 -s "${OUTPUT}" &> /dev/null
-(( $(awk -F "\t" '{print $7}' "${OUTPUT}") == 4 )) && \
+    "${SWARM}" -d 2 -o /dev/null -s - 2> /dev/null | \
+    awk '{exit $7 <= 4 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
 
 DESCRIPTION="issue 14 --- radius is in fact the sum of differences"
-OUTPUT=$(mktemp)
 printf ">a_3\nAAA\n>b_2\nACC\n>c_1\nCCC\n" | \
-    "${SWARM}" -d 2 -s "${OUTPUT}" &> /dev/null
-(( $(awk -F "\t" '{print $7}' "${OUTPUT}") == 3 )) && \
+    "${SWARM}" -d 2 -o /dev/null -s - 2> /dev/null | \
+    awk '{exit $7 == 3 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
 
 
 #*****************************************************************************#
