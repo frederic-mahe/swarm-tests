@@ -1515,16 +1515,13 @@ printf ">s_1\n\n" | swarm &> /dev/null && \
 ## should also be sorted by increasing alpha-numerical order to
 ## stabilize the sorting (assuming headers are unique)
 DESCRIPTION="issue 80 --- clustering results are not affected by input order"
-CLUSTERS_A=$(mktemp)
-CLUSTERS_B=$(mktemp)
-echo -e ">a_2\nAA\n>b_2\nTT\n>c_1\nAT\n" | \
-    "${SWARM}" -o "${CLUSTERS_A}" 2> /dev/null
-echo -e ">b_2\nTT\n>a_2\nAA\n>c_1\nAT\n" | \
-    "${SWARM}" -o "${CLUSTERS_B}" 2> /dev/null
-cmp -s "${CLUSTERS_A}" "${CLUSTERS_B}" && \
+cmp -s \
+    <(printf ">a_2\nAA\n>b_2\nTT\n>c_1\nAT\n" | \
+             "${SWARM}" -o - 2> /dev/null) \
+    <(printf ">b_2\nTT\n>a_2\nAA\n>c_1\nAT\n" | \
+             "${SWARM}" -o - 2> /dev/null) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${CLUSTERS_A}" "${CLUSTERS_B}"
 
 
 #*****************************************************************************#
