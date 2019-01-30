@@ -202,11 +202,12 @@ printf ">b_1\nT\n>s_10\nA\n" | \
 ## https://github.com/torognes/swarm/issues/8
 ##
 ## Simply check that swarm produces a non-empty file when using -u
-DESCRIPTION="issue 8 --- produce a uclust file with -u"
-UCLUST=$(mktemp)
-"${SWARM}" -u "${UCLUST}" "${ALL_IDENTICAL}" &> /dev/null
-[[ -s "${UCLUST}" ]] && success "${DESCRIPTION}" || failure "${DESCRIPTION}"
-rm "${UCLUST}"
+DESCRIPTION="issue 8 --- produce a non-empty uclust file with -u"
+printf ">s1_2\nA\n>s2_1\nT\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    grep -q "." && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 
 #*****************************************************************************#
