@@ -474,7 +474,7 @@ done
 ##
 ## -r reports the d value
 DESCRIPTION="issue 26 --- -r reports the d value"
-printf ">s_5\nA\n" | \
+printf ">s_1\nA\n" | \
     "${SWARM}" -d 2 -r -o - 2> /dev/null | \
     grep -q "swarm_2" && \
     success "${DESCRIPTION}" || \
@@ -529,16 +529,12 @@ printf ">s_1\nA\n" | "${SWARM}" 2>&1 | \
 ## https://github.com/torognes/swarm/issues/30
 ##
 ## -i number of differences is correct while -d 2 (2 expected)
-OUTPUT=$(mktemp)
 DESCRIPTION="issue 30 --- number of differences is correct in -i while -d 2 (2 expected)"
 printf ">a_1\nAAAA\n>b_1\nAACC\n" | \
-    "${SWARM}" -d 2 -i "${OUTPUT}" &> /dev/null
-SORTED_OUTPUT=$(awk -F "\t" '{print $3}' "${OUTPUT}")
-(( "${SORTED_OUTPUT}" == 2 )) && \
+    "${SWARM}" -d 2 -o /dev/null -i - 2> /dev/null | \
+    awk '{exit $3 == 2 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset SORTED_OUTPUT
 
 
 #*****************************************************************************#
