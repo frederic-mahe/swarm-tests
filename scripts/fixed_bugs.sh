@@ -668,12 +668,12 @@ printf ">a_2_2_3\nA\n" | \
 ##
 ## issue 40 --- swarm performs OTU breaking by default
 DESCRIPTION="issue 40 --- swarm performs OTU breaking by default"
-LINENUMBER=$(printf ">a_10\nACGT\n>b_9\nCGGT\n>c_1\nCCGT\n" | \
-		            "${SWARM}" 2> /dev/null | wc -l)
-(( "${LINENUMBER}" == 2 )) && \
+printf ">a_10\nACGT\n>b_9\nCGGT\n>c_1\nCCGT\n" | \
+	"${SWARM}" 2> /dev/null | \
+    wc -l | \
+    grep -q "^2$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-unset LINENUMBER
 
 
 #*****************************************************************************#
