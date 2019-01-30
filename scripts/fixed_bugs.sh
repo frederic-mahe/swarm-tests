@@ -135,12 +135,12 @@ printf ">s\0001a_1\nA\n" | \
 ## This is a mock-up for a possible warning message when duplicated
 ## sequences are present.
 DESCRIPTION="issue 3 --- check for unique sequences"
-WARNING="WARNING: 1 duplicated sequences detected."
-printf ">s1_1\nAA\n>s2_1\nAA\n" | \
-    "${SWARM}" 2>&1 | grep -q "^${WARNING}" && \
+printf ">s1_1\nA\n>s2_1\nA\n" | \
+    "${SWARM}" 2>&1 | \
+    grep -q "^WARNING: 1 duplicated sequences detected." && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-unset WARNING
+
 
 #*****************************************************************************#
 #                                                                             #
