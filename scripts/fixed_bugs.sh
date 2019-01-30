@@ -115,9 +115,10 @@ printf ">s1_3\nA\n>s2_1\nT\n" | \
 ## Allow ascii \x01 in headers (start-of-header, used by NCBI to
 ## separate entries in the FASTA headers of the NR and NT databases).
 DESCRIPTION="issue 2 --- ascii \\\x01 is allowed in fasta headers"
-echo -e ">aaa\0001aaa_1\nACGT\n" | \
+printf ">s\0001a_1\nA\n" | \
     "${SWARM}" &> /dev/null && \
-    success "${DESCRIPTION}" || failure "${DESCRIPTION}"
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 
 #*****************************************************************************#
