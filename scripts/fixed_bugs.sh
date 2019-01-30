@@ -1697,13 +1697,12 @@ unset CURRENT_MESSAGE EXPECTED_MESSAGE
 ## https://github.com/torognes/swarm/issues/93
 ##
 ## issue 93 --- uracil (U) is replaced with thymine (T) in output files
-OUTPUT=$(mktemp)
 DESCRIPTION="issue 93 --- uracil (U) is replaced with thymine (T) in -w output"
-printf ">s_1\nU\n" | swarm -w "${OUTPUT}" &> /dev/null
-awk 'NR == 2 {exit /^[Tt]$/ ? 0 : 1}' "${OUTPUT}" && \
+printf ">s_1\nU\n" | \
+    swarm -o /dev/null -w - 2> /dev/null | \
+    awk 'NR == 2 {exit /^[Tt]$/ ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
 
 
 #*****************************************************************************#
