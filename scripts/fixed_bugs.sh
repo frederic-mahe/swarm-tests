@@ -115,7 +115,7 @@ printf ">s1_3\nA\n>s2_1\nT\n" | \
 ## Allow ascii \x01 in headers (start-of-header, used by NCBI to
 ## separate entries in the FASTA headers of the NR and NT databases).
 DESCRIPTION="issue 2 --- ascii \\\x01 is allowed in fasta headers"
-printf ">s\0001a_1\nA\n" | \
+echo -e ">s\0001a_1\nA" | \
     "${SWARM}" &> /dev/null && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -153,15 +153,11 @@ printf ">s1_1\nA\n>s2_1\nA\n" | \
 ## Swarm outputs identifiers by decreasing abundance (and no
 ## additional criteria to stabilize the sorting)
 DESCRIPTION="issue 4 --- fasta entries are sorted by decreasing abundance"
-REPRESENTATIVES=$(mktemp)
-SEED="seq1"
-echo -e ">b_1\nACGTACGT\n>${SEED}_10\nACGTTCGT\n" | \
-    "${SWARM}" -w "${REPRESENTATIVES}" &> /dev/null
-head -n 1 "${REPRESENTATIVES}" | grep -q "^>${SEED}_11$" && \
+printf ">b_1\nT\n>s_10\nA\n" | \
+    "${SWARM}" -o /dev/null -w - 2> /dev/null | \
+    grep -q "^>s_11$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${REPRESENTATIVES}"
-unset SEED
 
 
 #*****************************************************************************#
