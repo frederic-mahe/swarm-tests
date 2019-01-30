@@ -69,7 +69,8 @@ ln -s "${ALL_IDENTICAL}" "${ALL_IDENTICAL2}"
 DESCRIPTION="swarm reads from a symbolic link"
 "${SWARM}" "${ALL_IDENTICAL2}" &> /dev/null && \
     success "${DESCRIPTION}" || failure "${DESCRIPTION}"
-rm -f "${ALL_IDENTICAL2}"
+## Clean
+rm -f "${ALL_IDENTICAL}" "${ALL_IDENTICAL2}"
 
 ## swarm accepts inputs from named pipes
 DESCRIPTION="swarm accepts inputs from named pipes"
@@ -257,8 +258,6 @@ printf ">s1_%d\nA\n" $(( (1 << 32) + 1 )) | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## Clean
-rm -f "${ALL_IDENTICAL}"
 
 exit 0
 
