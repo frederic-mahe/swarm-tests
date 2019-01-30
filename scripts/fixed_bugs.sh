@@ -1050,29 +1050,23 @@ rm "${OUTPUT}"
 ##
 ## issue 56 --- -i number of differences is correct with -d 1
 ##
-## with identical sequences we expect zero difference in column 3
+## with one-diff sequences we expect one difference in column 3
 DESCRIPTION="issue 56 --- -i number of differences is correct with -d 1"
-OUTPUT=$(mktemp)
-printf ">s_1\nA\n>w_1\nA\n" | "${SWARM}" -d 1 -i "${OUTPUT}"  &> /dev/null
-OBSERVED=$(awk '{print $3}' "${OUTPUT}") 
-(( "${OBSERVED}" == 0 )) && \
+printf ">s1_1\nA\n>s2_1\nT\n" | \
+    "${SWARM}" -d 1 -o /dev/null -i - 2> /dev/null | \
+    awk '{exit $3 == 1 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset OBSERVED
 
 ## issue 56 --- -i number of differences is correct with -d 2
 ##
 ## with identical sequences we expect zero difference in column 3
 DESCRIPTION="issue 56 --- -i number of differences is correct with -d 2"
-OUTPUT=$(mktemp)
-printf ">s_1\nA\n>w_1\nA\n" | "${SWARM}" -d 2 -i "${OUTPUT}"  &> /dev/null
-OBSERVED=$(awk '{print $3}' "${OUTPUT}") 
-(( "${OBSERVED}" == 0 )) && \
+printf ">s1_1\nA\n>s2_1\nT\n" | \
+    "${SWARM}" -d 2 -o /dev/null -i - 2> /dev/null | \
+    awk '{exit $3 == 1 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset OBSERVED
 
 
 #*****************************************************************************#
