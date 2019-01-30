@@ -637,15 +637,11 @@ printf ">s_1\na\n" | "${SWARM}" &> /dev/null && \
 ##
 ## issue 37 --- fasta headers can contain more than one underscore symbol
 DESCRIPTION="issue 37 --- fasta headers can contain more than one underscore symbol"
-STATS=$(mktemp)
-IDENTIFIER="a_2_2"
-echo -e ">${IDENTIFIER}_3\nACGTACGT" | \
-    "${SWARM}" -s "${STATS}" &> /dev/null
-grep -qE "[[:blank:]]${IDENTIFIER}[[:blank:]]" "${STATS}" && \
+printf ">a_2_2_3\nA\n" | \
+    "${SWARM}" -o /dev/null -s - 2> /dev/null | \
+    awk '{exit $3 == "a_2_2" ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${STATS}"
-unset IDENTIFIER
 
 
 #*****************************************************************************#
