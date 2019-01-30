@@ -2143,7 +2143,8 @@ done | "${SWARM}" &> /dev/null && \
 
 ## no problem when the input contains 3 sequences or more
 DESCRIPTION="issue 121 --- segmentation fault when there are only 1 or 2 input sequences"
-"${SWARM}" <(printf ">s1_1\nA\n>s2_1\nA\n") &> /dev/null && \
+printf ">s1_1\nA\n>s2_1\nT\n" | \
+    "${SWARM}" &> /dev/null && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 
