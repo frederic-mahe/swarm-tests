@@ -567,15 +567,12 @@ printf ">a_1\nAAAA\n>b_1\nAACC\n" | \
 ## that goes through a valley (D). The expected tree is A - {B - C, D}.
 ##
 DESCRIPTION="issue 33 --- subseeds are sorted by decreasing abundant"
-OUTPUT=$(mktemp)
-EXPECTED=$(printf "a\tb\t1\t1\t1\na\tc\t1\t1\t1\nb\td\t1\t1\t2\n")
-printf ">a_5\nAA\n>d_1\nGC\n>b_2\nAC\n>c_1\nGA\n" | \
-    "${SWARM}" -i "${OUTPUT}" &> /dev/null
-[[ $(< "${OUTPUT}") == "${EXPECTED}" ]] && \
+cmp -s \
+    <(printf ">a_5\nAA\n>d_1\nGC\n>b_2\nAC\n>c_1\nGA\n" | \
+             "${SWARM}" -o /dev/null -i - 2> /dev/null) \
+    <(printf "a\tb\t1\t1\t1\na\tc\t1\t1\t1\nb\td\t1\t1\t2\n") && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset EXPECTED
 
 
 #*****************************************************************************#
@@ -610,7 +607,8 @@ unset EXPECTED
 ##
 ## issue 36 --- swarm reads from a pipe
 DESCRIPTION="issue 36 --- swarm reads from a pipe"
-printf ">s_1\na\n" | "${SWARM}" &> /dev/null && \
+printf ">s_1\na\n" | \
+    "${SWARM}" &> /dev/null && \
     success "${DESCRIPTION}" || failure "${DESCRIPTION}"
 
 
