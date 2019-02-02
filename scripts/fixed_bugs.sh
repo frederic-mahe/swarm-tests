@@ -80,6 +80,34 @@ printf ">s_3\nA\n>s2_1\nAT\n>s1_1\nTA\n>s3_1\nATA\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+# Conflict between the shell's /dev/stdout and C++'s stdout. Swarm now
+# avoids opening /dev/stdout unless asked by the user:
+# https://github.com/torognes/swarm/commit/5a9ae812cca0333876250929ba0ece850fa64c0c
+DESCRIPTION="non-github issue 2 --- file capturing /dev/stdout is not empty"
+TMP=$(mktemp)
+(echo "1" ; "${SWARM}" -v 2> /dev/null) > "${TMP}"
+[[ -s "${TMP}" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${TMP}"
+
+DESCRIPTION="non-github issue 2 --- file capturing /dev/stdout contains the expected string"
+TMP=$(mktemp)
+(echo "1" ; "${SWARM}" -v 2> /dev/null) > "${TMP}"
+grep -q "^1" "${TMP}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${TMP}"
+
+DESCRIPTION="non-github issue 2 --- file capturing /dev/stdout contains no null character"
+TMP=$(mktemp)
+(echo "1" ; "${SWARM}" -v 2> /dev/null ; echo "2") > "${TMP}"
+# grep -E to work on OSX and -P on GNU/Linux
+(grep -Eqa '\x00' "${TMP}" || grep -Pqa '\x00' "${TMP}") && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+rm "${TMP}"
+
 
 #*****************************************************************************#
 #                                                                             #
