@@ -108,6 +108,14 @@ TMP=$(mktemp)
         success "${DESCRIPTION}"
 rm "${TMP}"
 
+DESCRIPTION="non-github issue 2 --- file capturing /dev/stderr starts with the expected string"
+TMP=$(mktemp)
+(1>&2 echo "1" ; "${SWARM}" -v ; 1>&2 echo "2") 2> "${TMP}"
+grep -q "^1" "${TMP}" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${TMP}"
+
 
 #*****************************************************************************#
 #                                                                             #
