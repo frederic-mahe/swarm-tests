@@ -146,7 +146,7 @@ printf ">s1_3\nA\n>s2_1\nT\n" | \
 ## separate entries in the FASTA headers of the NR and NT databases).
 DESCRIPTION="issue 2 --- ascii \\\x01 is allowed in fasta headers"
 echo -e ">s\0001a_1\nA" | \
-    "${SWARM}" &> /dev/null && \
+    "${SWARM}" > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -268,7 +268,7 @@ printf ">s_2\nA\n" | \
 ## Check for unique headers and report error if duplicates are found
 DESCRIPTION="issue 10 --- check for unique headers"
 printf ">s_10\nA\n>s_5\nT\n" | \
-    "${SWARM}" &> /dev/null && \
+    "${SWARM}" > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -442,13 +442,13 @@ unset OCTAL
 for OPTION in "-z" "--usearch-abundance" ; do
     DESCRIPTION="issue 22 --- support for usearch abundance ending with semicolon (${OPTION})"
     printf ">s;size=1;\nA\n" | \
-	    "${SWARM}" "${OPTION}" &> /dev/null && \
+	    "${SWARM}" "${OPTION}" > /dev/null 2>&1 && \
 	    success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 
     DESCRIPTION="issue 22 --- support for usearch abundance ending without semicolon (${OPTION})"
     printf ">s;size=1\nA\n" | \
-	    "${SWARM}" "${OPTION}" &> /dev/null && \
+	    "${SWARM}" "${OPTION}" > /dev/null 2>&1 && \
 	    success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
@@ -466,7 +466,7 @@ done
 for OPTION in "-r" "--mothur" ; do
     DESCRIPTION="issue 23 --- swarms accepts the option ${OPTION}"
     printf ">s_1\nA\n" | \
-        "${SWARM}" "${OPTION}" &> /dev/null && \
+        "${SWARM}" "${OPTION}" > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
@@ -644,7 +644,7 @@ cmp -s \
 ## issue 36 --- swarm reads from a pipe
 DESCRIPTION="issue 36 --- swarm reads from a pipe"
 printf ">s_1\na\n" | \
-    "${SWARM}" &> /dev/null && \
+    "${SWARM}" > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || failure "${DESCRIPTION}"
 
 
@@ -716,7 +716,7 @@ printf ">a_10\nACGT\n>b_9\nCGGT\n>c_1\nCCGT\n" | \
 OUTPUT=$(mktemp)
 DESCRIPTION="issue 41 --- -i number of the OTU is correct #1"
 printf ">a_1\nAAAA\n>b_1\nAAAC\n" | \
-    "${SWARM}" -i "${OUTPUT}" &> /dev/null
+    "${SWARM}" -i "${OUTPUT}" > /dev/null 2>&1
 SORTED_OUTPUT=$(awk -F "\t" '{print $4}' "${OUTPUT}")
 (( "${SORTED_OUTPUT}" == 1 )) && \
     success "${DESCRIPTION}" || \
@@ -728,7 +728,7 @@ unset SORTED_OUTPUT
 OUTPUT=$(mktemp)
 DESCRIPTION="issue 41 --- -i number of the OTU is correct #2"
 printf ">a_1\nAA\n>b_1\nAC\n>c_1\nGG\n>d_1\nGT\n" | \
-    "${SWARM}" -i "${OUTPUT}" &> /dev/null
+    "${SWARM}" -i "${OUTPUT}" > /dev/null 2>&1
 SORTED_OUTPUT=$(awk '{n = $4} END {print n}' "${OUTPUT}")
 (( "${SORTED_OUTPUT}" == 2 )) && \
     success "${DESCRIPTION}" || \
@@ -747,7 +747,7 @@ unset SORTED_OUTPUT
 ##
 ## issue 42 --- swarm accepts --fastidious options
 DESCRIPTION="issue 42 --- swarm accepts --fastidious options"
-printf ">s_1\nA\n" | "${SWARM}" -f &> /dev/null && \
+printf ">s_1\nA\n" | "${SWARM}" -f > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -817,7 +817,7 @@ printf ">s_1\nA\n" | "${SWARM}" -f &> /dev/null && \
 ##
 ## issue 48 --- swarm accepts -d 0
 DESCRIPTION="issue 48 --- swarm accepts -d 0"
-printf ">s_1\nA\n" | "${SWARM}" -d 0 &> /dev/null && \
+printf ">s_1\nA\n" | "${SWARM}" -d 0 > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -865,7 +865,7 @@ OUTPUT=$(mktemp)
 DESCRIPTION="issue 51 --- -w outputs abundance notation style matching the input #1"
 EXPECTED=$(printf ">a_1\nAAAA\n")
 printf ">a_1\nAAAA\n" | \
-    "${SWARM}" -w "${OUTPUT}" &> /dev/null
+    "${SWARM}" -w "${OUTPUT}" > /dev/null 2>&1
 [[ "$(< "${OUTPUT}")" == "${EXPECTED}" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -877,7 +877,7 @@ OUTPUT=$(mktemp)
 DESCRIPTION="issue 51 --- -w outputs abundance notation style matching the input #2"
 EXPECTED=$(printf ">a;size=1;\nAAAA\n")
 printf ">a;size=1;\nAAAA\n" | \
-    "${SWARM}" -w "${OUTPUT}" -z &> /dev/null
+    "${SWARM}" -w "${OUTPUT}" -z > /dev/null 2>&1
 [[ "$(< "${OUTPUT}")" == "${EXPECTED}" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1009,7 +1009,7 @@ unset SEQUENCE MICROVARIANTS_L1 MICROVARIANTS_L2
 OUTPUT=$(mktemp)
 DESCRIPTION="issue 55 --- grafted amplicon receives a number of difference of 2"
 printf ">a_3\nAAAA\n>b_1\nAATT\n" | \
-    "${SWARM}" -f -i "${OUTPUT}" &> /dev/null
+    "${SWARM}" -f -i "${OUTPUT}" > /dev/null 2>&1
 NUMBER_OF_DIFFERENCES=$(awk '{print $3}' "${OUTPUT}")
 NUMBER_OF_DIFFERENCES=${NUMBER_OF_DIFFERENCES:=0} # set to zero if null
 (( "${NUMBER_OF_DIFFERENCES}" == 2 )) && \
@@ -1023,7 +1023,7 @@ unset NUMBER_OF_DIFFERENCES
 OUTPUT=$(mktemp)
 DESCRIPTION="issue 55 --- grafted amplicons receive the OTU number of the main OTU"
 printf ">a_3\nAAAA\n>b_1\nAAAT\n>c_1\nATTT\n>d_1\nTTTT\n" | \
-    "${SWARM}" -f -i "${OUTPUT}" &> /dev/null
+    "${SWARM}" -f -i "${OUTPUT}" > /dev/null 2>&1
 awk '$4 != 1 {exit 1}' "${OUTPUT}" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1038,7 +1038,7 @@ rm "${OUTPUT}"
 OUTPUT=$(mktemp)
 DESCRIPTION="issue 55 --- 2 differences between the grafted amplicon and the grafting point"
 printf ">a_3\nAAAA\n>b_1\nAAAT\n>c_1\nATTT\n>d_1\nTTTT\n" | \
-    "${SWARM}" -f -i "${OUTPUT}" &> /dev/null
+    "${SWARM}" -f -i "${OUTPUT}" > /dev/null 2>&1
 awk '$3 == 2 {s = "true"} END {exit s == "true" ? 0 : 1}' "${OUTPUT}" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1054,7 +1054,7 @@ rm "${OUTPUT}"
 OUTPUT=$(mktemp)
 DESCRIPTION="issue 55 --- 5th column is the number of steps from the seed to the amplicon"
 printf ">a_3\nAAAA\n>b_1\nAAAT\n>c_1\nATTT\n>d_1\nTTTT\n" | \
-    "${SWARM}" -f -i "${OUTPUT}" &> /dev/null
+    "${SWARM}" -f -i "${OUTPUT}" > /dev/null 2>&1
 awk '$5 > 1 {s = "true"} END {exit s == "true" ? 0 : 1}' "${OUTPUT}" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1122,7 +1122,7 @@ printf ">s1_1\nA\n>s2_1\nT\n" | \
 ##
 ## issue 59 --- swarm accepts -a option
 DESCRIPTION="issue 59 --- swarm accepts -a option"
-printf ">s\nA\n" | "${SWARM}" -a 2 &> /dev/null && \
+printf ">s\nA\n" | "${SWARM}" -a 2 > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -1164,7 +1164,7 @@ rm "${OUTPUT}"
 
 ## issue 59 --- swarm -a fails without argument
 DESCRIPTION="issue 59 --- swarm -a fails without argument"
-printf ">s\nA\n" | "${SWARM}" -a &> /dev/null&& \
+printf ">s\nA\n" | "${SWARM}" -a > /dev/null 2>&1&& \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -1172,7 +1172,7 @@ printf ">s\nA\n" | "${SWARM}" -a &> /dev/null&& \
 DESCRIPTION="issue 59 --- issue 59 --- swarm -a does not overwrite abundance in case of multiple _ with numbers"
 OUTPUT=$(mktemp)
 printf ">a_33_2_3\nA\n>b_33_2_3\nA\n" | \
-    "${SWARM}" -a 2 -s "${OUTPUT}" &> /dev/null
+    "${SWARM}" -a 2 -s "${OUTPUT}" > /dev/null 2>&1
 (( $(awk '{print $4}' "${OUTPUT}") == 3 )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1293,7 +1293,7 @@ SEED="seq1"
 for i in {1..3} ; do
     DESCRIPTION="issue 67 --- when d = ${i}, seed is the first field of the OTU list"
     echo -e ">${SEED}_3\nA\n>seq2_1\nA" | \
-	    "${SWARM}" -d ${i} -w "${REPRESENTATIVES}" &> /dev/null
+	    "${SWARM}" -d ${i} -w "${REPRESENTATIVES}" > /dev/null 2>&1
     head -n 1 "${REPRESENTATIVES}" | grep -q "^>${SEED}_4$" && \
 	    success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
@@ -1306,7 +1306,7 @@ REPRESENTATIVES=$(mktemp)
 for i in {1..3} ; do
     DESCRIPTION="issue 67 --- the sequence of the representatives is the sequence of the seed"
     echo -e ">seq1_3\nA\n>seq2_1\nT" | \
-	    "${SWARM}" -d ${i} -w "${REPRESENTATIVES}" &> /dev/null
+	    "${SWARM}" -d ${i} -w "${REPRESENTATIVES}" > /dev/null 2>&1
     ##  printf ">s\nA\n" | awk 'NR == 2 {exit /^A$/ ? 0 : 1}' && echo "true" || echo "false"
     sed "2q;d" "${REPRESENTATIVES}" | grep -qi "^A$" && \
 	    success "${DESCRIPTION}" || \
@@ -1376,7 +1376,7 @@ for i in 0 10 13 32 ; do
     DESCRIPTION="issue 72 --- ascii character ${i} is not allowed in fasta headers"
     OCTAL=$(printf "\%04o" ${i})
     echo -e ">s${OCTAL}_1\nACGT\n" | \
-        "${SWARM}"  &> /dev/null && \
+        "${SWARM}"  > /dev/null 2>&1 && \
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
 done
@@ -1391,7 +1391,7 @@ for i in 0 10 13 32 ; do
     DESCRIPTION="issue 72 --- ascii character ${i} is accepted if present at the end of the header"
     OCTAL=$(printf "\%04o" ${i})
     echo -e ">s_1${OCTAL}\nACGT\n" | \
-        "${SWARM}"  &> /dev/null && \
+        "${SWARM}"  > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
@@ -1481,7 +1481,7 @@ printf ">s_1\nA\n" | \
 ## Number of differences (--differences is 256)
 DESCRIPTION="issue 76 --- swarm aborts when --difference is 256"
 printf ">s_1\nA\n" | \
-    "${SWARM}" -d 256 &> /dev/null && \
+    "${SWARM}" -d 256 > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -1518,7 +1518,7 @@ printf ">s_1\nA\n" | \
 ##
 ## issue 79 --- swarm deals with empty sequences
 DESCRIPTION="issue 79 --- swarm deals with empty sequences"
-printf ">s_1\n\n" | swarm &> /dev/null && \
+printf ">s_1\n\n" | swarm > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -1616,7 +1616,7 @@ printf ">s_1\nt\n" | \
 ##
 ## Swarm supports unseekable pipes
 DESCRIPTION="issue 86 --- swarm supports unseekable pipes"
-"${SWARM}" <(printf ">s_1\nT\n") &> /dev/null && \
+"${SWARM}" <(printf ">s_1\nT\n") > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -1780,7 +1780,7 @@ printf ">s1_1\nCTATTGTTGTC\n>s2_1\nTCTATGTGTCT\n" | \
 # with 2 differences, a score of 28 and an alignment length of 3.
 DESCRIPTION="issue 96 --- errors in SIMD alignment code"
 printf ">s1_1\nTT\n>s2_1\nGAT\n" | \
-    "${SWARM}" -d 2 -o /dev/null -u - &> /dev/null | \
+    "${SWARM}" -d 2 -o /dev/null -u - > /dev/null 2>&1 | \
     awk '/^H/ {exit $8 == "MIM" ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1839,21 +1839,21 @@ printf ">s_1\nA\n" | \
 ## issue 101 --- fail if an option is passed twice #1
 DESCRIPTION="issue 101 --- fail if an option is passed twice #1"
 printf ">s_1\nA\n" | \
-    "${SWARM}" -d 2 -d 2 &> /dev/null && \
+    "${SWARM}" -d 2 -d 2 > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## issue 101 --- fail if an option is passed twice #2
 DESCRIPTION="issue 101 --- fail if an option is passed twice #2"
 printf ">s_1\nA\n" | \
-    "${SWARM}" -v -v &> /dev/null && \
+    "${SWARM}" -v -v > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## issue 101 --- fail if an unknown option is passed
 DESCRIPTION="issue 101 --- fail if an unknown option is passed"
 printf ">s_1\nA\n" | \
-    "${SWARM}" --smurf &> /dev/null && \
+    "${SWARM}" --smurf > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -1870,7 +1870,7 @@ printf ">s_1\nA\n" | \
 ## swarm accepts abundance values equal to 2^32
 DESCRIPTION="issue 102 --- abundance values can be equal or greater than 2^32"
 printf ">s1_%d\nA\n" $(( 1 << 32 )) | \
-    "${SWARM}" &> /dev/null && \
+    "${SWARM}" > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -1913,7 +1913,7 @@ printf ">s1_%d\nA\n" $(( 1 << 32 )) | \
 ## redirection). That's normal. See also issue 36.
 DESCRIPTION="issue 105 --- when no filename is given, swarm says it is waiting for data on stdin"
 (cmdpid=${BASHPID}
- (sleep 1 ; kill -PIPE ${cmdpid} &> /dev/null) & "${SWARM}" 2>&1) | \
+ (sleep 1 ; kill -PIPE ${cmdpid} > /dev/null 2>&1) & "${SWARM}" 2>&1) | \
     grep -q "^Waiting" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -2015,7 +2015,7 @@ printf ">a_1\nTGGA\n>b_2\nTTTT\n>c_1\nTTGA\n>d_1\nCTGA\n" | \
 DESCRIPTION="issue 109 --- segmentation fault error with undereplicated dataset #1"
 for ((i=1 ; i<=23 ; i++)) ; do
     printf ">s%d_1\nA\n" ${i}
-done | "${SWARM}" &> /dev/null && \
+done | "${SWARM}" > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 
@@ -2023,7 +2023,7 @@ done | "${SWARM}" &> /dev/null && \
 DESCRIPTION="issue 109 --- segmentation fault error with undereplicated dataset #2"
 for ((i=1 ; i<=24 ; i++)) ; do
     printf ">s%d_1\nA\n" ${i}
-done | "${SWARM}" &> /dev/null && \
+done | "${SWARM}" > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 
@@ -2151,7 +2151,7 @@ done | "${SWARM}" &> /dev/null && \
 ## no problem when the input contains 3 sequences or more
 DESCRIPTION="issue 121 --- segmentation fault when there are only 1 or 2 input sequences"
 printf ">s1_1\nA\n>s2_1\nT\n" | \
-    "${SWARM}" &> /dev/null && \
+    "${SWARM}" > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 
