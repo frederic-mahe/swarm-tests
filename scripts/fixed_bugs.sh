@@ -2260,5 +2260,43 @@ if which valgrind > /dev/null ; then
 fi
 
 
+#*****************************************************************************#
+#                                                                             #
+#   Fastidious Bloom filter requires more memory than indicated in the help   #
+#   (issue 127)                                                               #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/127
+
+## Bloom filter needs at least 8 MB, even for a minimal example
+## (manpage used to indicate 3 MB)
+DESCRIPTION="issue 127 --- swarm fastidious needs at least 8 MB for the Bloom filter"
+printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" -f -c 8 > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## Ceiling should fail when 0 <= c < 8
+for ((c=0 ; c<8; c++)) ; do
+    DESCRIPTION="issue 127 --- swarm aborts when --ceiling is ${c}"
+    printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+        "${SWARM}" -f -c ${c} > /dev/null 2>&1 && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+done
+
+
+#*****************************************************************************#
+#                                                                             #
+#          Error occur in amplicon_contingency_table.py (issue 128)           #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/128
+
+## not testable
+
+
 exit 0
 
