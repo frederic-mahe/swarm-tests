@@ -995,59 +995,52 @@ unset SEQUENCE MICROVARIANTS_L1 MICROVARIANTS_L2
 
 ## The grafted amplicons should receive a number of differences of 2
 ## (present output: "", expected output: a b 2 1 2).
-OUTPUT=$(mktemp)
 DESCRIPTION="issue 55 --- grafted amplicon receives a number of difference of 2"
 printf ">a_3\nAAAA\n>b_1\nAATT\n" | \
-    "${SWARM}" -f -i "${OUTPUT}" > /dev/null 2>&1
-NUMBER_OF_DIFFERENCES=$(awk '{print $3}' "${OUTPUT}")
-NUMBER_OF_DIFFERENCES=${NUMBER_OF_DIFFERENCES:=0} # set to zero if null
-(( "${NUMBER_OF_DIFFERENCES}" == 2 )) && \
+    "${SWARM}" -f -o /dev/null -i - 2> /dev/null | \
+    awk '{exit $3 == 2 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset NUMBER_OF_DIFFERENCES
 
 ## Grafted amplicons receive the OTU number of the main OTU (in this
 ## toy example, the 4th column should be always equal to 1)
-OUTPUT=$(mktemp)
+##
+## a	b	1	1	1
+## b	c	2	1	2
+## c	d	1	1	1
 DESCRIPTION="issue 55 --- grafted amplicons receive the OTU number of the main OTU"
 printf ">a_3\nAAAA\n>b_1\nAAAT\n>c_1\nATTT\n>d_1\nTTTT\n" | \
-    "${SWARM}" -f -i "${OUTPUT}" > /dev/null 2>&1
-awk '$4 != 1 {exit 1}' "${OUTPUT}" && \
+    "${SWARM}" -f -o /dev/null -i - 2> /dev/null | \
+    awk '$4 != 1 {exit 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
 
 ## Number of differences between the grafted amplicon and the grafting point is 2
 ##
 ## the structure file should be:
 ## a   b   1   1   1
 ## b   c   2   1   2
-## c   d   1   1   3
-OUTPUT=$(mktemp)
+## c   d   1   1   1
 DESCRIPTION="issue 55 --- 2 differences between the grafted amplicon and the grafting point"
 printf ">a_3\nAAAA\n>b_1\nAAAT\n>c_1\nATTT\n>d_1\nTTTT\n" | \
-    "${SWARM}" -f -i "${OUTPUT}" > /dev/null 2>&1
-awk '$3 == 2 {s = "true"} END {exit s == "true" ? 0 : 1}' "${OUTPUT}" && \
+    "${SWARM}" -f -o /dev/null -i - 2> /dev/null | \
+        awk '$2 == "c" && $3 == 2 {s++} END {exit s ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
 
 ## The fifth column of the structure file should be equal to number of
-## steps from the seed to the amplicon.
+## steps from the seed to the amplicon (1 or 2 steps in the example).
 ##
 ## the structure file should be:
 ## a   b   1   1   1
 ## b   c   2   1   2
-## c   d   1   1   3
-OUTPUT=$(mktemp)
+## c   d   1   1   1
 DESCRIPTION="issue 55 --- 5th column is the number of steps from the seed to the amplicon"
 printf ">a_3\nAAAA\n>b_1\nAAAT\n>c_1\nATTT\n>d_1\nTTTT\n" | \
-    "${SWARM}" -f -i "${OUTPUT}" > /dev/null 2>&1
-awk '$5 > 1 {s = "true"} END {exit s == "true" ? 0 : 1}' "${OUTPUT}" && \
+    "${SWARM}" -f -i - -o /dev/null 2> /dev/null | \
+    awk '$5 < 1 || $5 > 2 {exit 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
 
 
 #*****************************************************************************#
