@@ -145,7 +145,7 @@ printf ">s1_3\nA\n>s2_1\nT\n" | \
 ## Allow ascii \x01 in headers (start-of-header, used by NCBI to
 ## separate entries in the FASTA headers of the NR and NT databases).
 DESCRIPTION="issue 2 --- ascii \\\x01 is allowed in fasta headers"
-echo -e ">s\0001a_1\nA" | \
+printf ">s\01a_1\nA\n" | \
     "${SWARM}" > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -183,9 +183,9 @@ printf ">s1_1\nA\n>s2_1\nA\n" | \
 ## Swarm outputs identifiers by decreasing abundance (and no
 ## additional criteria to stabilize the sorting)
 DESCRIPTION="issue 4 --- fasta entries are sorted by decreasing abundance"
-printf ">b_1\nT\n>s_10\nA\n" | \
+printf ">s1_1\nT\n>s2_10\nA\n" | \
     "${SWARM}" -o /dev/null -w - 2> /dev/null | \
-    grep -q "^>s_11$" && \
+    grep -q "^>s2_11$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -267,7 +267,7 @@ printf ">s_2\nA\n" | \
 ##
 ## Check for unique headers and report error if duplicates are found
 DESCRIPTION="issue 10 --- check for unique headers"
-printf ">s_10\nA\n>s_5\nT\n" | \
+printf ">s_2\nA\n>s_1\nT\n" | \
     "${SWARM}" > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
@@ -421,13 +421,11 @@ printf ">a_3\nAAA\n>b_2\nACC\n>c_1\nCCC\n" | \
 ## user of where that character was found. SWARM (1.2.6) now reports
 ## the line number and the bad character.
 DESCRIPTION="issue 21 --- report first illegal fasta character and line number"
-OCTAL=$(printf "\%04o" 66)
-echo -e ">aaaa_1\nAC${OCTAL}GT\n" | \
+printf ">s_1\nB\n" | \
     "${SWARM}" 2>&1 | \
     grep -qE "Error: Illegal character \'.\' in sequence on line [0-9]+" && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
-unset OCTAL
 
 
 #*****************************************************************************#
@@ -452,6 +450,7 @@ for OPTION in "-z" "--usearch-abundance" ; do
 	    success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
+unset OPTION
 
 
 #*****************************************************************************#
@@ -470,6 +469,7 @@ for OPTION in "-r" "--mothur" ; do
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
+unset OPTION
 
 
 #*****************************************************************************#
@@ -521,7 +521,8 @@ printf ">s_1\nA\n" | \
 ##
 ## swarm indicates its progress during the clustering process
 DESCRIPTION="issue 27 ---- report progress during the clustering process"
-printf ">s_1\nA\n" | "${SWARM}" 2>&1 | \
+printf ">s_1\nA\n" | \
+    "${SWARM}" 2>&1 | \
     sed 's/\r/\n/' | \
     grep -q -m 2 "Clustering: .*%" && \
     success "${DESCRIPTION}" || \
@@ -645,7 +646,8 @@ cmp -s \
 DESCRIPTION="issue 36 --- swarm reads from a pipe"
 printf ">s_1\nA\n" | \
     "${SWARM}" > /dev/null 2>&1 && \
-    success "${DESCRIPTION}" || failure "${DESCRIPTION}"
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 
 #*****************************************************************************#
@@ -713,28 +715,20 @@ printf ">s1_3\nAA\n>s2_3\nCC\n>s3_1\nAC\n" | \
 ## https://github.com/torognes/swarm/issues/41
 ##
 ## issue 41 --- -i number of the OTU is correct #1
-OUTPUT=$(mktemp)
 DESCRIPTION="issue 41 --- -i number of the OTU is correct #1"
-printf ">a_1\nAAAA\n>b_1\nAAAC\n" | \
-    "${SWARM}" -i "${OUTPUT}" > /dev/null 2>&1
-SORTED_OUTPUT=$(awk -F "\t" '{print $4}' "${OUTPUT}")
-(( "${SORTED_OUTPUT}" == 1 )) && \
+printf ">s1_1\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -i - -o /dev/null 2> /dev/null | \
+    awk -F "\t" '{exit $4 == 1 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset SORTED_OUTPUT
 
 ## issue 41 --- -i number of the OTU is correct #2
-OUTPUT=$(mktemp)
 DESCRIPTION="issue 41 --- -i number of the OTU is correct #2"
-printf ">a_1\nAA\n>b_1\nAC\n>c_1\nGG\n>d_1\nGT\n" | \
-    "${SWARM}" -i "${OUTPUT}" > /dev/null 2>&1
-SORTED_OUTPUT=$(awk '{n = $4} END {print n}' "${OUTPUT}")
-(( "${SORTED_OUTPUT}" == 2 )) && \
+printf ">s1_1\nAA\n>s2_1\nAC\n>s3_1\nGG\n>s4_1\nGT\n" | \
+    "${SWARM}" -i - -o /dev/null 2> /dev/null | \
+    awk 'NR == 2 {exit $4 == 2 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset SORTED_OUTPUT
 
 
 #*****************************************************************************#
@@ -745,9 +739,10 @@ unset SORTED_OUTPUT
 
 ## https://github.com/torognes/swarm/issues/42
 ##
-## issue 42 --- swarm accepts --fastidious options
+## issue 42 --- swarm accepts --fastidious options (-d 1 is implicit)
 DESCRIPTION="issue 42 --- swarm accepts --fastidious options"
-printf ">s_1\nA\n" | "${SWARM}" -f > /dev/null 2>&1 && \
+printf ">s_1\nA\n" | \
+    "${SWARM}" -f > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -817,17 +812,18 @@ printf ">s_1\nA\n" | "${SWARM}" -f > /dev/null 2>&1 && \
 ##
 ## issue 48 --- swarm accepts -d 0
 DESCRIPTION="issue 48 --- swarm accepts -d 0"
-printf ">s_1\nA\n" | "${SWARM}" -d 0 > /dev/null 2>&1 && \
+printf ">s_1\nA\n" | \
+    "${SWARM}" -d 0 > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
 ## issue 48 --- -d 0 delete duplicate sequences
 DESCRIPTION="issue 48 --- -d 0 delete duplicate sequences"
-OBSERVED=$(printf ">s_1\nA\n>w_1\nC\n" | "${SWARM}" -d 0 2> /dev/null | wc -l) 
-(( "${OBSERVED}" == 2 )) && \
+printf ">s1_1\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -d 0 2> /dev/null | \
+    awk 'END {exit NR == 2 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-unset OBSERVED
 
 
 #*****************************************************************************#
@@ -1299,7 +1295,7 @@ for i in {1..3} ; do
             failure "${DESCRIPTION}"
 done
 rm "${REPRESENTATIVES}"
-unset SEED
+unset i SEED
 
 ## The sequence of the representatives is the sequence of the seed
 REPRESENTATIVES=$(mktemp)
@@ -1313,8 +1309,6 @@ for i in {1..3} ; do
             failure "${DESCRIPTION}"
 done
 rm "${REPRESENTATIVES}"
-
-exit
 
 
 #*****************************************************************************#
@@ -1370,34 +1364,30 @@ exit
 ## https://github.com/torognes/swarm/issues/72
 ##
 ## Define ASCII characters not accepted in fasta identifiers
-#  0: NULL
-# 10: "\n"
-# 13: "\r"
-# 32: SPACE
-for i in 0 10 13 32 ; do
-    DESCRIPTION="issue 72 --- ascii character ${i} is not allowed in fasta headers"
-    OCTAL=$(printf "\%04o" ${i})
-    echo -e ">s${OCTAL}_1\nACGT\n" | \
+#  0 : NULL  : 00
+# 10 : \n    : 0A
+# 13 : \r    : 0D
+# 32 : SPACE : 20
+for i in 00 0A 0D 20 ; do
+    DESCRIPTION="issue 72 --- ascii character x${i} is not allowed in fasta headers"
+    printf ">s\x${i}_1\nA\n" | \
         "${SWARM}"  > /dev/null 2>&1 && \
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
 done
-unset OCTAL
 
 ## some ascii characters are accepted *if* present at the end of the header
-#  0: NULL
-# 10: "\n"
-# 13: "\r"
-# 32: SPACE
-for i in 0 10 13 32 ; do
-    DESCRIPTION="issue 72 --- ascii character ${i} is accepted if present at the end of the header"
-    OCTAL=$(printf "\%04o" ${i})
-    echo -e ">s_1${OCTAL}\nACGT\n" | \
+#  0 : NULL  : 00
+# 10 : \n    : 0A
+# 13 : \r    : 0D
+# 32 : SPACE : 20
+for i in 00 0A 0D 20 ; do
+    DESCRIPTION="issue 72 --- ascii character x${i} is accepted if present at the end of the header"
+    printf ">s_1\x${i}\nA\n" | \
         "${SWARM}"  > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
-unset OCTAL
 
 
 #*****************************************************************************#
@@ -2287,6 +2277,7 @@ for ((c=0 ; c<8; c++)) ; do
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
 done
+unset c
 
 
 #*****************************************************************************#
