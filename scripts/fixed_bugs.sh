@@ -895,7 +895,7 @@ printf ">s;size=1\nA\n" | \
 ##
 ## a sequence and all its microvariants should form only one OTU
 
-function microvariants() {
+microvariants() {
     local SEQ="${1}"
     local -i LENGTH=${#SEQ}
     for ((i=0 ; i<=LENGTH ; i++)) ; do
