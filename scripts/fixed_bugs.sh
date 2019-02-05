@@ -850,35 +850,28 @@ printf ">s1_1\nA\n>s2_1\nC\n" | \
 
 #*****************************************************************************#
 #                                                                             #
-#Abundance annotation style should also be in the output fasta file (issue 51)#
+#     Abundance annotation style should also be in the output fasta file      #
+#     (issue 51)                                                              #
 #                                                                             #
 #*****************************************************************************#
 
 ## https://github.com/torognes/swarm/issues/51
 ##
 ## issue 51 --- -w gives abundance notation style matching the input #1
-OUTPUT=$(mktemp)
 DESCRIPTION="issue 51 --- -w outputs abundance notation style matching the input #1"
-EXPECTED=$(printf ">a_1\nAAAA\n")
-printf ">a_1\nAAAA\n" | \
-    "${SWARM}" -w "${OUTPUT}" > /dev/null 2>&1
-[[ "$(< "${OUTPUT}")" == "${EXPECTED}" ]] && \
+printf ">s_1\nA\n" | \
+    "${SWARM}" -w - -o /dev/null 2> /dev/null | \
+    grep -q "^>s_1$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset EXPECTED
 
 ## issue 51 --- -w gives abundance notation style matching the input #2
-OUTPUT=$(mktemp)
 DESCRIPTION="issue 51 --- -w outputs abundance notation style matching the input #2"
-EXPECTED=$(printf ">a;size=1;\nAAAA\n")
-printf ">a;size=1;\nAAAA\n" | \
-    "${SWARM}" -w "${OUTPUT}" -z > /dev/null 2>&1
-[[ "$(< "${OUTPUT}")" == "${EXPECTED}" ]] && \
+printf ">s;size=1\nA\n" | \
+    "${SWARM}" -z -w - -o /dev/null 2> /dev/null | \
+    grep -q "^>s;size=1;$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset EXPECTED
 
 
 #*****************************************************************************#
