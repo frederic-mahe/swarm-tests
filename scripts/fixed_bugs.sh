@@ -110,7 +110,7 @@ rm "${TMP}"
 
 DESCRIPTION="non-github issue 2 --- file capturing /dev/stderr starts with the expected string"
 TMP=$(mktemp)
-(1>&2 echo "1" ; "${SWARM}" -v ; 1>&2 echo "2") 2> "${TMP}"
+(echo "1" 1>&2 ; "${SWARM}" -v ; echo "2" 1>&2) 2> "${TMP}"
 grep -q "^1" "${TMP}" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -643,7 +643,7 @@ cmp -s \
 ##
 ## issue 36 --- swarm reads from a pipe
 DESCRIPTION="issue 36 --- swarm reads from a pipe"
-printf ">s_1\na\n" | \
+printf ">s_1\nA\n" | \
     "${SWARM}" > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || failure "${DESCRIPTION}"
 
@@ -658,9 +658,9 @@ printf ">s_1\na\n" | \
 ##
 ## issue 37 --- fasta headers can contain more than one underscore symbol
 DESCRIPTION="issue 37 --- fasta headers can contain more than one underscore symbol"
-printf ">a_2_2_3\nA\n" | \
+printf ">s_2_2_3\nA\n" | \
     "${SWARM}" -o /dev/null -s - 2> /dev/null | \
-    awk '{exit $3 == "a_2_2" ? 0 : 1}' && \
+    awk '{exit $3 == "s_2_2" ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -694,9 +694,9 @@ printf ">a_2_2_3\nA\n" | \
 
 ## https://github.com/torognes/swarm/issues/40
 ##
-## issue 40 --- swarm performs OTU breaking by default
+## issue 40 --- swarm performs OTU breaking by default (AA-AC CC)
 DESCRIPTION="issue 40 --- swarm performs OTU breaking by default"
-printf ">a_10\nACGT\n>b_9\nCGGT\n>c_1\nCCGT\n" | \
+printf ">s1_3\nAA\n>s2_3\nCC\n>s3_1\nAC\n" | \
 	"${SWARM}" 2> /dev/null | \
     wc -l | \
     grep -q "^2$" && \
@@ -1304,8 +1304,8 @@ unset SEED
 ## The sequence of the representatives is the sequence of the seed
 REPRESENTATIVES=$(mktemp)
 for i in {1..3} ; do
-    DESCRIPTION="issue 67 --- the sequence of the representatives is the sequence of the seed"
-    echo -e ">seq1_3\nA\n>seq2_1\nT" | \
+    DESCRIPTION="issue 67 --- representative sequence is the sequence of the seed (-d ${i})"
+    printf ">s1_3\nA\n>s2_1\nT\n" | \
 	    "${SWARM}" -d ${i} -w "${REPRESENTATIVES}" > /dev/null 2>&1
     ##  printf ">s\nA\n" | awk 'NR == 2 {exit /^A$/ ? 0 : 1}' && echo "true" || echo "false"
     sed "2q;d" "${REPRESENTATIVES}" | grep -qi "^A$" && \
@@ -1313,6 +1313,8 @@ for i in {1..3} ; do
             failure "${DESCRIPTION}"
 done
 rm "${REPRESENTATIVES}"
+
+exit
 
 
 #*****************************************************************************#
