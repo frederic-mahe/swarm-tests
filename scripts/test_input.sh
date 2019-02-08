@@ -57,7 +57,7 @@ DESCRIPTION="swarm reads from a redirection"
 
 ## swarm reads from a HEREDOC
 DESCRIPTION="swarm reads from a HEREDOC"
-cat <<End-of-message | swarm &> /dev/null \
+cat <<End-of-message | "${SWARM}" &> /dev/null \
     && success "${DESCRIPTION}" || failure "${DESCRIPTION}"
 >a_1
 ACGT
@@ -260,4 +260,3 @@ printf ">s1_%d\nA\n" $(( (1 << 32) + 1 )) | \
 
 
 exit 0
-

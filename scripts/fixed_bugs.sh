@@ -128,7 +128,7 @@ rm "${TMP}"
 ## Swarm radius values are available in the statistics file (-s), 7th column.
 DESCRIPTION="issue 1 --- theoretical radii of OTUs is available with -s"
 printf ">s1_3\nA\n>s2_1\nT\n" | \
-    swarm -d 1 -o /dev/null -s - 2> /dev/null | \
+    "${SWARM}" -d 1 -o /dev/null -s - 2> /dev/null | \
     awk '{exit $7 == 1 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1257,9 +1257,9 @@ printf ">s1;size=1\nAA\n>s2;size=2\nAA\n" | \
 ##
 ## Bug reported by Antti Karkman first and latter by Noah Hoffman
 for i in {1..3} ; do
-    DESCRIPTION="issue 67 --- name of the representative is the name of the seed (-d ${i})"
+    DESCRIPTION="issue 67 --- name of the representative is tshe name of the seed (-d ${i})"
     printf ">s1_3\nA\n>s2_1\nT\n" | \
-        swarm -d ${i} -o /dev/null -w - 2> /dev/null | \
+       "${SWARM}" -d ${i} -o /dev/null -w - 2> /dev/null | \
         grep -q "^>s1_4$" && \
 	    success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
@@ -1387,21 +1387,15 @@ unset OPTION
 ## Sequence or microvariant of sequences have to be of length =
 ## threads - 1, and have to be repeated (identical sequences)
 ## (https://github.com/torognes/swarm/issues/74)
-MAX_D=5
-MAX_T=30
 DESCRIPTION="issue 74 --- run normally with short undereplicated sequences"
-for ((d=1 ; d<=$MAX_D ; d++)) ; do
-    for ((t=1 ; t<=$MAX_T ; t++)) ; do
+for ((d=1 ; d<=5 ; d++)) ; do
+    for ((t=1 ; t<=30 ; t++)) ; do
         printf ">s_1\nA\n" | \
-            "${SWARM}" \
-                -d ${d} \
-                -t ${t} 2> /dev/null | \
-            wc -l | \
-            grep -q "^1$" || \
+            "${SWARM}" -d ${d} -t ${t} > /dev/null 2> /dev/null || \
             failure "clustering fails for d=${d} and t=${t}"
     done
 done && success "${DESCRIPTION}"
-unset MAX_D MAX_T d t OTUs 
+unset d t
 
 
 #*****************************************************************************#
@@ -1475,7 +1469,8 @@ printf ">s_1\nA\n" | \
 ##
 ## issue 79 --- swarm deals with empty sequences
 DESCRIPTION="issue 79 --- swarm deals with empty sequences"
-printf ">s_1\n\n" | swarm > /dev/null 2>&1 && \
+printf ">s_1\n\n" | \
+    "${SWARM}" > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -1523,7 +1518,7 @@ cmp -s \
 ## issue 82 --- output uppercase nucleotidic sequences
 DESCRIPTION="issue 82 --- output uppercase nucleotidic sequences (-w output)"
 printf ">s_1\nt\n" | \
-    swarm -o /dev/null -w - 2> /dev/null | \
+    "${SWARM}" -o /dev/null -w - 2> /dev/null | \
     awk 'NR == 2 {exit /^T$/ ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1676,7 +1671,7 @@ unset CURRENT_MESSAGE EXPECTED_MESSAGE
 ## issue 93 --- uracil (U) is replaced with thymine (T) in output files
 DESCRIPTION="issue 93 --- uracil (U) is replaced with thymine (T) in -w output"
 printf ">s_1\nU\n" | \
-    swarm -o /dev/null -w - 2> /dev/null | \
+    "${SWARM}" -o /dev/null -w - 2> /dev/null | \
     awk 'NR == 2 {exit /^[Tt]$/ ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
