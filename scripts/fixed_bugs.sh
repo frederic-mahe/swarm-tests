@@ -1259,31 +1259,24 @@ unset WARNING
 ## https://github.com/torognes/swarm/issues/67
 ##
 ## Bug reported by Antti Karkman first and latter by Noah Hoffman
-REPRESENTATIVES=$(mktemp)
-SEED="seq1"
 for i in {1..3} ; do
-    DESCRIPTION="issue 67 --- when d = ${i}, seed is the first field of the OTU list"
-    echo -e ">${SEED}_3\nA\n>seq2_1\nA" | \
-	    "${SWARM}" -d ${i} -w "${REPRESENTATIVES}" > /dev/null 2>&1
-    head -n 1 "${REPRESENTATIVES}" | grep -q "^>${SEED}_4$" && \
+    DESCRIPTION="issue 67 --- name of the representative is the name of the seed (-d ${i})"
+    printf ">s1_3\nA\n>s2_1\nT\n" | \
+        swarm -d ${i} -o /dev/null -w - 2> /dev/null | \
+        grep -q "^>s1_4$" && \
 	    success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
-rm "${REPRESENTATIVES}"
-unset i SEED
 
 ## The sequence of the representatives is the sequence of the seed
-REPRESENTATIVES=$(mktemp)
 for i in {1..3} ; do
-    DESCRIPTION="issue 67 --- representative sequence is the sequence of the seed (-d ${i})"
+    DESCRIPTION="issue 67 --- sequence of the representative is the sequence of the seed (-d ${i})"
     printf ">s1_3\nA\n>s2_1\nT\n" | \
-	    "${SWARM}" -d ${i} -w "${REPRESENTATIVES}" > /dev/null 2>&1
-    ##  printf ">s\nA\n" | awk 'NR == 2 {exit /^A$/ ? 0 : 1}' && echo "true" || echo "false"
-    sed "2q;d" "${REPRESENTATIVES}" | grep -qi "^A$" && \
+	    "${SWARM}" -d ${i} -o /dev/null -w - 2> /dev/null | \
+        grep -qi "^A$" && \
 	    success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
-rm "${REPRESENTATIVES}"
 
 
 #*****************************************************************************#
