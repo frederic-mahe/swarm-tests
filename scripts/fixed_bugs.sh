@@ -1215,28 +1215,25 @@ printf ">s1_1_2\nA\n>s2_1_2\nA\n" | \
 ##
 ## issue 65 --- swarm complains if input sequences are not dereplicated
 DESCRIPTION="issue 65 --- swarm complains if input sequences are duplicated (d=2)"
-WARNING="WARNING: 1 duplicated sequences detected."
 printf ">s1;size=1\nAA\n>s2;size=2\nAA\n" | \
-    "${SWARM}" -z -d 2 2>&1 | grep -q "^${WARNING}" && \
+    "${SWARM}" -z -d 2 2>&1 | \
+    grep -q "^WARNING: 1 duplicated sequences detected." && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-unset WARNING
 
 DESCRIPTION="issue 65 --- swarm complains if input sequences are duplicated (d=1)"
-WARNING="WARNING: 1 duplicated sequences detected."
 printf ">s1;size=1\nAA\n>s2;size=2\nAA\n" | \
-    "${SWARM}" -z -d 1 2>&1 | grep -q "^${WARNING}" && \
+    "${SWARM}" -z -d 1 2>&1 | \
+    grep -q "^WARNING: 1 duplicated sequences detected." && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-unset WARNING
 
 DESCRIPTION="issue 65 --- swarm does not complain if input sequences are duplicated (d=0)"
-WARNING="WARNING: 1 duplicated sequences detected."
 printf ">s1;size=1\nAA\n>s2;size=2\nAA\n" | \
-    "${SWARM}" -z -d 0 2>&1 | grep -q "^${WARNING}" && \
+    "${SWARM}" -z -d 0 2>&1 | \
+    grep -q "^WARNING: 1 duplicated sequences detected." && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
-unset WARNING
 
 
 #*****************************************************************************#
