@@ -1074,7 +1074,8 @@ printf ">s1_1\nA\n>s2_1\nT\n" | \
 
 #*****************************************************************************#
 #                                                                             #
-# Sequence identifiers format, abundance annotation not found error (issue 57)#
+#     Sequence identifiers format, abundance annotation not found error       #
+#     (issue 57)                                                              #
 #                                                                             #
 #*****************************************************************************#
 
@@ -1104,61 +1105,49 @@ printf ">s1_1\nA\n>s2_1\nT\n" | \
 ##
 ## issue 59 --- swarm accepts -a option
 DESCRIPTION="issue 59 --- swarm accepts -a option"
-printf ">s\nA\n" | "${SWARM}" -a 2 > /dev/null 2>&1 && \
+printf ">s\nA\n" | \
+    "${SWARM}" -a 2 > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
 ## issue 59 --- number of missing abundance  notation is correct in error message #1
 DESCRIPTION="issue 59 --- number of missing abundance  notation is correct in error message #1"
-OUTPUT=$(mktemp)
-printf ">q_1\nA\n>s\nA\n" | "${SWARM}" 2> "${OUTPUT}"
-[[ $(awk '/^Error/{print $7}' "${OUTPUT}") == "1" ]] && \
+printf ">s1_1\nA\n>s2\nT\n" | \
+    "${SWARM}" 2>&1 | \
+    grep -q "^Error.*for 1 sequences" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
 
 ## issue 59 --- number of missing abundance  notation is correct in error message #2
 DESCRIPTION="issue 59 --- number of missing abundance  notation is correct in error message #2"
-OUTPUT=$(mktemp)
-printf ">q\nA\n>s_1\nA\n>d\nA\n" | "${SWARM}" 2> "${OUTPUT}"
-[[ $(awk '/^Error/{print $7}' "${OUTPUT}") == "2" ]] && \
+printf ">s1\nA\n>s2_1\nC\n>s3\nG\n" | \
+    "${SWARM}" 2>&1 | \
+    grep -q "^Error.*for 2 sequences" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
 
-## issue 59 --- first line of abundance notation missing is correct in error message #1
-DESCRIPTION="issue 59 --- first line of abundance notation missing is correct in error message #1"
-OUTPUT=$(mktemp)
-printf ">q\nA\n>s_1\nA\n>d\nA\n" | "${SWARM}" 2> "${OUTPUT}"
-[[ $(awk '/^Error/{print $12}' "${OUTPUT}") == "1." ]] && \
+## issue 59 --- first line of abundance notation missing is correct in error message
+DESCRIPTION="issue 59 --- first line of abundance notation missing is correct in error message"
+printf ">s1_1\nA\n>s2\nT\n" | \
+        "${SWARM}" 2>&1 | \
+    grep -q "^Error.*starting on line 3." && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-
-## issue 59 --- first line of abundance notation missing is correct in error message #2
-DESCRIPTION="issue 59 --- first line of abundance notation missing is correct in error message #2"
-OUTPUT=$(mktemp)
-printf ">q_1\nA\n>s\nA\n" | "${SWARM}" 2> "${OUTPUT}"
-[[ $(awk '/^Error/{print $12}' "${OUTPUT}") == "3." ]] && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
 
 ## issue 59 --- swarm -a fails without argument
 DESCRIPTION="issue 59 --- swarm -a fails without argument"
-printf ">s\nA\n" | "${SWARM}" -a > /dev/null 2>&1&& \
+printf ">s\nA\n" | \
+    "${SWARM}" -a 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## issue 59 --- swarm -a does not overwrite abundance in case of multiple _ with numbers
-DESCRIPTION="issue 59 --- issue 59 --- swarm -a does not overwrite abundance in case of multiple _ with numbers"
-OUTPUT=$(mktemp)
-printf ">a_33_2_3\nA\n>b_33_2_3\nA\n" | \
-    "${SWARM}" -a 2 -s "${OUTPUT}" > /dev/null 2>&1
-(( $(awk '{print $4}' "${OUTPUT}") == 3 )) && \
+DESCRIPTION="issue 59 --- -a does not overwrite abundance in case of multiple _ with numbers"
+printf ">s1_1_2\nA\n>s2_1_2\nA\n" | \
+    "${SWARM}" -a 1 2> /dev/null | \
+    grep -q "^s1_1_2 s2_1_2$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
 
 
 #*****************************************************************************#
