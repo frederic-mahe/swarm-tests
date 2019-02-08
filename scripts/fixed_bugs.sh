@@ -1568,7 +1568,8 @@ printf ">s_1\nt\n" | \
 ##
 ## Swarm supports unseekable pipes
 DESCRIPTION="issue 86 --- swarm supports unseekable pipes"
-"${SWARM}" <(printf ">s_1\nT\n") > /dev/null 2>&1 && \
+printf ">s_1\nT\n" | \
+    "${SWARM}" > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -1707,7 +1708,7 @@ printf ">s_1\nU\n" | \
 # with 5 differences and an alignment length of 13.
 DESCRIPTION="issue 95 --- default gap extension penalty is too large"
 printf ">s1_1\nCTATTGTTGTC\n>s2_1\nTCTATGTGTCT\n" | \
-    "${SWARM}" -d 5 -o /dev/null -u - 2> /dev/null |
+    "${SWARM}" -d 5 -o /dev/null -u - 2> /dev/null | \
     awk '/^H/ {exit $8 == "I4M2D5MI" ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1732,7 +1733,7 @@ printf ">s1_1\nCTATTGTTGTC\n>s2_1\nTCTATGTGTCT\n" | \
 # with 2 differences, a score of 28 and an alignment length of 3.
 DESCRIPTION="issue 96 --- errors in SIMD alignment code"
 printf ">s1_1\nTT\n>s2_1\nGAT\n" | \
-    "${SWARM}" -d 2 -o /dev/null -u - > /dev/null 2>&1 | \
+    "${SWARM}" -d 2 -o /dev/null -u - 2> /dev/null | \
     awk '/^H/ {exit $8 == "MIM" ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1749,7 +1750,7 @@ printf ">s1_1\nTT\n>s2_1\nGAT\n" | \
 ## issue 98 --- writing seeds never above 100%
 DESCRIPTION="issue 98 --- writing seeds never above 100 percent"
 printf ">s_1\nA\n" | \
-    "${SWARM}" -w /dev/null 2>&1 | \
+    "${SWARM}" -o /dev/null -w /dev/null 2>&1 | \
     sed 's/\r/\n/' | \
     grep "Writing seeds" | \
     tr -d "%" | \
@@ -1835,7 +1836,7 @@ printf ">s1_%d\nA\n" $(( 1 << 32 )) | \
 
 ## https://github.com/torognes/swarm/issues/103
 ##
-## not testable
+## testable, but won't be fixed:
 ##
 ## printf ">s1\nA\n" | valgrind --leak-check=full --show-leak-kinds=all swarm
 
@@ -1921,7 +1922,7 @@ printf ">s\nT\n" | \
 ## H	1	4	50.0	+	0	0	4M	d_1	a_1
 ## H	1	4	25.0	+	0	0	4M	b_2	a_1
 
-DESCRIPTION="issue 108 --- when using the fastidious option, swarm reports the wrong cluster number in the UC output"
+DESCRIPTION="issue 108 --- (fastidious) wrong cluster number in the UC output"
 printf ">a_1\nTGGA\n>b_2\nTTTT\n>c_1\nTTGA\n>d_1\nCTGA\n" | \
         "${SWARM}" -f -o /dev/null -u - 2> /dev/null | \
         awk '$2 != 0 {exit 1}' && \
@@ -2179,9 +2180,8 @@ fi
 ## for an input with 4 times the same sequence, swarm should indicate
 ## 3 duplicates (not 6):
 DESCRIPTION="issue 125 --- report the correct number of duplicated sequences"
-"${SWARM}" \
-    -o /dev/null \
-    <(printf ">a_1\nA\n>b_1\nA\n>c_1\nA\n>d_1\nA\n") 2>&1 | \
+printf ">s1_1\nA\n>s2_1\nA\n>s3_1\nA\n>s4_1\nA\n" | \
+    "${SWARM}" -o /dev/null 2>&1 | \
     grep -q "^WARNING: 3 duplicated sequences detected.$" && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
@@ -2223,7 +2223,7 @@ fi
 
 ## Bloom filter needs at least 8 MB, even for a minimal example
 ## (manpage used to indicate 3 MB)
-DESCRIPTION="issue 127 --- swarm fastidious needs at least 8 MB for the Bloom filter"
+DESCRIPTION="issue 127 --- (fastidious) Bloom filter needs at least 8 MB (can fail)"
 printf ">s1_3\nAA\n>s2_1\nCC\n" | \
     "${SWARM}" -f -c 8 > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
@@ -2231,7 +2231,7 @@ printf ">s1_3\nAA\n>s2_1\nCC\n" | \
 
 ## Ceiling should fail when 0 <= c < 8
 for ((c=0 ; c<8; c++)) ; do
-    DESCRIPTION="issue 127 --- swarm aborts when --ceiling is ${c}"
+    DESCRIPTION="issue 127 --- aborts when --ceiling is ${c}"
     printf ">s1_3\nAA\n>s2_1\nCC\n" | \
         "${SWARM}" -f -c ${c} > /dev/null 2>&1 && \
         failure "${DESCRIPTION}" || \
