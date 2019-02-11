@@ -109,15 +109,24 @@ DESCRIPTION="swarm reads from a process substitution (unseekable)"
 
 ## Test empty sequence
 DESCRIPTION="swarm handles empty sequences"
-printf ">a_10\n\n" | \
+printf ">s_1\n\n" | \
     "${SWARM}" > /dev/null 2>&1 && \
-    failure "${DESCRIPTION}" || success "${DESCRIPTION}"
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
 
 ## Test empty header
 DESCRIPTION="swarm aborts on empty fasta headers"
-printf ">;size=10\nACGT\n" | \
+printf ">_1\nA\n" | \
     "${SWARM}" -z > /dev/null 2>&1 && \
-    failure "${DESCRIPTION}" || success "${DESCRIPTION}"
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+## Test empty header (;size=n format)
+DESCRIPTION="swarm aborts on empty fasta headers (-z)"
+printf ">;size=1\nA\n" | \
+    "${SWARM}" -z > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
 
 ## Clustering with only one sequence is accepted
 DESCRIPTION="clustering with only one sequence is accepted"
