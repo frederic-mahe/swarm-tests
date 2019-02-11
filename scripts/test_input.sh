@@ -19,12 +19,6 @@ success () {
     printf "${GREEN}PASS${NO_COLOR}: ${1}\n"
 }
 
-## Create a test file with 10 identical sequences (different headers)
-ALL_IDENTICAL=$(mktemp)
-for ((i=1 ; i<=10 ; i++)) ; do
-    printf ">%s%d_1\nACGT\n" "seq" ${i}
-done > "${ALL_IDENTICAL}"
-
 ## use the first swarm binary in $PATH by default, unless user wants
 ## to test another binary
 SWARM=$(which swarm)
