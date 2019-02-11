@@ -130,21 +130,23 @@ printf ">;size=1\nA\n" | \
 
 ## Clustering with only one sequence is accepted
 DESCRIPTION="clustering with only one sequence is accepted"
-printf ">a_10\nACGT\n" | \
+printf ">s_1\nA\n" | \
     "${SWARM}" > /dev/null 2>&1 && \
-    success "${DESCRIPTION}" || failure "${DESCRIPTION}"
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 ## Clustering sequences of length 1 should work with d > 1 too (shorter than kmers)
 DESCRIPTION="clustering a sequence shorter than kmer length is accepted"
-printf ">a_10\nA\n" | \
+printf ">s_1\nA\n" | \
     "${SWARM}" -d 2 > /dev/null 2>&1 && \
-    success "${DESCRIPTION}" || failure "${DESCRIPTION}"
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 ## Define ASCII characters accepted in fasta identifiers
 DESCRIPTION="ascii characters 1-9, 11-12, 14-31, 33-127 allowed in fasta identifiers"
 for i in {1..9} 11 12 {14..31} {33..127} ; do
     OCTAL=$(printf "\%04o" ${i})
-    echo -e ">aa${OCTAL}aa_1\nACGT\n" | \
+    echo -e ">s${OCTAL}_1\nA\n" | \
         "${SWARM}" > /dev/null 2>&1 || \
         failure "ascii character ${i} allowed in fasta identifiers"
 done && success "${DESCRIPTION}"
@@ -158,7 +160,7 @@ unset OCTAL
 for i in 0 10 13 32 ; do
     DESCRIPTION="ascii character ${i} is not allowed in fasta identifiers"
     OCTAL=$(printf "\%04o" ${i})
-    echo -e ">aa${OCTAL}aa_1\nACGT\n" | \
+    echo -e ">s${OCTAL}_1\nA\n" | \
         "${SWARM}" > /dev/null 2>&1 && \
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
@@ -172,7 +174,7 @@ unset OCTAL
 for i in 0 13 32 ; do
     DESCRIPTION="ascii character ${i} is allowed in fasta header (outside identifier)"
     OCTAL=$(printf "\%04o" ${i})
-    echo -e ">aa_1 ${OCTAL}padding\nACGT\n" | \
+    echo -e ">s_1 ${OCTAL}\nA\n" | \
         "${SWARM}" > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
@@ -183,7 +185,7 @@ unset OCTAL
 # 10: "\n"
 DESCRIPTION="ascii character 10 is not allowed in fasta headers (outside identifier)"
 OCTAL=$(printf "\%04o" 10)
-echo -e ">aa_1 ${OCTAL}padding\nACGT\n" | \
+echo -e ">s_1 ${OCTAL}\nA\n" | \
     "${SWARM}" > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
@@ -191,9 +193,10 @@ unset OCTAL
 
 ## non-ASCII characters accepted in fasta identifiers
 DESCRIPTION="non-ASCII characters accepted in fasta identifiers"
-printf ">ø_1\nACGT\n" | \
+printf ">ø_1\nA\n" | \
     "${SWARM}"  > /dev/null 2>&1 && \
-    success "${DESCRIPTION}" || failure "${DESCRIPTION}"
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 ## Define ASCII characters accepted in fasta sequences
 # 10: "\n"
@@ -203,7 +206,7 @@ printf ">ø_1\nACGT\n" | \
 for i in 0 10 13 65 67 71 84 85 97 99 103 116 117 ; do
     DESCRIPTION="ascii character ${i} is allowed in sequences"
     OCTAL=$(printf "\%04o" ${i})
-    echo -e ">aaaa_1\nAC${OCTAL}GT\n" | \
+    echo -e ">s_1\nAC${OCTAL}GT\n" | \
         "${SWARM}" > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
@@ -223,39 +226,43 @@ unset OCTAL
 
 ## Swarm aborts if fasta identifiers are not unique
 DESCRIPTION="swarm aborts if fasta headers are not unique"
-printf ">a_10\nACGT\n>a_10\nAAGT\n" | \
+printf ">s_1\nA\n>s_1\nC\n" | \
     "${SWARM}" > /dev/null 2>&1 && \
-    failure "${DESCRIPTION}" || success "${DESCRIPTION}"
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
 
 ## Fasta headers can contain more than one underscore symbol
 DESCRIPTION="fasta headers can contain more than one underscore symbol"
-printf ">a_2_2_3\nA\n" | \
+printf ">s_2_2_3\nA\n" | \
     "${SWARM}" -o /dev/null -s - 2> /dev/null | \
-    awk '{exit $3 == "a_2_2" ? 0 : 1}' && \
+    awk '{exit $3 == "s_2_2" ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
 ## Fasta header must contain an abundance value after being truncated
 DESCRIPTION="swarm aborts if fasta headers lacks abundance value"
-printf ">a a_1\nACGT\n" | \
+printf ">s s_1\nA\n" | \
     "${SWARM}" 2> /dev/null && \
-    failure "${DESCRIPTION}" || success "${DESCRIPTION}"
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
 
 ## swarm aborts if abundance value is not a number
 DESCRIPTION="swarm aborts if abundance value is not a number"
-printf ">a_n\nACGT\n" | \
+printf ">s_n\nA\n" | \
     "${SWARM}" 2> /dev/null && \
-    failure "${DESCRIPTION}" || success "${DESCRIPTION}"
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
 
 ## swarm aborts if abundance value is zero
 DESCRIPTION="swarm aborts if abundance value is zero"
-printf ">a_0\nACGT\n" | \
+printf ">s_0\nA\n" | \
     "${SWARM}" 2> /dev/null && \
-    failure "${DESCRIPTION}" || success "${DESCRIPTION}"
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
 
 ## swarm aborts if abundance value is negative
 DESCRIPTION="swarm aborts if abundance value is negative"
-printf ">a_-1\nACGT\n" | \
+printf ">s_-1\nA\n" | \
     "${SWARM}" 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
@@ -271,14 +278,14 @@ unset POWER
 
 ## swarm accepts abundance values equal to 2^32
 DESCRIPTION="swarm accepts abundance values equal to 2^32"
-printf ">s1_%d\nA\n" $(( 1 << 32 )) | \
+printf ">s_%d\nA\n" $(( 1 << 32 )) | \
     "${SWARM}" > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
 ## swarm accepts abundance values equal to 2^32 + 1
 DESCRIPTION="swarm accepts abundance values equal to 2^32 + 1"
-printf ">s1_%d\nA\n" $(( (1 << 32) + 1 )) | \
+printf ">s_%d\nA\n" $(( (1 << 32) + 1 )) | \
     "${SWARM}" > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
