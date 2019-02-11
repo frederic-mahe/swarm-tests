@@ -31,7 +31,9 @@ SWARM=$(which swarm)
 [[ "${1}" ]] && SWARM="${1}"
 
 DESCRIPTION="check if swarm is executable"
-[[ -x "${SWARM}" ]] && success "${DESCRIPTION}" || failure "${DESCRIPTION}"
+[[ -x "${SWARM}" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 
 #*****************************************************************************#
@@ -42,35 +44,52 @@ DESCRIPTION="check if swarm is executable"
 
 ## swarm reads from a file
 DESCRIPTION="swarm reads from a file"
-"${SWARM}" "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
-    success "${DESCRIPTION}" || failure "${DESCRIPTION}"
+FASTA=$(mktemp)
+printf ">s_1\nA\n" > "${FASTA}"
+"${SWARM}" "${FASTA}" > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm -f "${FASTA}"
+unset FASTA
 
 ## swarm reads from a pipe
 DESCRIPTION="swarm reads from a pipe"
-cat "${ALL_IDENTICAL}" | "${SWARM}" > /dev/null 2>&1 && \
-    success "${DESCRIPTION}" || failure "${DESCRIPTION}"
+printf ">s_1\nA\n" | \
+    "${SWARM}" > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 ## swarm reads from a redirection
 DESCRIPTION="swarm reads from a redirection"
-"${SWARM}" < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
-    success "${DESCRIPTION}" || failure "${DESCRIPTION}"
+FASTA=$(mktemp)
+printf ">s_1\nA\n" > "${FASTA}"
+"${SWARM}" < "${FASTA}" > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm -f "${FASTA}"
+unset FASTA
 
 ## swarm reads from a HEREDOC
 DESCRIPTION="swarm reads from a HEREDOC"
-cat <<End-of-message | "${SWARM}" > /dev/null 2>&1 \
-    && success "${DESCRIPTION}" || failure "${DESCRIPTION}"
->a_1
-ACGT
+cat <<End-of-message | \
+    "${SWARM}" > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+>s_1
+A
 End-of-message
 
 ## swarm reads from a symbolic link
-ALL_IDENTICAL2=$(mktemp -u)
-ln -s "${ALL_IDENTICAL}" "${ALL_IDENTICAL2}"
+FASTA=$(mktemp)
+FASTA_LINK=$(mktemp -u)
+printf ">s_1\nA\n" > "${FASTA}"
+ln -s "${FASTA}" "${FASTA_LINK}"
 DESCRIPTION="swarm reads from a symbolic link"
-"${SWARM}" "${ALL_IDENTICAL2}" > /dev/null 2>&1 && \
-    success "${DESCRIPTION}" || failure "${DESCRIPTION}"
-## Clean
-rm -f "${ALL_IDENTICAL}" "${ALL_IDENTICAL2}"
+"${SWARM}" "${FASTA_LINK}" > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm -f "${FASTA}" "${FASTA_LINK}"
+unset FASTA FASTA_LINK
 
 ## swarm accepts inputs from named pipes
 DESCRIPTION="swarm accepts inputs from named pipes"
@@ -84,7 +103,8 @@ rm fifoTestInput123
 ## swarm reads from a process substitution (anonymous pipe)
 DESCRIPTION="swarm reads from a process substitution (unseekable)"
 "${SWARM}" <(printf ">a_1\nACGT\n") > /dev/null 2>&1 && \
-    success "${DESCRIPTION}" || failure "${DESCRIPTION}"
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 
 #*****************************************************************************#
@@ -234,7 +254,8 @@ printf ">a_0\nACGT\n" | \
 DESCRIPTION="swarm aborts if abundance value is negative"
 printf ">a_-1\nACGT\n" | \
     "${SWARM}" 2> /dev/null && \
-    failure "${DESCRIPTION}" || success "${DESCRIPTION}"
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
 
 ## swarm accepts large abundance values (2^32 - 1)
 DESCRIPTION="swarm accepts large abundance values (up to 2^32 - 1)"
@@ -243,6 +264,7 @@ for POWER in {2..32} ; do
         "${SWARM}" > /dev/null 2>&1 || \
         failure "${DESCRIPTION}"
 done && success "${DESCRIPTION}"
+unset POWER
 
 ## swarm accepts abundance values equal to 2^32
 DESCRIPTION="swarm accepts abundance values equal to 2^32"
