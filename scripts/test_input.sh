@@ -185,10 +185,20 @@ unset OCTAL
 # 10: "\n"
 DESCRIPTION="ascii character 10 is not allowed in fasta headers (outside identifier)"
 OCTAL=$(printf "\%04o" 10)
-echo -e ">s_1 ${OCTAL}\nA\n" | \
+echo -e ">s_1 ${OCTAL}s\nA\n" | \
     "${SWARM}" > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
+unset OCTAL
+
+## ASCII character 10 (\n) is allowed at the end of fasta headers (outside identifier)
+# 10: "\n"
+DESCRIPTION="ascii character 10 is allowed at the end of fasta headers (outside identifier)"
+OCTAL=$(printf "\%04o" 10)
+echo -e ">s_1 ${OCTAL}\nA\n" | \
+    "${SWARM}" > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 unset OCTAL
 
 ## non-ASCII characters accepted in fasta identifiers
