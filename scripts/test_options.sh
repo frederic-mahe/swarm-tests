@@ -105,7 +105,7 @@ OUTPUT=$(printf ">a_1\nAAAA\n>c_1\nAAAA\n>b_1\nAAAA\n" | \
 
 ## End of option marker is supported (usefull for weirdly named input files)
 DESCRIPTION="swarm runs normally when -- marks the end of options"
-"${SWARM}" -- "${ALL_IDENTICAL}" &> /dev/null && \
+"${SWARM}" -- "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -118,13 +118,13 @@ DESCRIPTION="swarm runs normally when -- marks the end of options"
 
 ## Accept to read from /dev/stdin
 DESCRIPTION="swarm reads from /dev/stdin"
-"${SWARM}" /dev/stdin < "${ALL_IDENTICAL}" &> /dev/null && \
+"${SWARM}" /dev/stdin < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
 ## Accept "-" as a placeholder for stdin
 DESCRIPTION="swarm reads from stdin when - is used"
-"${SWARM}" - < "${ALL_IDENTICAL}" &> /dev/null && \
+"${SWARM}" - < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -145,13 +145,13 @@ SSE2=$(grep -io -m 1 "sse2" /proc/cpuinfo 2> /dev/null)
 # if sse2 is present, check if swarm runs normally
 if [[ -n "${SSE2}" ]] ; then
     DESCRIPTION="swarm runs normally when SSE2 instructions are available"
-    "${SWARM}" "${ALL_IDENTICAL}" &> /dev/null && \
+    "${SWARM}" "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 else
     # swarm aborts with a non-zero status if SSE2 is missing (hardcoded)
     DESCRIPTION="swarm aborts when SSE2 instructions are not available"
-    "${SWARM}" "${ALL_IDENTICAL}" &> /dev/null && \
+    "${SWARM}" "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
 fi
@@ -182,7 +182,7 @@ done
 ## Swarm accepts the options -t and --threads
 for OPTION in "-t" "--threads" ; do
     DESCRIPTION="swarms accepts the option ${OPTION}"
-    "${SWARM}" "${OPTION}" 1 < "${ALL_IDENTICAL}" &> /dev/null && \
+    "${SWARM}" "${OPTION}" 1 < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
@@ -192,7 +192,7 @@ MIN=1
 MAX=256
 DESCRIPTION="swarm runs normally when --threads goes from ${MIN} to ${MAX}"
 for ((t=$MIN ; t<=$MAX ; t++)) ; do
-    "${SWARM}" -t ${t} < "${ALL_IDENTICAL}" &> /dev/null || \
+    "${SWARM}" -t ${t} < "${ALL_IDENTICAL}" > /dev/null 2>&1 || \
         failure "swarm aborts when --threads equals ${t}"
 done && success "${DESCRIPTION}"
 
@@ -242,7 +242,7 @@ unset MIN MAX
 ## Swarm accepts the options -d and --differences
 for OPTION in "-d" "--differences" ; do
     DESCRIPTION="swarms accepts the option ${OPTION}"
-    "${SWARM}" "${OPTION}" 1 < "${ALL_IDENTICAL}" &> /dev/null && \
+    "${SWARM}" "${OPTION}" 1 < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
@@ -252,7 +252,7 @@ MIN=0
 MAX=255
 DESCRIPTION="swarm runs normally when --differences goes from ${MIN} to ${MAX}"
 for ((d=$MIN ; d<=$MAX ; d++)) ; do
-    "${SWARM}" -d ${d} < "${ALL_IDENTICAL}" &> /dev/null || \
+    "${SWARM}" -d ${d} < "${ALL_IDENTICAL}" > /dev/null 2>&1 || \
         failure "swarm aborts when --differences equals ${d}"
 done && success "${DESCRIPTION}"
 
@@ -270,13 +270,13 @@ DESCRIPTION="swarm aborts when --difference is -1"
 
 ## Number of differences (--differences is 256)
 DESCRIPTION="swarm aborts when --difference is 256"
-"${SWARM}" -d 256 < "${ALL_IDENTICAL}" &> /dev/null && \
+"${SWARM}" -d 256 < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Number of differences (number of differences is way too large)
 DESCRIPTION="swarm aborts when --difference is intmax_t (signed)"
-"${SWARM}" -d $(((1 << 63) - 1)) < "${ALL_IDENTICAL}" &> /dev/null && \
+"${SWARM}" -d $(((1 << 63) - 1)) < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -299,7 +299,7 @@ unset MIN MAX
 for OPTION in "-n" "--no-otu-breaking" ; do
     DESCRIPTION="swarms accepts the option ${OPTION}"
     printf ">a_10\nACGT\n>b_9\nCGGT\n>c_1\nCCGT\n" | \
-        "${SWARM}" "${OPTION}" &> /dev/null && \
+        "${SWARM}" "${OPTION}" > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
@@ -326,7 +326,7 @@ printf ">a_10\nACGT\n>b_2\nAGCT\n" > "${FASTIDOUSINPUT}"
 ## Swarm accepts the options -f and --fastidious
 for OPTION in "-f" "--fastidious" ; do
     DESCRIPTION="swarms accepts the option ${OPTION}"
-    "${SWARM}" "${OPTION}" < "${FASTIDOUSINPUT}" &> /dev/null && \
+    "${SWARM}" "${OPTION}" < "${FASTIDOUSINPUT}" > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
@@ -344,7 +344,7 @@ unset LINENUMBER
 ## Swarm accepts the options -b and --boundary
 for OPTION in "-b" "--boundary" ; do
     DESCRIPTION="swarms accepts the option ${OPTION}"
-    "${SWARM}" -f "${OPTION}" 3 < "${FASTIDOUSINPUT}" &> /dev/null && \
+    "${SWARM}" -f "${OPTION}" 3 < "${FASTIDOUSINPUT}" > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
@@ -357,7 +357,7 @@ DESCRIPTION="swarm aborts when --boundary is empty"
 
 ## Boundary (-b is negative)
 DESCRIPTION="swarm aborts when --boundary is -1"
-"${SWARM}" -f -b \-1 < "${FASTIDOUSINPUT}" &> /dev/null && \
+"${SWARM}" -f -b \-1 < "${FASTIDOUSINPUT}" > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -369,7 +369,7 @@ DESCRIPTION="swarm aborts when --boundary is not numerical"
 
 ## Boundary (-b == 1)
 DESCRIPTION="swarm aborts when --boundary is 1"
-"${SWARM}" -f -b 1 < "${FASTIDOUSINPUT}" &> /dev/null && \
+"${SWARM}" -f -b 1 < "${FASTIDOUSINPUT}" > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -378,20 +378,20 @@ MIN=2
 MAX=255
 DESCRIPTION="swarm runs normally when --boundary goes from ${MIN} to ${MAX}"
 for ((b=$MIN ; b<=$MAX ; b++)) ; do
-    "${SWARM}" -f -b ${b} < "${FASTIDOUSINPUT}" &> /dev/null || \
+    "${SWARM}" -f -b ${b} < "${FASTIDOUSINPUT}" > /dev/null 2>&1 || \
         failure "swarm aborts when --boundary equals ${b}"
 done && success "${DESCRIPTION}"
 unset MIN MAX
 
 ## boundary option accepts large integers #1
 DESCRIPTION="swarm accepts large values for --boundary (2^32)"
-"${SWARM}" -f -b $(( 1 << 32 )) < "${FASTIDOUSINPUT}" &> /dev/null && \
+"${SWARM}" -f -b $(( 1 << 32 )) < "${FASTIDOUSINPUT}" > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
 ## boundary option accepts large integers #2
 DESCRIPTION="swarm accepts large values for --boundary (2^64, signed)"
-"${SWARM}" -f -b $(((1 << 63) - 1)) < "${FASTIDOUSINPUT}" &> /dev/null && \
+"${SWARM}" -f -b $(((1 << 63) - 1)) < "${FASTIDOUSINPUT}" > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -405,7 +405,7 @@ unset LINENUMBER
 
 ## Passing the --boundary option without the fastidious option should fail
 DESCRIPTION="swarm fails when the boundary option is specified without -f"
-"${SWARM}" -b 3 < "${FASTIDOUSINPUT}" &> /dev/null && \
+"${SWARM}" -b 3 < "${FASTIDOUSINPUT}" > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -415,7 +415,7 @@ DESCRIPTION="swarm fails when the boundary option is specified without -f"
 ## Swarm accepts the options -c and --ceiling
 for OPTION in "-c" "--ceiling" ; do
     DESCRIPTION="swarms accepts the option ${OPTION}"
-    "${SWARM}" -f "${OPTION}" 10 < "${FASTIDOUSINPUT}" &> /dev/null && \
+    "${SWARM}" -f "${OPTION}" 10 < "${FASTIDOUSINPUT}" > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
@@ -428,7 +428,7 @@ DESCRIPTION="swarm aborts when --ceiling is empty"
 
 ## Ceiling (-c is negative)
 DESCRIPTION="swarm aborts when --ceiling is -1"
-"${SWARM}" -f -c \-1 < "${FASTIDOUSINPUT}" &> /dev/null && \
+"${SWARM}" -f -c \-1 < "${FASTIDOUSINPUT}" > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -441,14 +441,14 @@ DESCRIPTION="swarm aborts when --ceiling is not numerical"
 ## Ceiling should fail when 0 <= c < 8
 for ((c=0 ; c<8; c++)) ; do
     DESCRIPTION="swarm aborts when --ceiling is ${c}"
-    "${SWARM}" -f -c ${c} < "${FASTIDOUSINPUT}" &> /dev/null && \
+    "${SWARM}" -f -c ${c} < "${FASTIDOUSINPUT}" > /dev/null 2>&1 && \
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
 done
 
 ## Bloom filter needs at least 8 MB, even for a minimal example
 DESCRIPTION="swarm fastidious needs at least 8 MB for the Bloom filter"
-"${SWARM}" -f -c 8 <(printf ">s1_3\nAA\n>s2_1\nCC\n") &> /dev/null && \
+"${SWARM}" -f -c 8 <(printf ">s1_3\nAA\n>s2_1\nCC\n") > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -458,26 +458,26 @@ MAX=255
 DESCRIPTION="swarm runs normally when --ceiling goes from 8 to ${MAX}"
 for ((c=$MIN ; c<=$MAX ; c++)) ; do
     printf ">a_10\nACGT\n>b_2\nAGCT\n" | \
-        "${SWARM}" -f -c ${c} &> /dev/null || \
+        "${SWARM}" -f -c ${c} > /dev/null 2>&1 || \
         failure "swarm aborts when --ceiling equals ${c}"
 done && success "${DESCRIPTION}"
 unset MIN MAX c
 
 ## ceiling option accepts large integers
 DESCRIPTION="swarm accepts large values for --ceiling (up to 2^30)"
-"${SWARM}" -f -c $(( 1 << 30 )) < "${FASTIDOUSINPUT}" &> /dev/null && \
+"${SWARM}" -f -c $(( 1 << 30 )) < "${FASTIDOUSINPUT}" > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
 ## ceiling option rejects very large integers
 DESCRIPTION="swarm rejects very large values for --ceiling (up to 2^32)"
-"${SWARM}" -f -c $(( 1 << 32 )) < "${FASTIDOUSINPUT}" &> /dev/null && \
+"${SWARM}" -f -c $(( 1 << 32 )) < "${FASTIDOUSINPUT}" > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Passing the --ceiling option without the fastidious option should fail
 DESCRIPTION="swarm fails when the ceiling option is specified without -f"
-"${SWARM}" -c 10 < "${FASTIDOUSINPUT}" &> /dev/null && \
+"${SWARM}" -c 10 < "${FASTIDOUSINPUT}" > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -487,7 +487,7 @@ DESCRIPTION="swarm fails when the ceiling option is specified without -f"
 ## Swarm accepts the options -y and --bloom-bits
 for OPTION in "-y" "--bloom-bits" ; do
     DESCRIPTION="swarms accepts the option ${OPTION}"
-    "${SWARM}" -f "${OPTION}" 8 < "${FASTIDOUSINPUT}" &> /dev/null && \
+    "${SWARM}" -f "${OPTION}" 8 < "${FASTIDOUSINPUT}" > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
@@ -500,7 +500,7 @@ DESCRIPTION="swarm aborts when --bloom-bits is empty"
 
 ## Bloom bits (-y is negative)
 DESCRIPTION="swarm aborts when --bloom-bits is -1"
-"${SWARM}" -f -y \-1 < "${FASTIDOUSINPUT}" &> /dev/null && \
+"${SWARM}" -f -y \-1 < "${FASTIDOUSINPUT}" > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -515,7 +515,7 @@ MIN=2
 MAX=64
 DESCRIPTION="swarm runs normally when --bloom-bits goes from ${MIN} to ${MAX}"
 for ((y=$MIN ; y<=$MAX ; y++)) ; do
-    "${SWARM}" -f -y ${y} < "${FASTIDOUSINPUT}" &> /dev/null || \
+    "${SWARM}" -f -y ${y} < "${FASTIDOUSINPUT}" > /dev/null 2>&1 || \
         failure "swarm aborts when --bloom-bits equals ${y}"
 done && success "${DESCRIPTION}"
 unset MIN MAX
@@ -523,7 +523,7 @@ unset MIN MAX
 ## Rejected values for the --bloom-bits option are < 2
 DESCRIPTION="swarm aborts when --bloom-bits is lower than 2"
 for y in 0 1 ; do
-    "${SWARM}" -f -y ${y} < "${FASTIDOUSINPUT}" &> /dev/null && \
+    "${SWARM}" -f -y ${y} < "${FASTIDOUSINPUT}" > /dev/null 2>&1 && \
         failure "swarm runs normally when --bloom-bits equals ${y}"
 done || success "${DESCRIPTION}"
 
@@ -532,14 +532,14 @@ MIN=65
 MAX=255
 DESCRIPTION="swarm aborts when --bloom-bits is higher than 64"
 for ((y=$MIN ; y<=$MAX ; y++)) ; do
-    "${SWARM}" -f -y ${y} < "${FASTIDOUSINPUT}" &> /dev/null && \
+    "${SWARM}" -f -y ${y} < "${FASTIDOUSINPUT}" > /dev/null 2>&1 && \
         failure "swarm runs normally when --bloom-bits equals ${y}"
 done || success "${DESCRIPTION}"
 unset MIN MAX
 
 ## Passing the --bloom-bits option without the fastidious option should fail
 DESCRIPTION="swarm fails when the --bloom-bits option is specified without -f"
-"${SWARM}" -y 16 < "${FASTIDOUSINPUT}" &> /dev/null && \
+"${SWARM}" -y 16 < "${FASTIDOUSINPUT}" > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 rm "${FASTIDOUSINPUT}"
@@ -556,7 +556,7 @@ rm "${FASTIDOUSINPUT}"
 ## Swarm accepts the options -a and --append-abundance
 for OPTION in "-a" "--append-abundance" ; do
     DESCRIPTION="swarms accepts the option ${OPTION}"
-    "${SWARM}" "${OPTION}" 2 < "${ALL_IDENTICAL}" &> /dev/null && \
+    "${SWARM}" "${OPTION}" 2 < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
@@ -564,7 +564,7 @@ done
 ## Swarm -a appends an abundance value to OTU members
 OUTPUT=$(mktemp)
 DESCRIPTION="-a appends an abundance number to OTU members (-o output)"
-printf ">b\nACGT\n" | "${SWARM}" -a 2 -o "${OUTPUT}" &> /dev/null
+printf ">b\nACGT\n" | "${SWARM}" -a 2 -o "${OUTPUT}" > /dev/null 2>&1
 ABUNDANCE=$(sed -n 's/.*_//p' "${OUTPUT}")
 [[ "${ABUNDANCE}" == "2" ]] && \
     success "${DESCRIPTION}" || \
@@ -576,7 +576,7 @@ unset ABUNDANCE
 OUTPUT=$(mktemp)
 DESCRIPTION="-a appends the abundance number (vsearch notation)"
 printf ">a_3\nACGT\n>b\nACGT\n" | \
-    "${SWARM}" -a 2 -w "${OUTPUT}" &> /dev/null
+    "${SWARM}" -a 2 -w "${OUTPUT}" > /dev/null 2>&1
 SUMABUNDANCES=$(sed -n '/^>/ s/.*_//p' "${OUTPUT}")
 (( "${SUMABUNDANCES}" == 5 )) && \
     success "${DESCRIPTION}" || \
@@ -588,7 +588,7 @@ unset SUMABUNDANCE
 OUTPUT=$(mktemp)
 DESCRIPTION="-a appends the abundance number (usearch notation)"
 printf ">a;size=3\nACGT\n>b\nACGT\n" | \
-    "${SWARM}" -z -a 2 -w "${OUTPUT}" &> /dev/null
+    "${SWARM}" -z -a 2 -w "${OUTPUT}" > /dev/null 2>&1
 SUMABUNDANCES=$(awk -F "[;=]" '/^>/ {print $3}' "${OUTPUT}")
 (( "${SUMABUNDANCES}" == 5 )) && \
     success "${DESCRIPTION}" || \
@@ -599,7 +599,7 @@ unset SUMABUNDANCE
 ## Swarm does not overwrite the abundance number with -a for swarm notation
 OUTPUT=$(mktemp)
 DESCRIPTION="-a does not overwrite the abundance number (swarm notation)"
-printf ">b_3\nACGT\n" | "${SWARM}" -a 2 -w "${OUTPUT}" &> /dev/null
+printf ">b_3\nACGT\n" | "${SWARM}" -a 2 -w "${OUTPUT}" > /dev/null 2>&1
 SUMABUNDANCES=$(sed -n '/^>/ s/.*_//p' "${OUTPUT}")
 (( "${SUMABUNDANCES}" == 3 )) && \
     success "${DESCRIPTION}" || \
@@ -610,7 +610,7 @@ unset SUMABUNDANCE
 ## Swarm does not overwrite the abundance number with -a for usearch notation
 OUTPUT=$(mktemp)
 DESCRIPTION="-a does not overwrite the abundance number (usearch notation)"
-printf ">b;size=3\nACGT\n" | "${SWARM}" -z -a 2 -w "${OUTPUT}" &> /dev/null
+printf ">b;size=3\nACGT\n" | "${SWARM}" -z -a 2 -w "${OUTPUT}" > /dev/null 2>&1
 SUMABUNDANCES=$(awk -F "[;=]" '/^>/ {print $3}' "${OUTPUT}")
 (( "${SUMABUNDANCES}" == 3 )) && \
     success "${DESCRIPTION}" || \
@@ -621,7 +621,7 @@ unset SUMABUNDANCE
 ## when using -a, check if the added abundance annotation appears in -o output
 OUTPUT=$(mktemp)
 DESCRIPTION="-a abundance annotation appears in -o output"
-printf ">s1\nA\n" | "${SWARM}" -a 1 -o "${OUTPUT}" &> /dev/null
+printf ">s1\nA\n" | "${SWARM}" -a 1 -o "${OUTPUT}" > /dev/null 2>&1
 awk '{exit $1 == "s1_1" ? 0 : 1}' "${OUTPUT}" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -630,7 +630,7 @@ rm "${OUTPUT}"
 ## when using -a, check if the added abundance annotation appears in -i output
 OUTPUT=$(mktemp)
 DESCRIPTION="-a abundance annotation appears in -i output"
-printf ">s1_1\nA\n>s2\nT\n" | "${SWARM}" -a 1 -i "${OUTPUT}" &> /dev/null
+printf ">s1_1\nA\n>s2\nT\n" | "${SWARM}" -a 1 -i "${OUTPUT}" > /dev/null 2>&1
 awk '{exit $2 == "s2" ? 0 : 1}' "${OUTPUT}" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -639,7 +639,7 @@ rm "${OUTPUT}"
 ## when using -a and -r, check if the added abundance annotation appears in -o output
 OUTPUT=$(mktemp)
 DESCRIPTION="-a abundance annotation appears in -o output when using -r"
-printf ">s1_1\nA\n>s2\nT\n" | "${SWARM}" -a 1 -r -o "${OUTPUT}" &> /dev/null
+printf ">s1_1\nA\n>s2\nT\n" | "${SWARM}" -a 1 -r -o "${OUTPUT}" > /dev/null 2>&1
 grep -q "s2_1$" "${OUTPUT}" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -648,7 +648,7 @@ rm "${OUTPUT}"
 ## when using -a, check if the added abundance annotation appears in -s output
 OUTPUT=$(mktemp)
 DESCRIPTION="-a abundance annotation appears in -s output"
-printf ">s1\nA\n>s2_1\nT\n" | "${SWARM}" -a 2 -s "${OUTPUT}" &> /dev/null
+printf ">s1\nA\n>s2_1\nT\n" | "${SWARM}" -a 2 -s "${OUTPUT}" > /dev/null 2>&1
 awk '{exit $3 == "s1" ? 0 : 1}' "${OUTPUT}" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -657,7 +657,7 @@ rm "${OUTPUT}"
 ## when using -a, check if the added abundance annotation appears in -u output
 OUTPUT=$(mktemp)
 DESCRIPTION="-a abundance annotation appears in -u output"
-printf ">s1\nT\n>s2_1\nT\n" | "${SWARM}" -a 2 -u "${OUTPUT}" &> /dev/null
+printf ">s1\nT\n>s2_1\nT\n" | "${SWARM}" -a 2 -u "${OUTPUT}" > /dev/null 2>&1
 grep -q "s1_2" "${OUTPUT}" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -666,7 +666,7 @@ rm "${OUTPUT}"
 ## when using -a, check if the added abundance annotation appears in -w output
 OUTPUT=$(mktemp)
 DESCRIPTION="-a abundance annotation appears in -w output"
-printf ">s1\nT\n" | "${SWARM}" -a 1 -w "${OUTPUT}" &> /dev/null
+printf ">s1\nT\n" | "${SWARM}" -a 1 -w "${OUTPUT}" > /dev/null 2>&1
 grep -q "s1_1" "${OUTPUT}" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -678,21 +678,21 @@ rm "${OUTPUT}"
 ## Swarm accepts the options -i and --internal-structure
 for OPTION in "-i" "--internal-structure" ; do
     DESCRIPTION="swarms accepts the option ${OPTION}"
-    "${SWARM}" "${OPTION}" /dev/null < "${ALL_IDENTICAL}" &> /dev/null && \
+    "${SWARM}" "${OPTION}" /dev/null < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
 
 ## Swarm -i fails if no output file given
 DESCRIPTION="-i fails if no output file given"
-"${SWARM}" -i  < "${ALL_IDENTICAL}" &> /dev/null && \
+"${SWARM}" -i  < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Swarm -i create and fill given output file
 OUTPUT=$(mktemp)
 DESCRIPTION="-i creates and fill given output file"
-"${SWARM}" --internal-structure "${OUTPUT}" < "${ALL_IDENTICAL}" &> /dev/null
+"${SWARM}" --internal-structure "${OUTPUT}" < "${ALL_IDENTICAL}" > /dev/null 2>&1
 [[ -s "${OUTPUT}" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -702,7 +702,7 @@ rm "${OUTPUT}"
 OUTPUT=$(mktemp)
 DESCRIPTION="-i columns 1 and 2 contain sequence names"
 printf ">a_1\nAAAA\n>b_1\nAAAA\n" | \
-    "${SWARM}" -i "${OUTPUT}" &> /dev/null
+    "${SWARM}" -i "${OUTPUT}" > /dev/null 2>&1
 awk '{exit ($1 == "a" && $2 == "b") ? 0 : 1}' "${OUTPUT}" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -712,7 +712,7 @@ rm "${OUTPUT}"
 OUTPUT=$(mktemp)
 DESCRIPTION="-i number of differences is correct (0 expected)"
 printf ">a_1\nAAAA\n>b_1\nAAAA\n" | \
-    "${SWARM}" -i "${OUTPUT}" &> /dev/null
+    "${SWARM}" -i "${OUTPUT}" > /dev/null 2>&1
 NUMBER_OF_DIFFERENCES=$(awk -F "\t" '{print $3}' "${OUTPUT}")
 (( "${NUMBER_OF_DIFFERENCES}" == 0 )) && \
     success "${DESCRIPTION}" || \
@@ -724,7 +724,7 @@ unset NUMBER_OF_DIFFERENCES
 OUTPUT=$(mktemp)
 DESCRIPTION="-i number of differences is correct when -d 2 (2 expected)"
 printf ">a_1\nAAAA\n>b_1\nAACC\n" | \
-    "${SWARM}" -d 2 -i "${OUTPUT}" &> /dev/null
+    "${SWARM}" -d 2 -i "${OUTPUT}" > /dev/null 2>&1
 NUMBER_OF_DIFFERENCES=$(awk -F "\t" '{print $3}' "${OUTPUT}")
 (( "${NUMBER_OF_DIFFERENCES}" == 2 )) && \
     success "${DESCRIPTION}" || \
@@ -736,7 +736,7 @@ unset NUMBER_OF_DIFFERENCES
 OUTPUT=$(mktemp)
 DESCRIPTION="-i number of differences is correct while -d 2 (1 expected)"
 printf ">a_1\nAAAA\n>b_1\nAAAC\n" | \
-    "${SWARM}" -d 2 -i "${OUTPUT}" &> /dev/null
+    "${SWARM}" -d 2 -i "${OUTPUT}" > /dev/null 2>&1
 NUMBER_OF_DIFFERENCES=$(awk -F "\t" '{print $3}' "${OUTPUT}")
 (( "${NUMBER_OF_DIFFERENCES}" == 1 )) && \
     success "${DESCRIPTION}" || \
@@ -748,7 +748,7 @@ unset NUMBER_OF_DIFFERENCES
 OUTPUT=$(mktemp)
 DESCRIPTION="-i number of the OTU is correct #1"
 printf ">a_1\nAAAA\n>b_1\nAAAC\n" | \
-    "${SWARM}" -i "${OUTPUT}" &> /dev/null
+    "${SWARM}" -i "${OUTPUT}" > /dev/null 2>&1
 NUMBER_OF_OTUs=$(awk -F "\t" '{print $4}' "${OUTPUT}")
 (( "${NUMBER_OF_OTUs}" == 1 )) && \
     success "${DESCRIPTION}" || \
@@ -760,7 +760,7 @@ unset NUMBER_OF_OTUs
 OUTPUT=$(mktemp)
 DESCRIPTION="-i number of the OTU is correct #2"
 printf ">a_1\nAA\n>b_1\nAC\n>c_1\nGG\n>d_1\nGT\n" | \
-    "${SWARM}" -i "${OUTPUT}" &> /dev/null
+    "${SWARM}" -i "${OUTPUT}" > /dev/null 2>&1
 NUMBER_OF_OTUs=$(awk '{n = $4} END {print n}' "${OUTPUT}")
 (( "${NUMBER_OF_OTUs}" == 2 )) && \
     success "${DESCRIPTION}" || \
@@ -772,7 +772,7 @@ unset NUMBER_OF_OTUs
 OUTPUT=$(mktemp)
 DESCRIPTION="-i number of steps is correct (1 expected)"
 printf ">a_1\nAAAA\n>b_1\nAAAC\n" | \
-    "${SWARM}" -i "${OUTPUT}" &> /dev/null
+    "${SWARM}" -i "${OUTPUT}" > /dev/null 2>&1
 NUMBER_OF_STEPS=$(awk -F "\t" '{print $5}' "${OUTPUT}")
 (( "${NUMBER_OF_STEPS}" == 1 )) && \
     success "${DESCRIPTION}" || \
@@ -784,7 +784,7 @@ unset NUMBER_OF_STEPS
 OUTPUT=$(mktemp)
 DESCRIPTION="-i number of steps is correct (3 expected)"
 printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nAACC\n>d_1\nACCC\n" | \
-    "${SWARM}" -i "${OUTPUT}" &> /dev/null
+    "${SWARM}" -i "${OUTPUT}" > /dev/null 2>&1
 NUMBER_OF_STEPS=$(awk -F "\t" '{print $5}' "${OUTPUT}" | sed '3q;d' )
 (( "${NUMBER_OF_STEPS}" == 3 )) && \
     success "${DESCRIPTION}" || \
@@ -796,7 +796,7 @@ unset NUMBER_OF_STEPS
 OUTPUT=$(mktemp)
 DESCRIPTION="-i number of steps is correct while -d 2 (1 expected)"
 printf ">a_1\nAAAA\n>c_1\nAACC\n" | \
-    "${SWARM}" -d 2 -i "${OUTPUT}" &> /dev/null
+    "${SWARM}" -d 2 -i "${OUTPUT}" > /dev/null 2>&1
 NUMBER_OF_STEPS=$(awk -F "\t" '{print $5}' "${OUTPUT}" )
 (( "${NUMBER_OF_STEPS}" == 1 )) && \
     success "${DESCRIPTION}" || \
@@ -808,7 +808,7 @@ unset NUMBER_OF_STEPS
 OUTPUT=$(mktemp)
 DESCRIPTION="-i number of steps is correct while -d 2 (2 expected)"
 printf ">a_1\nAAAA\n>b_1\nAACC\n>c_1\nACCC\n" | \
-    "${SWARM}" -d 2 -i "${OUTPUT}" &> /dev/null
+    "${SWARM}" -d 2 -i "${OUTPUT}" > /dev/null 2>&1
 NUMBER_OF_STEPS=$(awk -F "\t" 'NR == 2 {print $5}' "${OUTPUT}")
 (( "${NUMBER_OF_STEPS}" == 2 )) && \
     success "${DESCRIPTION}" || \
@@ -823,7 +823,7 @@ unset NUMBER_OF_STEPS
 DESCRIPTION="-i -f OTU numbering is updated"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_1\nAAAT\n>c_1\nATTT\n>d_1\nTTTT\n" | \
-    "${SWARM}" -f -i "${OUTPUT}" &> /dev/null
+    "${SWARM}" -f -i "${OUTPUT}" > /dev/null 2>&1
 awk 'NR == 2 {exit $4 == 1 ? 0 : 1}' "${OUTPUT}" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -837,7 +837,7 @@ rm "${OUTPUT}"
 DESCRIPTION="-i -f OTU numbering is contiguous (no gap)"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_1\nAAAT\n>c_1\nATTT\n>d_1\nTTTT\n>e_1\nGGGG\n>f_1\nGGGA\n" | \
-    "${SWARM}" -f -i "${OUTPUT}" &> /dev/null
+    "${SWARM}" -f -i "${OUTPUT}" > /dev/null 2>&1
 awk 'NR == 4 {exit $4 == 2 ? 0 : 1}' "${OUTPUT}" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -859,7 +859,7 @@ rm "${OUTPUT}"
 DESCRIPTION="-i -f number of steps between grafted amplicon and its new seed is not updated"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_1\nAAAT\n>c_2\nTTTT\n>d_1\nATTT\n" | \
-    "${SWARM}" -f -b 4 -i "${OUTPUT}" &> /dev/null
+    "${SWARM}" -f -b 4 -i "${OUTPUT}" > /dev/null 2>&1
 awk 'NR == 3 {exit $5 == 1 ? 0 : 1}' "${OUTPUT}" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -871,7 +871,7 @@ rm "${OUTPUT}"
 ## Swarm accepts the options -l and --log
 for OPTION in "-l" "--log" ; do
     DESCRIPTION="swarms accepts the option ${OPTION}"
-    "${SWARM}" "${OPTION}" /dev/null < "${ALL_IDENTICAL}" &> /dev/null && \
+    "${SWARM}" "${OPTION}" /dev/null < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
@@ -901,7 +901,7 @@ rm "${ERRORINPUT}"
 ## Swarm accepts the options -o and --output-file
 for OPTION in "-o" "--output-file" ; do
     DESCRIPTION="swarms accepts the option ${OPTION}"
-    "${SWARM}" "${OPTION}" /dev/null < "${ALL_IDENTICAL}" &> /dev/null && \
+    "${SWARM}" "${OPTION}" /dev/null < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
@@ -909,7 +909,7 @@ done
 ## Swarm creates output file with -o option
 OUTPUT=$(mktemp)
 DESCRIPTION="-o writes to the specified output file"
-"${SWARM}" -o  "${OUTPUT}" < "${ALL_IDENTICAL}" &> /dev/null
+"${SWARM}" -o  "${OUTPUT}" < "${ALL_IDENTICAL}" > /dev/null 2>&1
 [[ -s "${OUTPUT}" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -918,7 +918,7 @@ rm "${OUTPUT}"
 ## Swarm fills correctly output file with -o option
 OUTPUT=$(mktemp)
 DESCRIPTION="-o creates and fills the output file"
-"${SWARM}" -o  "${OUTPUT}" < "${ALL_IDENTICAL}" &> /dev/null
+"${SWARM}" -o  "${OUTPUT}" < "${ALL_IDENTICAL}" > /dev/null 2>&1
 EXPECTED=$(sed -n '/^>/ s/>//p' "${ALL_IDENTICAL}" | tr "\n" " " | sed 's/ $//')
 [[ $(< "${OUTPUT}") == "${EXPECTED}" ]] && \
     success "${DESCRIPTION}" || \
@@ -932,7 +932,7 @@ unset EXPECTED
 ## Swarm accepts the options -r and --mothur
 for OPTION in "-r" "--mothur" ; do
     DESCRIPTION="swarms accepts the option ${OPTION}"
-    "${SWARM}" "${OPTION}" < "${ALL_IDENTICAL}" &> /dev/null && \
+    "${SWARM}" "${OPTION}" < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
@@ -1094,7 +1094,7 @@ unset OTU
 ## Swarm accepts the options -s and --statistics-file
 for OPTION in "-s" "--statistics-file" ; do
     DESCRIPTION="swarms accepts the option ${OPTION}"
-    "${SWARM}" "${OPTION}" /dev/null < "${ALL_IDENTICAL}" &> /dev/null && \
+    "${SWARM}" "${OPTION}" /dev/null < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
@@ -1102,7 +1102,7 @@ done
 ## Swarm -s create and fill given filename
 DESCRIPTION="-s create and fill filename given"
 OUTPUT=$(mktemp)
-"${SWARM}" -s "${OUTPUT}" < "${ALL_IDENTICAL}" &> /dev/null
+"${SWARM}" -s "${OUTPUT}" < "${ALL_IDENTICAL}" > /dev/null 2>&1
 [[ -s "${OUTPUT}" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1110,14 +1110,14 @@ rm "${OUTPUT}"
 
 ## Swarm -s fails if no filename given
 DESCRIPTION="-s fails if no filename given"
-"${SWARM}" -s  < "${ALL_IDENTICAL}" &> /dev/null && \
+"${SWARM}" -s  < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Number of unique amplicons is correct with -s (1 expected)
 DESCRIPTION="-s number of unique amplicons is correct (1 expected)"
 OUTPUT=$(mktemp)
-printf ">a_5\nAAAA\n" | "${SWARM}" -s "${OUTPUT}" &> /dev/null
+printf ">a_5\nAAAA\n" | "${SWARM}" -s "${OUTPUT}" > /dev/null 2>&1
 UNIQUE_AMPLICONS=$(awk -F "\t" '{print $1}' "${OUTPUT}")
 (( "${UNIQUE_AMPLICONS}" == 1 )) && \
     success "${DESCRIPTION}" || \
@@ -1129,7 +1129,7 @@ unset UNIQUE_AMPLICONS
 DESCRIPTION="-s number of unique amplicons is correct (2 expected)"
 OUTPUT=$(mktemp)
 printf ">a_5\nAAAA\n>b_1\nAAAC\n" | \
-    "${SWARM}" -s "${OUTPUT}" &> /dev/null
+    "${SWARM}" -s "${OUTPUT}" > /dev/null 2>&1
 UNIQUE_AMPLICONS=$(awk -F "\t" '{print $1}' "${OUTPUT}")
 (( "${UNIQUE_AMPLICONS}" == 2 )) && \
     success "${DESCRIPTION}" || \
@@ -1141,7 +1141,7 @@ unset UNIQUE_AMPLICONS
 DESCRIPTION="-s number of unique amplicons is still correct (2 expected)"
 OUTPUT=$(mktemp)
 printf ">a_5\nAAAA\n>b_5\nAAAC\n>c_1\nGGGG\n" | \
-    "${SWARM}" -s "${OUTPUT}" &> /dev/null
+    "${SWARM}" -s "${OUTPUT}" > /dev/null 2>&1
 UNIQUE_AMPLICONS=$(awk -F "\t" 'NR == 1 {print $1}' "${OUTPUT}")
 (( "${UNIQUE_AMPLICONS}" == 2 )) && \
     success "${DESCRIPTION}" || \
@@ -1153,7 +1153,7 @@ unset UNIQUE_AMPLICONS
 DESCRIPTION="-s total abundance of amplicons is correct (1 expected)"
 OUTPUT=$(mktemp)
 printf ">a_1\nAAAA\n" | \
-    "${SWARM}" -s "${OUTPUT}" &> /dev/null
+    "${SWARM}" -s "${OUTPUT}" > /dev/null 2>&1
 TOTAL_ABUNDANCE=$(awk -F "\t" '{print $2}' "${OUTPUT}")
 (( "${TOTAL_ABUNDANCE}" == 1 )) && \
     success "${DESCRIPTION}" || \
@@ -1165,7 +1165,7 @@ unset TOTAL_ABUNDANCE
 DESCRIPTION="-s total abundance of amplicons is correct (5 expected)"
 OUTPUT=$(mktemp)
 printf ">a_5\nAAAA\n" | \
-    "${SWARM}" -s "${OUTPUT}" &> /dev/null
+    "${SWARM}" -s "${OUTPUT}" > /dev/null 2>&1
 TOTAL_ABUNDANCE=$(awk -F "\t" 'NR == 1 {print $2}' "${OUTPUT}")
 (( "${TOTAL_ABUNDANCE}" == 5 )) && \
     success "${DESCRIPTION}" || \
@@ -1177,7 +1177,7 @@ unset TOTAL_ABUNDANCE
 DESCRIPTION="-s total abundance of amplicons is still correct (5 expected)"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_2\nAAAC\n>c_1\nGGGG\n" | \
-    "${SWARM}" -s "${OUTPUT}" &> /dev/null
+    "${SWARM}" -s "${OUTPUT}" > /dev/null 2>&1
 TOTAL_ABUNDANCE=$(awk -F "\t" 'NR == 1 {print $2}' "${OUTPUT}")
 (( "${TOTAL_ABUNDANCE}" == 5 )) && \
     success "${DESCRIPTION}" || \
@@ -1189,7 +1189,7 @@ unset TOTAL_ABUNDANCE
 DESCRIPTION="-s ID of initial seed is correct"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_2\nAAAC\n>c_1\nGGGG\n" | \
-    "${SWARM}" -s "${OUTPUT}" &> /dev/null
+    "${SWARM}" -s "${OUTPUT}" > /dev/null 2>&1
 SEED_ID=$(awk -F "\t" 'NR == 1 {print $3}' "${OUTPUT}")
 [[ "${SEED_ID}" == "a" ]] && \
     success "${DESCRIPTION}" || \
@@ -1201,7 +1201,7 @@ unset SEED_ID
 DESCRIPTION="-s ID of initial seed is still correct"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_2\nAAAC\n>c_1\nGGGG\n" | \
-    "${SWARM}" -s "${OUTPUT}" &> /dev/null
+    "${SWARM}" -s "${OUTPUT}" > /dev/null 2>&1
 SEED_ID=$(awk -F "\t" 'NR == 2 {print $3}' "${OUTPUT}")
 [[ "${SEED_ID}" == "c" ]] && \
     success "${DESCRIPTION}" || \
@@ -1213,7 +1213,7 @@ unset SEED_ID
 DESCRIPTION="-s abundance of initial seed is correct"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_2\nAAAC\n>c_1\nGGGG\n" | \
-    "${SWARM}" -s "${OUTPUT}" &> /dev/null
+    "${SWARM}" -s "${OUTPUT}" > /dev/null 2>&1
 SEED_ABUNDANCE=$(awk -F "\t" 'NR == 1 {print $4}' "${OUTPUT}")
 (( "${SEED_ABUNDANCE}" == 3 )) && \
     success "${DESCRIPTION}" || \
@@ -1225,7 +1225,7 @@ unset SEED_ABUNDANCE
 DESCRIPTION="-s abundance of initial seed is still correct"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_2\nAAAC\n>c_1\nGGGG\n" | \
-    "${SWARM}" -s "${OUTPUT}" &> /dev/null
+    "${SWARM}" -s "${OUTPUT}" > /dev/null 2>&1
 SEED_ABUNDANCE=$(awk -F "\t" 'NR == 2 {print $4}' "${OUTPUT}")
 (( "${SEED_ABUNDANCE}" == 1 )) && \
     success "${DESCRIPTION}" || \
@@ -1237,7 +1237,7 @@ unset SEED_ABUNDANCE
 DESCRIPTION="-s number of amplicons with an abundance of 1 is correct (0 expected)"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_2\nAAAC\n>c_1\nGGGG\n" | \
-    "${SWARM}" -s "${OUTPUT}" &> /dev/null
+    "${SWARM}" -s "${OUTPUT}" > /dev/null 2>&1
 NUMBER_OF_AMPLICONS=$(awk -F "\t" 'NR == 1 {print $5}' "${OUTPUT}")
 (( "${NUMBER_OF_AMPLICONS}" == 0 )) && \
     success "${DESCRIPTION}" || \
@@ -1249,7 +1249,7 @@ unset NUMBER_OF_AMPLICONS
 DESCRIPTION="-s number of amplicons with an abundance of 1 is correct (1 expected)"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_2\nAAAC\n>c_1\nGGGG\n" | \
-    "${SWARM}" -s "${OUTPUT}" &> /dev/null
+    "${SWARM}" -s "${OUTPUT}" > /dev/null 2>&1
 NUMBER_OF_AMPLICONS=$(awk -F "\t" 'NR == 2 {print $5}' "${OUTPUT}")
 (( "${NUMBER_OF_AMPLICONS}" == 1 )) && \
     success "${DESCRIPTION}" || \
@@ -1261,7 +1261,7 @@ unset NUMBER_OF_AMPLICONS
 DESCRIPTION="-s number of iterations is correct (0 expected)"
 OUTPUT=$(mktemp)
 printf ">a_2\nAAAA\n" | \
-    "${SWARM}" -s "${OUTPUT}" &> /dev/null
+    "${SWARM}" -s "${OUTPUT}" > /dev/null 2>&1
 NUMBER_OF_ITERATIONS=$(awk -F "\t" 'NR == 1 {print $6}' "${OUTPUT}")
 (( "${NUMBER_OF_ITERATIONS}" == 0 )) && \
     success "${DESCRIPTION}" || \
@@ -1273,7 +1273,7 @@ unset NUMBER_OF_ITERATIONS
 DESCRIPTION="-s number of iterations is correct (1 expected)"
 OUTPUT=$(mktemp)
 printf ">a_2\nAAAA\n>c_1\nAACC\n" | \
-    "${SWARM}" -d 2 -s "${OUTPUT}" &> /dev/null
+    "${SWARM}" -d 2 -s "${OUTPUT}" > /dev/null 2>&1
 NUMBER_OF_ITERATIONS=$(awk -F "\t" 'NR == 1 {print $6}' "${OUTPUT}")
 (( "${NUMBER_OF_ITERATIONS}" == 1 )) && \
     success "${DESCRIPTION}" || \
@@ -1285,7 +1285,7 @@ unset NUMBER_OF_ITERATIONS
 DESCRIPTION="-s number of iterations is correct (2 expected)"
 OUTPUT=$(mktemp)
 printf ">a_2\nAAAA\n>b_2\nAAAC\n>c_1\nACCC\n" | \
-    "${SWARM}" -d 2 -s "${OUTPUT}" &> /dev/null
+    "${SWARM}" -d 2 -s "${OUTPUT}" > /dev/null 2>&1
 NUMBER_OF_ITERATIONS=$(awk -F "\t" 'NR == 1 {print $6}' "${OUTPUT}")
 (( "${NUMBER_OF_ITERATIONS}" == 2 )) && \
     success "${DESCRIPTION}" || \
@@ -1297,7 +1297,7 @@ unset NUMBER_OF_ITERATIONS
 DESCRIPTION="-s theorical maximum radius is correct (0 expected)"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n" | \
-    "${SWARM}" -s "${OUTPUT}" &> /dev/null
+    "${SWARM}" -s "${OUTPUT}" > /dev/null 2>&1
 THEORICAL_RADIUS=$(awk -F "\t" 'NR == 1 {print $7}' "${OUTPUT}")
 (( "${THEORICAL_RADIUS}" == 0 )) && \
     success "${DESCRIPTION}" || \
@@ -1309,7 +1309,7 @@ unset THEORICAL_RADIUS
 DESCRIPTION="-s theorical maximum radius is correct (2 expected)"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_2\nAAAC\n>c_1\nAACC\n" | \
-    "${SWARM}" -s "${OUTPUT}" &> /dev/null
+    "${SWARM}" -s "${OUTPUT}" > /dev/null 2>&1
 THEORICAL_RADIUS=$(awk -F "\t" 'NR == 1 {print $7}' "${OUTPUT}")
 (( "${THEORICAL_RADIUS}" == 2 )) && \
     success "${DESCRIPTION}" || \
@@ -1321,7 +1321,7 @@ unset THEORICAL_RADIUS
 DESCRIPTION="-s theorical maximum radius is correct -d 2 (2 expected)"
 OUTPUT=$(mktemp)
 printf ">a_2\nAAAA\n>c_1\nAACC\n" | \
-    "${SWARM}" -d 2 -s "${OUTPUT}" &> /dev/null
+    "${SWARM}" -d 2 -s "${OUTPUT}" > /dev/null 2>&1
 THEORICAL_RADIUS=$(awk -F "\t" 'NR == 1 {print $7}' "${OUTPUT}")
 (( "${THEORICAL_RADIUS}" == 2 )) && \
     success "${DESCRIPTION}" || \
@@ -1333,7 +1333,7 @@ unset THEORICAL_RADIUS
 DESCRIPTION="-s theorical radius != actuel radius -d 2"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAAA\n>b_3\nAAACC\n>c_2\nACCCC\n>d_2\nACCAC\n" | \
-    "${SWARM}" -d 2 -s "${OUTPUT}" &> /dev/null
+    "${SWARM}" -d 2 -s "${OUTPUT}" > /dev/null 2>&1
 THEORICAL_RADIUS=$(awk -F "\t" 'NR == 1 {print $7}' "${OUTPUT}")
 (( "${THEORICAL_RADIUS}" == 5 )) && \
     success "${DESCRIPTION}" || \
@@ -1348,7 +1348,7 @@ unset THEORICAL_RADIUS
 for OPTION in "-u" "--uclust-file" ; do
     DESCRIPTION="swarms accepts the option ${OPTION}"
     printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
-        "${SWARM}" "${OPTION}" /dev/null &> /dev/null && \
+        "${SWARM}" "${OPTION}" /dev/null > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
@@ -1356,7 +1356,7 @@ done
 ## Swarm -u fails if no output file given
 DESCRIPTION="-u fails if no output file given"
 printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
-    "${SWARM}" -u &> /dev/null && \
+    "${SWARM}" -u > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -1364,7 +1364,7 @@ printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
 OUTPUT=$(mktemp)
 DESCRIPTION="-u creates and fills file given in argument"
 printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 [[ -s "${OUTPUT}" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1374,7 +1374,7 @@ rm "${OUTPUT}"
 DESCRIPTION="-u number of hits is correct in the first column #1"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nAAAC\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 NUMBER_OF_HITS=$(grep -c "^H" "${OUTPUT}")
 (( "${NUMBER_OF_HITS}" == 1 )) && \
     success "${DESCRIPTION}" || \
@@ -1386,7 +1386,7 @@ unset NUMBER_OF_HITS
 DESCRIPTION="-u number of hits is correct in the first column #2"
 OUTPUT=$(mktemp)
 printf ">a_3\nGGGG\n>b_3\nAAAA\n>c_3\nAAAC\n>d_3\nAACC\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 NUMBER_OF_HITS=$(grep -c "^H" "${OUTPUT}")
 (( "${NUMBER_OF_HITS}" == 2 )) && \
     success "${DESCRIPTION}" || \
@@ -1398,7 +1398,7 @@ unset NUMBER_OF_HITS
 DESCRIPTION="-u number of centroids is correct in the first column #1"
 OUTPUT=$(mktemp)
 printf ">a_3\nGGGG\n>b_3\nAAAA\n>c_3\nAAAC\n>d_3\nAACC\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 NUMBER_OF_CENTROIDS=$(grep -c "^S" "${OUTPUT}")
 (( "${NUMBER_OF_CENTROIDS}" == 2 )) && \
     success "${DESCRIPTION}" || \
@@ -1410,7 +1410,7 @@ unset NUMBER_OF_CENTROIDS
 DESCRIPTION="-u number of centroids is correct in the first column #2"
 OUTPUT=$(mktemp)
 printf ">a_3\nGGGG\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 NUMBER_OF_CENTROIDS=$(grep -c "^S" "${OUTPUT}")
 (( "${NUMBER_OF_CENTROIDS}" == 1 )) && \
     success "${DESCRIPTION}" || \
@@ -1422,7 +1422,7 @@ unset NUMBER_OF_CENTROIDS
 DESCRIPTION="-u number of cluster records is correct in the first column #1"
 OUTPUT=$(mktemp)
 printf ">a_3\nGGGG\n>b_3\nAAAA\n>c_3\nAAAC\n>d_3\nAACC\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 NUMBER_OF_CLUSTERS=$(grep -c "^C" "${OUTPUT}")
 (( "${NUMBER_OF_CLUSTERS}" == 2 )) && \
     success "${DESCRIPTION}" || \
@@ -1434,7 +1434,7 @@ unset NUMBER_OF_CLUSTERS
 DESCRIPTION="-u number of cluster records is correct in the first column #2"
 OUTPUT=$(mktemp)
 printf ">a_3\nGGGG\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 NUMBER_OF_CLUSTERS=$(grep -c "^C" "${OUTPUT}")
 (( "${NUMBER_OF_CLUSTERS}" == 1 )) && \
     success "${DESCRIPTION}" || \
@@ -1446,7 +1446,7 @@ unset NUMBER_OF_CLUSTERS
 DESCRIPTION="-u cluster number is correct in 2nd column #1"
 OUTPUT=$(mktemp)
 printf ">a_3\nGGGG\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 CLUSTER_NUMBER=$(awk '/^C/ {v = $2} END {print v}' "${OUTPUT}")
 (( "${CLUSTER_NUMBER}" == 0 )) && \
     success "${DESCRIPTION}" || \
@@ -1458,7 +1458,7 @@ unset CLUSTER_NUMBER
 DESCRIPTION="-u cluster number is correct in 2nd column #2"
 OUTPUT=$(mktemp)
 printf ">a_3\nGGGG\n>b_3\nAAAA\n>c_3\nAAAC\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 CLUSTER_NUMBER=$(awk '/^C/ {v = $2} END {print v}' "${OUTPUT}")
 (( "${CLUSTER_NUMBER}" == 1 )) && \
     success "${DESCRIPTION}" || \
@@ -1470,7 +1470,7 @@ unset CLUSTER_NUMBER
 DESCRIPTION="-u cluster number is correct in 3rd column #1"
 OUTPUT=$(mktemp)
 printf ">a_3\nGGGG\n>b_3\nAAAA\n>c_3\nAAAC\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 CLUSTER_SIZE=$(awk '/^C/ {v = $3} END {print v}' "${OUTPUT}")
 (( "${CLUSTER_SIZE}" == 2 )) && \
     success "${DESCRIPTION}" || \
@@ -1482,7 +1482,7 @@ unset CLUSTER_SIZE
 DESCRIPTION="-u cluster number is correct in 3rd column #2"
 OUTPUT=$(mktemp)
 printf ">a_3\nGGGG\n>b_3\nAAAA\n>c_3\nAAAC\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 CLUSTER_SIZE=$(grep "^C" "${OUTPUT}" | \
                awk -F "\t" '{if (NR == 2) {print $2}}')
 [[ "${CLUSTER_SIZE}" == "1" ]] && \
@@ -1495,7 +1495,7 @@ unset CLUSTER_SIZE
 DESCRIPTION="-u centroid length is correct in 3rd column #1"
 OUTPUT=$(mktemp)
 printf ">a_3\nGGGG\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 CENTROID_LENGTH=$(awk '/^S/ {v = $3} END {print v}' "${OUTPUT}")
 (( "${CENTROID_LENGTH}" == 4 )) && \
     success "${DESCRIPTION}" || \
@@ -1507,7 +1507,7 @@ unset CENTROIS_LENGTH
 DESCRIPTION="-u centroid length is correct in 3rd column #2"
 OUTPUT=$(mktemp)
 printf ">a_3\nGGGG\n>b_3\nA\n>c_3\nC\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 CENTROID_LENGTH=$(awk '/^S/ {v = $3} END {print v}' "${OUTPUT}")
 [[ "${CENTROID_LENGTH}" == "1" ]] && \
     success "${DESCRIPTION}" || \
@@ -1519,7 +1519,7 @@ unset CENTROIS_LENGTH
 DESCRIPTION="-u query length is correct in 3rd column #1"
 OUTPUT=$(mktemp)
 printf ">a_3\nGGGG\n>b_3\nAA\n>c_3\nAAA\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 QUERY_LENGTH=$(awk '/^H/ {if (NR == 5) {print $3}}' "${OUTPUT}")
 [[ "${QUERY_LENGTH}" == "3" ]] && \
     success "${DESCRIPTION}" || \
@@ -1531,7 +1531,7 @@ unset QUERY_LENGTH
 DESCRIPTION="-u query length is correct in 3rd column #2"
 OUTPUT=$(mktemp)
 printf ">a_3\nGGGG\n>b_3\nA\n>c_3\nA\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 QUERY_LENGTH=$(awk '/^H/ {v = $3} END {print v}' "${OUTPUT}")
 (( "${QUERY_LENGTH}" == 1 )) && \
     success "${DESCRIPTION}" || \
@@ -1543,7 +1543,7 @@ unset QUERY_LENGTH
 DESCRIPTION="-u similarity percentage is correct in 4th column #1"
 OUTPUT=$(mktemp)
 printf ">a_3\nGGGG\n>b_3\nAAAA\n>c_3\nAAAC\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 SIMILARITY_PERCENTAGE=$(awk '/^H/ {v = $4} END {print v}' "${OUTPUT}")
 [[ "${SIMILARITY_PERCENTAGE}" == "75.0" ]] && \
     success "${DESCRIPTION}" || \
@@ -1569,7 +1569,7 @@ unset SIMILARITY_PERCENTAGE
 DESCRIPTION="-u similarity percentage is correct in 4th column #3"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAAAAAA\n>b_3\nAAAAAAAC\n>c_3\nAAAAAACC\n>d_3\nAAAAACCC\n>e_3\nAAAACCCC\n>f_3\nAAACCCCC\n>g_3\nAACCCCCC\n>h_3\nACCCCCCC\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 SIMILARITY_PERCENTAGE=$(awk '/^H/ {v = $4} END {print v}' "${OUTPUT}")
 [[ "${SIMILARITY_PERCENTAGE}" == "12.5" ]] && \
     success "${DESCRIPTION}" || \
@@ -1581,7 +1581,7 @@ unset SIMILARITY_PERCENTAGE
 DESCRIPTION="-u similarity percentage is * in 4th column with S"
 OUTPUT=$(mktemp)
 printf ">a_3\nGGGG\n>b_3\nAAAA\n>c_3\nAAAC\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 SIMILARITY_PERCENTAGE=$(grep "^S" "${OUTPUT}" | \
                awk -F "\t" '{if (NR == 1) {print $4}}')
 [[ "${SIMILARITY_PERCENTAGE}" == "*" ]] && \
@@ -1594,7 +1594,7 @@ unset SIMILARITY_PERCENTAGE
 DESCRIPTION="-u match orientation is correct in 5th column with H"
 OUTPUT=$(mktemp)
 printf ">a_3\nGGGG\n>b_3\nAAAA\n>c_3\nAAAC\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 MATCH_ORIENTATION=$(awk '/^H/ {v = $5} END {print v}' "${OUTPUT}")
 [[ "${MATCH_ORIENTATION}" == "+" ]] && \
     success "${DESCRIPTION}" || \
@@ -1606,7 +1606,7 @@ unset MATCH_ORIENTATION
 DESCRIPTION="-u match orientation is correct in 5th column with S"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nAGCC\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 MATCH_ORIENTATION=$(awk '/^S/ {v = $5} END {print v}' "${OUTPUT}")
 [[ "${MATCH_ORIENTATION}" == "*" ]] && \
     success "${DESCRIPTION}" || \
@@ -1618,7 +1618,7 @@ unset MATCH_ORIENTATION
 DESCRIPTION="-u match orientation is correct in 5th column with C"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nAGCC\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 MATCH_ORIENTATION=$(awk '/^C/ {v = $5} END {print v}' "${OUTPUT}")
 [[ "${MATCH_ORIENTATION}" == "*" ]] && \
     success "${DESCRIPTION}" || \
@@ -1630,7 +1630,7 @@ unset MATCH_ORIENTATION
 DESCRIPTION="-u 6th column is * with C"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nAGCC\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 COLUMN_6=$(awk '/^C/ {v = $6} END {print v}' "${OUTPUT}")
 [[ "${COLUMN_6}" == "*" ]] && \
     success "${DESCRIPTION}" || \
@@ -1642,7 +1642,7 @@ unset COLUMN_6
 DESCRIPTION="-u 6th column is * with S"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nAGCC\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 COLUMN_6=$(awk '/^S/ {v = $6} END {print v}' "${OUTPUT}")
 [[ "${COLUMN_6}" == "*" ]] && \
     success "${DESCRIPTION}" || \
@@ -1654,7 +1654,7 @@ unset COLUMN_6
 DESCRIPTION="-u 6th column is 0 with H"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nAGCC\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 COLUMN_6=$(awk '/^H/ {v = $6} END {print v}' "${OUTPUT}")
 (( "${COLUMN_6}" == 0 )) && \
     success "${DESCRIPTION}" || \
@@ -1666,7 +1666,7 @@ unset COLUMN_6
 DESCRIPTION="-u 7th column is * with C"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nAGCC\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 COLUMN_7=$(awk '/^C/ {v = $7} END {print v}' "${OUTPUT}")
 [[ "${COLUMN_7}" == "*" ]] && \
     success "${DESCRIPTION}" || \
@@ -1678,7 +1678,7 @@ unset COLUMN_7
 DESCRIPTION="-u 7th column is * with S"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nAGCC\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 COLUMN_7=$(grep "^S" "${OUTPUT}" | \
                   awk -F "\t" '{if (NR == 1) {print $7}}')
 [[ "${COLUMN_7}" == "*" ]] && \
@@ -1691,7 +1691,7 @@ unset COLUMN_7
 DESCRIPTION="-u 7th column is 0 with H"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nAGCC\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 COLUMN_7=$(awk '/^H/ {v = $7} END {print v}' "${OUTPUT}")
 [[ "${COLUMN_7}" == "0" ]] && \
     success "${DESCRIPTION}" || \
@@ -1703,7 +1703,7 @@ unset COLUMN_7
 DESCRIPTION="-u CIGAR is * with S"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nAGCC\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 CIGAR=$(awk '/^S/ {v = $8} END {print v}' "${OUTPUT}")
 [[ "${CIGAR}" == "*" ]] && \
     success "${DESCRIPTION}" || \
@@ -1715,7 +1715,7 @@ unset CIGAR
 DESCRIPTION="-u CIGAR is * with C"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nAGCC\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 CIGAR=$(awk '/^C/ {v = $8} END {print v}' "${OUTPUT}")
 [[ "${CIGAR}" == "*" ]] && \
     success "${DESCRIPTION}" || \
@@ -1727,7 +1727,7 @@ unset CIGAR
 DESCRIPTION="-u CIGAR notation is correct in 8th column is with H #1"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nAAAC\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 CIGAR=$(awk '/^H/ {v = $8} END {print v}' "${OUTPUT}")
 [[ "${CIGAR}" == "4M" ]] && \
     success "${DESCRIPTION}" || \
@@ -1739,7 +1739,7 @@ unset CIGAR
 DESCRIPTION="-u CIGAR notation is correct in 8th column is with H #2"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nAAA\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 CIGAR=$(awk '/^H/ {v = $8} END {print v}' "${OUTPUT}")
 [[ "${CIGAR}" == "D3M" ]] && \
     success "${DESCRIPTION}" || \
@@ -1751,7 +1751,7 @@ unset CIGAR
 DESCRIPTION="-u CIGAR notation is correct in 8th column is with H #3"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nAAAAA\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 CIGAR=$(awk '/^H/ {v = $8} END {print v}' "${OUTPUT}")
 [[ "${CIGAR}" == "4MI" ]] && \
     success "${DESCRIPTION}" || \
@@ -1763,7 +1763,7 @@ unset CIGAR
 DESCRIPTION="-u CIGAR notation is correct in 8th column is with H #4"
 OUTPUT=$(mktemp)
 printf ">a_3\nACGT\n>b_3\nACGT\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 CIGAR=$(awk '/^H/ {v = $8} END {print v}' "${OUTPUT}")
 [[ "${CIGAR}" == "=" ]] && \
     success "${DESCRIPTION}" || \
@@ -1775,7 +1775,7 @@ unset CIGAR
 DESCRIPTION="-u CIGAR notation is correct in 8th column is with H using -d 5 #1"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nACGT\n" | \
-    "${SWARM}" -d 5 -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -d 5 -u "${OUTPUT}" > /dev/null 2>&1
 CIGAR=$(awk '/^H/ {v = $8} END {print v}' "${OUTPUT}")
 [[ "${CIGAR}" == "4M" ]] && \
     success "${DESCRIPTION}" || \
@@ -1787,7 +1787,7 @@ unset CIGAR
 DESCRIPTION="-u CIGAR notation is correct in 8th column is with H using -d 5 #2"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nCG\n" | \
-    "${SWARM}" -d 5 -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -d 5 -u "${OUTPUT}" > /dev/null 2>&1
 CIGAR=$(awk '/^H/ {v = $8} END {print v}' "${OUTPUT}")
 [[ "${CIGAR}" == "2D2M" ]] && \
     success "${DESCRIPTION}" || \
@@ -1799,7 +1799,7 @@ unset CIGAR
 DESCRIPTION="-u CIGAR notation is correct in 8th column is with H using -d 5 #3"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nACGTTT\n" | \
-    "${SWARM}" -d 5 -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -d 5 -u "${OUTPUT}" > /dev/null 2>&1
 CIGAR=$(awk '/^H/ {v = $8} END {print v}' "${OUTPUT}")
 [[ "${CIGAR}" == "4M2I" ]] && \
     success "${DESCRIPTION}" || \
@@ -1811,7 +1811,7 @@ unset CIGAR
 DESCRIPTION="-u query sequence's label is correct in 9th column with H #1"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nAAAC\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 QUERY_LABEL=$(awk '/^H/ {v = $9} END {print v}' "${OUTPUT}")
 [[ "${QUERY_LABEL}" == "b_3" ]] && \
     success "${DESCRIPTION}" || \
@@ -1823,7 +1823,7 @@ unset QUERY_LABEL
 DESCRIPTION="-u query sequence's label is correct in 9th column with H #2"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_1\nAACC\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 QUERY_LABEL=$(awk '/^H/ {v = $9} END {print v}' "${OUTPUT}")
 [[ "${QUERY_LABEL}" == "c_1" ]] && \
     success "${DESCRIPTION}" || \
@@ -1835,7 +1835,7 @@ unset QUERY_LABEL
 DESCRIPTION="-u centroid sequence's label is correct in 9th column with S #1"
 OUTPUT=$(mktemp)
 printf ">a_2\nGGGG\n>b_3\nAAAA\n>c_2\nAAAC\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 CENTROID_LABEL=$(awk '/^S/ {v = $9} END {print v}' "${OUTPUT}")
 [[ "${CENTROID_LABEL}" == "a_2" ]] && \
     success "${DESCRIPTION}" || \
@@ -1847,7 +1847,7 @@ unset CENTROID_LABEL
 DESCRIPTION="-u centroid sequence's label is correct in 9th column with S #2"
 OUTPUT=$(mktemp)
 printf ">a_2\nAAAA\n>b_3\nAAAC\n>c_1\nAACC\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 CENTROID_LABEL=$(awk '/^S/ {v = $9} END {print v}' "${OUTPUT}")
 [[ "${CENTROID_LABEL}" == "b_3" ]] && \
     success "${DESCRIPTION}" || \
@@ -1859,7 +1859,7 @@ unset CENTROID_LABEL
 DESCRIPTION="-u centroid sequence's label is correct in 9th column with C #1"
 OUTPUT=$(mktemp)
 printf ">a_2\nGGGG\n>b_3\nAAAA\n>c_2\nAAAC\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 CENTROID_LABEL=$(awk '/^C/ {v = $9} END {print v}' "${OUTPUT}")
 [[ "${CENTROID_LABEL}" == "a_2" ]] && \
     success "${DESCRIPTION}" || \
@@ -1871,7 +1871,7 @@ unset CENTROID_LABEL
 DESCRIPTION="-u centroid sequence's label is correct in 9th column with C #2"
 OUTPUT=$(mktemp)
 printf ">a_2\nAAAA\n>b_3\nAAAC\n>c_1\nAACC\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 CENTROID_LABEL=$(awk '/^S/ {v = $9} END {print v}' "${OUTPUT}")
 [[ "${CENTROID_LABEL}" == "b_3" ]] && \
     success "${DESCRIPTION}" || \
@@ -1883,7 +1883,7 @@ unset CENTROID_LABEL
 DESCRIPTION="-u centroid sequence's label is correct in 10th column with H"
 OUTPUT=$(mktemp)
 printf ">a_2\nAAAA\n>b_3\nAAAC\n>c_1\nAACC\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 CENTROID_LABEL=$(awk '/^H/ {v = $10} END {print v}' "${OUTPUT}")
 [[ "${CENTROID_LABEL}" == "b_3" ]] && \
     success "${DESCRIPTION}" || \
@@ -1895,7 +1895,7 @@ unset CENTROID_LABEL
 DESCRIPTION="-u 10th column is * with C"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nAGCC\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 CENTROID_LABEL=$(awk '/^C/ {v = $10} END {print v}' "${OUTPUT}")
 [[ "${CENTROID_LABEL}" == "*" ]] && \
     success "${DESCRIPTION}" || \
@@ -1907,7 +1907,7 @@ unset CENTROID_LABEL
 DESCRIPTION="-u 10th column is * with S"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nAGCC\n" | \
-    "${SWARM}" -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 CENTROID_LABEL=$(awk '/^S/ {v = $10} END {print v}' "${OUTPUT}")
 [[ "${CENTROID_LABEL}" == "*" ]] && \
     success "${DESCRIPTION}" || \
@@ -1919,7 +1919,7 @@ unset CENTROID_LABEL
 DESCRIPTION="-u -f OTU numbering is contiguous (no gap)"
 OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_1\nAAAT\n>c_1\nATTT\n>d_1\nTTTT\n>e_1\nGGGG\n" | \
-    "${SWARM}" -f -u "${OUTPUT}" &> /dev/null
+    "${SWARM}" -f -u "${OUTPUT}" > /dev/null 2>&1
 OTU_NUMBER=$(awk '/^C/ {v = $2} END {print v}' "${OUTPUT}")
 (( "${OTU_NUMBER}" == 1 )) && \
     success "${DESCRIPTION}" || \
@@ -1934,7 +1934,7 @@ unset OTU_NUMBER
 for OPTION in "-w" "--seeds" ; do
     DESCRIPTION="swarms accepts the option ${OPTION}"
     printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
-        "${SWARM}" "${OPTION}" /dev/null &> /dev/null && \
+        "${SWARM}" "${OPTION}" /dev/null > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
@@ -1943,7 +1943,7 @@ done
 OUTPUT=$(mktemp)
 DESCRIPTION="swarm -w create and fill file given in argument"
 printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG\n" | \
-    "${SWARM}" -w "${OUTPUT}" &> /dev/null
+    "${SWARM}" -w "${OUTPUT}" > /dev/null 2>&1
 [[ -s "${OUTPUT}" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1952,7 +1952,7 @@ rm "${OUTPUT}"
 ## Swarm -w fails if no output file given
 DESCRIPTION="-w fails if no output file given"
 printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
-    "${SWARM}" -w &> /dev/null && \
+    "${SWARM}" -w > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -1961,7 +1961,7 @@ OUTPUT=$(mktemp)
 DESCRIPTION="-w gives expected output"
 EXPECTED=$(printf ">a_2\nAAAA\n>c_1\nGGGG\n")
 printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
-    "${SWARM}" -w "${OUTPUT}" &> /dev/null
+    "${SWARM}" -w "${OUTPUT}" > /dev/null 2>&1
 [[ "$(sed '/^>/! y/acgt/ACGT/' "${OUTPUT}")" == "${EXPECTED}" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1973,7 +1973,7 @@ OUTPUT=$(mktemp)
 DESCRIPTION="-w can sum up large abundance values (2 * (2^32 + 1))"
 EXPECTED=$(( ((1 << 32) + 1) * 2 ))
 printf ">s1_%d\nA\n>s2_%d\nT\n" $(( (1 << 32) + 1)) $(( (1 << 32) + 1)) | \
-    "${SWARM}" -w "${OUTPUT}" &> /dev/null
+    "${SWARM}" -w "${OUTPUT}" > /dev/null 2>&1
 (( "$(awk -F "_" '/^>/ {print $2}' "${OUTPUT}")" == ${EXPECTED} )) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -2111,37 +2111,37 @@ rm "${OUTPUT}"
 while read LONG SHORT ; do
     ## Using option when d = 1 should fail (or warning?)
     DESCRIPTION="swarm aborts when --${LONG} is specified and d = 1"
-    "${SWARM}" -d 1 ${SHORT} 1 < "${ALL_IDENTICAL}" &> /dev/null && \
+    "${SWARM}" -d 1 ${SHORT} 1 < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
 
     ## option is empty
     DESCRIPTION="swarm aborts when --${LONG} is empty"
-    "${SWARM}" -d 2 ${SHORT} < "${ALL_IDENTICAL}" &> /dev/null && \
+    "${SWARM}" -d 2 ${SHORT} < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
 
     ## option is negative
     DESCRIPTION="swarm aborts when --${LONG} is -1"
-    "${SWARM}" -d 2 ${SHORT} \-1 < "${ALL_IDENTICAL}" &> /dev/null && \
+    "${SWARM}" -d 2 ${SHORT} \-1 < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
 
     ## option is non-numerical
     DESCRIPTION="swarm aborts when --${LONG} is not numerical"
-    "${SWARM}" -d 2 ${SHORT} "a" < "${ALL_IDENTICAL}" &> /dev/null && \
+    "${SWARM}" -d 2 ${SHORT} "a" < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
 
     ## option is null (allowed for -m & -p, not for -g & -e)
     if [[ "${SHORT}" == "-m" || "${SHORT}" == "-p" ]] ; then
         DESCRIPTION="swarm aborts when --${LONG} is null"
-        "${SWARM}" -d 2 ${SHORT} 0 < "${ALL_IDENTICAL}" &> /dev/null && \
+        "${SWARM}" -d 2 ${SHORT} 0 < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
             failure "${DESCRIPTION}" || \
                 success "${DESCRIPTION}"
     elif [[ "${SHORT}" == "-g" || "${SHORT}" == "-e" ]] ; then
         DESCRIPTION="swarm runs normally when --${LONG} is null"
-        "${SWARM}" -d 2 ${SHORT} 0 < "${ALL_IDENTICAL}" &> /dev/null && \
+        "${SWARM}" -d 2 ${SHORT} 0 < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
             success "${DESCRIPTION}" || \
                 failure "${DESCRIPTION}"
     else
@@ -2154,7 +2154,7 @@ while read LONG SHORT ; do
     MAX=255
     DESCRIPTION="swarm runs normally when --${LONG} goes from ${MIN} to ${MAX}"
     for ((i=$MIN ; i<=$MAX ; i++)) ; do
-        "${SWARM}" -d 2 "${SHORT}" ${i} < "${ALL_IDENTICAL}" &> /dev/null || \
+        "${SWARM}" -d 2 "${SHORT}" ${i} < "${ALL_IDENTICAL}" > /dev/null 2>&1 || \
             failure "swarm aborts when --${LONG} equals ${i}"
     done && success "${DESCRIPTION}"
     
