@@ -68,33 +68,35 @@ unset FASTA
 
 ## OTUs are correct
 DESCRIPTION="OTUs are correct"
-OUTPUT=$(printf ">s1_2\nAAAA\n>s2_1\nAAAA\n>s3_1\nCCCC\n" | \
-    "${SWARM}" 2> /dev/null)
-[[ "${OUTPUT}" == $(printf "s1_2 s2_1\ns3_1") ]] && \
+printf ">s1_2\nAA\n>s2_1\nAT\n>s3_1\nCC\n" | \
+    "${SWARM}" 2> /dev/null | \
+    tr "\n" "@" | \
+    grep -q "s1_2 s2_1@s3_1" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
 ## OTUs number is correct
 DESCRIPTION="number of OTUs is correct"
-OUTPUT=$(printf ">s1_2\nAAAA\n>s2_1\nAAAA\n>s3_1\nCCCC\n" | \
-                "${SWARM}" 2> /dev/null)
-(( $(wc -l <<< "${OUTPUT}") == 2 )) && \
+printf ">s1_2\nAA\n>s2_1\nAT\n>s3_1\nCC\n" | \
+    "${SWARM}" 2> /dev/null | \
+    wc -l | \
+    grep -q "^2$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## OTUs' seeds are the more abundants amplicons
-DESCRIPTION="OTUs' seeds are the more abundants amplicons"
-OUTPUT=$(printf ">s1_1\nAAAA\n>s2_2\nAAAA\n>s3_1\nAAAAA\n" | \
-    "${SWARM}" 2> /dev/null | awk 'NR==1 {print $1}')
-[[ "${OUTPUT}" == "s2_2" ]] && \
+## OTU seed is the most abundant amplicon
+DESCRIPTION="OTU seed is the most abundant amplicon"
+printf ">s1_1\nA\n>s2_2\nT\n" | \
+    "${SWARM}" 2> /dev/null | \
+    grep -q "^s2_2" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## OTUs' amplicons are sorted in alphabetical order
+## OTU amplicons are sorted alphabetically
 DESCRIPTION="amplicons with the same abundance are sorted alphabetically"
-OUTPUT=$(printf ">a_1\nAAAA\n>c_1\nAAAA\n>b_1\nAAAA\n" | \
-    "${SWARM}" 2> /dev/null)
-[[ "${OUTPUT}" == "a_1 b_1 c_1" ]] && \
+printf ">b_1\nA\n>a_1\nT\n" | \
+    "${SWARM}" 2> /dev/null | \
+    grep -q "^a_1 b_1$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
