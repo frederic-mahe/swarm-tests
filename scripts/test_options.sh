@@ -209,7 +209,7 @@ for ((t=$MIN ; t<=$MAX ; t++)) ; do
             "${SWARM}" -t ${t} > /dev/null 2>&1 || \
             failure "swarm aborts when --threads equals ${t}"
 done && success "${DESCRIPTION}"
-unset MIN MAX
+unset MIN MAX t
 
 ## Number of threads (--threads is empty)
 DESCRIPTION="swarm aborts when --threads is empty"
@@ -275,7 +275,7 @@ for ((d=$MIN ; d<=$MAX ; d++)) ; do
         "${SWARM}" -d ${d} > /dev/null 2>&1 || \
         failure "swarm aborts when --differences equals ${d}"
 done && success "${DESCRIPTION}"
-unset MIN MAX
+unset MIN MAX d
 
 ## Number of differences (--difference is empty)
 DESCRIPTION="swarm aborts when --difference is empty"
@@ -350,50 +350,58 @@ printf ">a_10\nACGT\n>b_2\nAGCT\n" > "${FASTIDOUSINPUT}"
 ## Swarm accepts the options -f and --fastidious
 for OPTION in "-f" "--fastidious" ; do
     DESCRIPTION="swarms accepts the option ${OPTION}"
-    "${SWARM}" "${OPTION}" < "${FASTIDOUSINPUT}" > /dev/null 2>&1 && \
+    printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+        "${SWARM}" "${OPTION}" > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
 
 ## Swarm performs a second clustering (aka fastidious)
-DESCRIPTION="swarm performs a second clustering (-b 3)"
-LINENUMBER=$("${SWARM}" -f "${FASTIDOUSINPUT}" 2> /dev/null | wc -l)
-(( ${LINENUMBER} == 1 )) && \
+DESCRIPTION="swarm groups small OTUs with large OTUs (boundary = 3)"
+    printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+        "${SWARM}" -f 2> /dev/null | \
+        wc -l | \
+        grep -q "^1$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-unset LINENUMBER
+
 
 ## Boundary -------------------------------------------------------------------
 
 ## Swarm accepts the options -b and --boundary
 for OPTION in "-b" "--boundary" ; do
     DESCRIPTION="swarms accepts the option ${OPTION}"
-    "${SWARM}" -f "${OPTION}" 3 < "${FASTIDOUSINPUT}" > /dev/null 2>&1 && \
+    printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" -f "${OPTION}" 3 > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
 
 ## Boundary (-b is empty)
 DESCRIPTION="swarm aborts when --boundary is empty"
-"${SWARM}" -f -b < "${FASTIDOUSINPUT}" 2> /dev/null && \
+printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" -f -b 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Boundary (-b is negative)
 DESCRIPTION="swarm aborts when --boundary is -1"
-"${SWARM}" -f -b \-1 < "${FASTIDOUSINPUT}" > /dev/null 2>&1 && \
+printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" -f -b \-1 > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Boundary (-b is non-numerical)
 DESCRIPTION="swarm aborts when --boundary is not numerical"
-"${SWARM}" -f -b "a" < "${FASTIDOUSINPUT}" 2> /dev/null && \
+printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" -f -b "a" 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Boundary (-b == 1)
 DESCRIPTION="swarm aborts when --boundary is 1"
-"${SWARM}" -f -b 1 < "${FASTIDOUSINPUT}" > /dev/null 2>&1 && \
+printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" -f -b 1 > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -402,34 +410,39 @@ MIN=2
 MAX=255
 DESCRIPTION="swarm runs normally when --boundary goes from ${MIN} to ${MAX}"
 for ((b=$MIN ; b<=$MAX ; b++)) ; do
-    "${SWARM}" -f -b ${b} < "${FASTIDOUSINPUT}" > /dev/null 2>&1 || \
+    printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+        "${SWARM}" -f -b ${b} > /dev/null 2>&1 || \
         failure "swarm aborts when --boundary equals ${b}"
 done && success "${DESCRIPTION}"
-unset MIN MAX
+unset MIN MAX b
 
 ## boundary option accepts large integers #1
 DESCRIPTION="swarm accepts large values for --boundary (2^32)"
-"${SWARM}" -f -b $(( 1 << 32 )) < "${FASTIDOUSINPUT}" > /dev/null 2>&1 && \
+printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" -f -b $(( 1 << 32 )) > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
 ## boundary option accepts large integers #2
 DESCRIPTION="swarm accepts large values for --boundary (2^64, signed)"
-"${SWARM}" -f -b $(((1 << 63) - 1)) < "${FASTIDOUSINPUT}" > /dev/null 2>&1 && \
+printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" -f -b $(((1 << 63) - 1)) > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
 ## Boundary value is taken into account by the fastidious option (-b 2)
 DESCRIPTION="boundary value is taken into account by the fastidious option (-b 2)"
-LINENUMBER=$("${SWARM}" -f -b 2 < "${FASTIDOUSINPUT}" 2> /dev/null | wc -l)
-(( ${LINENUMBER} == 2 )) && \
+printf ">s1_3\nAA\n>s2_2\nCC\n" | \
+    "${SWARM}" -f -b 2 2> /dev/null | \
+    wc -l | \
+    grep -q "^2$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-unset LINENUMBER
 
 ## Passing the --boundary option without the fastidious option should fail
 DESCRIPTION="swarm fails when the boundary option is specified without -f"
-"${SWARM}" -b 3 < "${FASTIDOUSINPUT}" > /dev/null 2>&1 && \
+printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" -b 3 > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
