@@ -31,7 +31,9 @@ SWARM=$(which swarm)
 [[ "${1}" ]] && SWARM="${1}"
 
 DESCRIPTION="check if swarm is executable"
-[[ -x "${SWARM}" ]] && success "${DESCRIPTION}" || failure "${DESCRIPTION}"
+[[ -x "${SWARM}" ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 
 #*****************************************************************************#
