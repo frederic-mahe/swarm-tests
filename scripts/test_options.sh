@@ -607,7 +607,8 @@ printf ">s1_3\nAA\n>s2_1\nCC\n" | \
 ## Swarm accepts the options -a and --append-abundance
 for OPTION in "-a" "--append-abundance" ; do
     DESCRIPTION="swarms accepts the option ${OPTION}"
-    "${SWARM}" "${OPTION}" 2 < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
+    printf ">s\nA\n" | \
+    "${SWARM}" "${OPTION}" 2 > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
@@ -615,25 +616,38 @@ done
 ## Swarm -a appends an abundance value to OTU members
 OUTPUT=$(mktemp)
 DESCRIPTION="-a appends an abundance number to OTU members (-o output)"
-printf ">b\nACGT\n" | "${SWARM}" -a 2 -o "${OUTPUT}" > /dev/null 2>&1
-ABUNDANCE=$(sed -n 's/.*_//p' "${OUTPUT}")
-[[ "${ABUNDANCE}" == "2" ]] && \
+printf ">s\nA\n" | \
+    "${SWARM}" -a 2 -o - 2> /dev/null | \
+    grep -q "^s_2$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset ABUNDANCE
+
+## Swarm -a appends an abundance value to OTU members (-z)
+OUTPUT=$(mktemp)
+DESCRIPTION="-a appends an abundance number to OTU members (-o output, -z)"
+printf ">s\nA\n" | \
+    "${SWARM}" -z -a 2 -o - 2> /dev/null | \
+    grep -qE "^s;size=2;?$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## Swarm append an abundance value to representative sequences
+OUTPUT=$(mktemp)
+DESCRIPTION="-a appends an abundance value (-w output)"
+printf ">s\nA\n" | \
+    "${SWARM}" -a 2 -o /dev/null -w - 2> /dev/null | \
+    grep -q "^>s_2$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 ## Swarm append the abundance number set with -a for swarm notation
 OUTPUT=$(mktemp)
-DESCRIPTION="-a appends the abundance number (vsearch notation)"
-printf ">a_3\nACGT\n>b\nACGT\n" | \
-    "${SWARM}" -a 2 -w "${OUTPUT}" > /dev/null 2>&1
-SUMABUNDANCES=$(sed -n '/^>/ s/.*_//p' "${OUTPUT}")
-(( "${SUMABUNDANCES}" == 5 )) && \
+DESCRIPTION="-a appends an abundance value (-w output, -z)"
+printf ">s\nA\n" | \
+    "${SWARM}" -z -a 2 -o /dev/null -w - 2> /dev/null | \
+    grep -qE "^>s;size=2;?$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset SUMABUNDANCE
 
 ## Swarm append the abundance number set with -a for usearch notation
 OUTPUT=$(mktemp)
