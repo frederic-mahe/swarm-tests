@@ -109,9 +109,13 @@ printf ">b_1\nA\n>a_1\nT\n" | \
 
 ## End of option marker is supported (usefull for weirdly named input files)
 DESCRIPTION="swarm runs normally when -- marks the end of options"
-"${SWARM}" -- "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
+FASTA=$(mktemp)
+printf ">s_1\nA\n" > "${FASTA}"
+"${SWARM}" -- "${FASTA}" > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
+rm "${FASTA}"
+unset FASTA
 
 
 #*****************************************************************************#
