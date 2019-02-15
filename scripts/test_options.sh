@@ -452,40 +452,46 @@ printf ">s1_3\nAA\n>s2_1\nCC\n" | \
 ## Swarm accepts the options -c and --ceiling
 for OPTION in "-c" "--ceiling" ; do
     DESCRIPTION="swarms accepts the option ${OPTION}"
-    "${SWARM}" -f "${OPTION}" 10 < "${FASTIDOUSINPUT}" > /dev/null 2>&1 && \
+    printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+        "${SWARM}" -f "${OPTION}" 10 > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
 
 ## Ceiling (-c is empty)
 DESCRIPTION="swarm aborts when --ceiling is empty"
-"${SWARM}" -f -c < "${FASTIDOUSINPUT}" 2> /dev/null && \
+printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" -f -c 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Ceiling (-c is negative)
 DESCRIPTION="swarm aborts when --ceiling is -1"
-"${SWARM}" -f -c \-1 < "${FASTIDOUSINPUT}" > /dev/null 2>&1 && \
+printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" -f -c \-1 > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Ceiling (-c is non-numerical)
 DESCRIPTION="swarm aborts when --ceiling is not numerical"
-"${SWARM}" -f -c "a" < "${FASTIDOUSINPUT}" 2> /dev/null && \
+printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" -f -c "a" 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Ceiling should fail when 0 <= c < 8
 for ((c=0 ; c<8; c++)) ; do
     DESCRIPTION="swarm aborts when --ceiling is ${c}"
-    "${SWARM}" -f -c ${c} < "${FASTIDOUSINPUT}" > /dev/null 2>&1 && \
+    printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+        "${SWARM}" -f -c ${c} > /dev/null 2>&1 && \
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
 done
 
 ## Bloom filter needs at least 8 MB, even for a minimal example
 DESCRIPTION="swarm fastidious needs at least 8 MB for the Bloom filter"
-"${SWARM}" -f -c 8 <(printf ">s1_3\nAA\n>s2_1\nCC\n") > /dev/null 2>&1 && \
+printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" -f -c 8 > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -494,7 +500,7 @@ MIN=8
 MAX=255
 DESCRIPTION="swarm runs normally when --ceiling goes from 8 to ${MAX}"
 for ((c=$MIN ; c<=$MAX ; c++)) ; do
-    printf ">a_10\nACGT\n>b_2\nAGCT\n" | \
+    printf ">s1_3\nAA\n>s2_1\nCC\n" | \
         "${SWARM}" -f -c ${c} > /dev/null 2>&1 || \
         failure "swarm aborts when --ceiling equals ${c}"
 done && success "${DESCRIPTION}"
@@ -502,19 +508,22 @@ unset MIN MAX c
 
 ## ceiling option accepts large integers
 DESCRIPTION="swarm accepts large values for --ceiling (up to 2^30)"
-"${SWARM}" -f -c $(( 1 << 30 )) < "${FASTIDOUSINPUT}" > /dev/null 2>&1 && \
+printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" -f -c $(( 1 << 30 )) > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
 ## ceiling option rejects very large integers
 DESCRIPTION="swarm rejects very large values for --ceiling (up to 2^32)"
-"${SWARM}" -f -c $(( 1 << 32 )) < "${FASTIDOUSINPUT}" > /dev/null 2>&1 && \
+printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" -f -c $(( 1 << 32 )) > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Passing the --ceiling option without the fastidious option should fail
 DESCRIPTION="swarm fails when the ceiling option is specified without -f"
-"${SWARM}" -c 10 < "${FASTIDOUSINPUT}" > /dev/null 2>&1 && \
+printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" -c 10 > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
