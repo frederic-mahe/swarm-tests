@@ -344,9 +344,6 @@ printf ">s1_9\nAA\n>s2_8\nCC\n>s3_1\nAC\n" | \
 #                                                                             #
 #*****************************************************************************#
 
-FASTIDOUSINPUT=$(mktemp)
-printf ">a_10\nACGT\n>b_2\nAGCT\n" > "${FASTIDOUSINPUT}"
-
 ## Swarm accepts the options -f and --fastidious
 for OPTION in "-f" "--fastidious" ; do
     DESCRIPTION="swarms accepts the option ${OPTION}"
@@ -533,26 +530,30 @@ printf ">s1_3\nAA\n>s2_1\nCC\n" | \
 ## Swarm accepts the options -y and --bloom-bits
 for OPTION in "-y" "--bloom-bits" ; do
     DESCRIPTION="swarms accepts the option ${OPTION}"
-    "${SWARM}" -f "${OPTION}" 8 < "${FASTIDOUSINPUT}" > /dev/null 2>&1 && \
+    printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+        "${SWARM}" -f "${OPTION}" 8 > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
 
 ## Bloom bits (-y is empty)
 DESCRIPTION="swarm aborts when --bloom-bits is empty"
-"${SWARM}" -f -y < "${FASTIDOUSINPUT}" 2> /dev/null && \
+printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" -f -y 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Bloom bits (-y is negative)
 DESCRIPTION="swarm aborts when --bloom-bits is -1"
-"${SWARM}" -f -y \-1 < "${FASTIDOUSINPUT}" > /dev/null 2>&1 && \
+printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" -f -y \-1 > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Bloom bits (-y is non-numerical)
 DESCRIPTION="swarm aborts when --bloom-bits is not numerical"
-"${SWARM}" -f -y "a" < "${FASTIDOUSINPUT}" 2> /dev/null && \
+printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" -f -y "a" 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -561,34 +562,38 @@ MIN=2
 MAX=64
 DESCRIPTION="swarm runs normally when --bloom-bits goes from ${MIN} to ${MAX}"
 for ((y=$MIN ; y<=$MAX ; y++)) ; do
-    "${SWARM}" -f -y ${y} < "${FASTIDOUSINPUT}" > /dev/null 2>&1 || \
+    printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+        "${SWARM}" -f -y ${y} > /dev/null 2>&1 || \
         failure "swarm aborts when --bloom-bits equals ${y}"
 done && success "${DESCRIPTION}"
-unset MIN MAX
+unset MIN MAX y
 
 ## Rejected values for the --bloom-bits option are < 2
 DESCRIPTION="swarm aborts when --bloom-bits is lower than 2"
 for y in 0 1 ; do
-    "${SWARM}" -f -y ${y} < "${FASTIDOUSINPUT}" > /dev/null 2>&1 && \
+    printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+        "${SWARM}" -f -y ${y} > /dev/null 2>&1 && \
         failure "swarm runs normally when --bloom-bits equals ${y}"
 done || success "${DESCRIPTION}"
+unset y
 
 ## Rejected values for the --bloom-bits option goes from 65 to +infinite
 MIN=65
 MAX=255
 DESCRIPTION="swarm aborts when --bloom-bits is higher than 64"
 for ((y=$MIN ; y<=$MAX ; y++)) ; do
-    "${SWARM}" -f -y ${y} < "${FASTIDOUSINPUT}" > /dev/null 2>&1 && \
+    printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+        "${SWARM}" -f -y ${y} > /dev/null 2>&1 && \
         failure "swarm runs normally when --bloom-bits equals ${y}"
 done || success "${DESCRIPTION}"
-unset MIN MAX
+unset MIN MAX y
 
 ## Passing the --bloom-bits option without the fastidious option should fail
 DESCRIPTION="swarm fails when the --bloom-bits option is specified without -f"
-"${SWARM}" -y 16 < "${FASTIDOUSINPUT}" > /dev/null 2>&1 && \
+printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" -y 16 > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
-rm "${FASTIDOUSINPUT}"
 
 
 #*****************************************************************************#
