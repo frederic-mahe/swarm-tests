@@ -42,15 +42,20 @@ DESCRIPTION="check if swarm is executable"
 
 ## No option, only standard input
 DESCRIPTION="swarm runs normally when no option is specified (data on stdin)"
-"${SWARM}" < "${ALL_IDENTICAL}" &> /dev/null && \
+printf ">s_1\nA\n" | \
+    "${SWARM}" > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
 ## No option, only a fasta file
 DESCRIPTION="swarm runs normally when no option is specified (data in file)"
-"${SWARM}" "${ALL_IDENTICAL}" &> /dev/null && \
+FASTA=$(mktemp)
+printf ">s_1\nA\n" > "${FASTA}"
+"${SWARM}" "${FASTA}" > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
+rm "${FASTA}"
+unset FASTA
 
 
 #*****************************************************************************#
