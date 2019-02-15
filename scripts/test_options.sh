@@ -260,7 +260,8 @@ printf ">s_1\nA\n" | \
 ## Swarm accepts the options -d and --differences
 for OPTION in "-d" "--differences" ; do
     DESCRIPTION="swarms accepts the option ${OPTION}"
-    "${SWARM}" "${OPTION}" 1 < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
+    printf ">s_1\nA\n" | \
+        "${SWARM}" "${OPTION}" 1 > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
@@ -270,41 +271,46 @@ MIN=0
 MAX=255
 DESCRIPTION="swarm runs normally when --differences goes from ${MIN} to ${MAX}"
 for ((d=$MIN ; d<=$MAX ; d++)) ; do
-    "${SWARM}" -d ${d} < "${ALL_IDENTICAL}" > /dev/null 2>&1 || \
+    printf ">s_1\nA\n" | \
+        "${SWARM}" -d ${d} > /dev/null 2>&1 || \
         failure "swarm aborts when --differences equals ${d}"
 done && success "${DESCRIPTION}"
+unset MIN MAX
 
 ## Number of differences (--difference is empty)
 DESCRIPTION="swarm aborts when --difference is empty"
-"${SWARM}" -d < "${ALL_IDENTICAL}" 2> /dev/null && \
+printf ">s_1\nA\n" | \
+    "${SWARM}" -d 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Number of differences (--differences is negative)
 DESCRIPTION="swarm aborts when --difference is -1"
-"${SWARM}" -d \-1 < "${ALL_IDENTICAL}" 2> /dev/null && \
+printf ">s_1\nA\n" | \
+    "${SWARM}" -d \-1 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Number of differences (--differences is 256)
 DESCRIPTION="swarm aborts when --difference is 256"
-"${SWARM}" -d 256 < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
+printf ">s_1\nA\n" | \
+    "${SWARM}" -d 256 > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Number of differences (number of differences is way too large)
 DESCRIPTION="swarm aborts when --difference is intmax_t (signed)"
-"${SWARM}" -d $(((1 << 63) - 1)) < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
+printf ">s_1\nA\n" | \
+    "${SWARM}" -d $(((1 << 63) - 1)) > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Number of differences (--difference is non-numerical)
 DESCRIPTION="swarm aborts when --difference is not numerical"
-"${SWARM}" -d "a" < "${ALL_IDENTICAL}" 2> /dev/null && \
+printf ">s_1\nA\n" | \
+    "${SWARM}" -d "a" 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
-
-unset MIN MAX
 
 
 #*****************************************************************************#
