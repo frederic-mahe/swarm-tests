@@ -38,6 +38,27 @@ DESCRIPTION="check if swarm is executable"
 
 #*****************************************************************************#
 #                                                                             #
+#                             Read from stdin (-)                             #
+#                                                                             #
+#*****************************************************************************#
+
+## Accept to read from /dev/stdin
+DESCRIPTION="swarm reads from /dev/stdin"
+printf ">s_1\nA\n" | \
+    "${SWARM}" /dev/stdin > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## Accept "-" as a placeholder for stdin
+DESCRIPTION="swarm reads from stdin when - is used"
+printf ">s_1\nA\n" | \
+    "${SWARM}" - > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+
+#*****************************************************************************#
+#                                                                             #
 #                                  No option                                  #
 #                                                                             #
 #*****************************************************************************#
@@ -116,25 +137,6 @@ printf ">s_1\nA\n" > "${FASTA}"
         failure "${DESCRIPTION}"
 rm "${FASTA}"
 unset FASTA
-
-
-#*****************************************************************************#
-#                                                                             #
-#                             Read from stdin (-)                             #
-#                                                                             #
-#*****************************************************************************#
-
-## Accept to read from /dev/stdin
-DESCRIPTION="swarm reads from /dev/stdin"
-"${SWARM}" /dev/stdin < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-
-## Accept "-" as a placeholder for stdin
-DESCRIPTION="swarm reads from stdin when - is used"
-"${SWARM}" - < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
 
 
 #*****************************************************************************#
