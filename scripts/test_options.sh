@@ -194,7 +194,8 @@ done
 ## Swarm accepts the options -t and --threads
 for OPTION in "-t" "--threads" ; do
     DESCRIPTION="swarms accepts the option ${OPTION}"
-    "${SWARM}" "${OPTION}" 1 < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
+    printf ">s_1\nA\n" | \
+        "${SWARM}" "${OPTION}" 1 > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
@@ -204,45 +205,50 @@ MIN=1
 MAX=256
 DESCRIPTION="swarm runs normally when --threads goes from ${MIN} to ${MAX}"
 for ((t=$MIN ; t<=$MAX ; t++)) ; do
-    "${SWARM}" -t ${t} < "${ALL_IDENTICAL}" > /dev/null 2>&1 || \
-        failure "swarm aborts when --threads equals ${t}"
+        printf ">s_1\nA\n" | \
+            "${SWARM}" -t ${t} > /dev/null 2>&1 || \
+            failure "swarm aborts when --threads equals ${t}"
 done && success "${DESCRIPTION}"
+unset MIN MAX
 
 ## Number of threads (--threads is empty)
 DESCRIPTION="swarm aborts when --threads is empty"
-"${SWARM}" -t < "${ALL_IDENTICAL}" 2> /dev/null && \
+printf ">s_1\nA\n" | \
+    "${SWARM}" -t 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Number of threads (--threads is zero)
 DESCRIPTION="swarm aborts when --threads is zero"
-"${SWARM}" -t 0 < "${ALL_IDENTICAL}" 2> /dev/null && \
+printf ">s_1\nA\n" | \
+    "${SWARM}" -t 0 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Number of threads (--threads is 257)
 DESCRIPTION="swarm aborts when --threads is 257"
-"${SWARM}" -t 257 < "${ALL_IDENTICAL}" 2> /dev/null && \
+printf ">s_1\nA\n" | \
+    "${SWARM}" -t 257 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Number of threads (number of threads is way too large)
 DESCRIPTION="swarm aborts when --threads is intmax_t (signed)"
-"${SWARM}" -t $(((1<<63)-1)) < "${ALL_IDENTICAL}" 2> /dev/null && \
+printf ">s_1\nA\n" | \
+    "${SWARM}" -t $(((1<<63)-1)) 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Number of threads (--threads is non-numerical)
 DESCRIPTION="swarm aborts when --threads is not numerical"
-"${SWARM}" -t "a" < "${ALL_IDENTICAL}" 2> /dev/null && \
+printf ">s_1\nA\n" | \
+    "${SWARM}" -t "a" 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## It should be possible to check how many threads swarm is using
 ## (with ps huH | grep -c "swarm") but I cannot get it to work
 ## properly.
-
-unset MIN MAX
 
 
 #*****************************************************************************#
