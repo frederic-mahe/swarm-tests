@@ -155,13 +155,15 @@ SSE2=$(grep -io -m 1 "sse2" /proc/cpuinfo 2> /dev/null)
 # if sse2 is present, check if swarm runs normally
 if [[ -n "${SSE2}" ]] ; then
     DESCRIPTION="swarm runs normally when SSE2 instructions are available"
-    "${SWARM}" "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
+    printf ">s_1\nA\n" | \
+    "${SWARM}" > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 else
     # swarm aborts with a non-zero status if SSE2 is missing (hardcoded)
     DESCRIPTION="swarm aborts when SSE2 instructions are not available"
-    "${SWARM}" "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
+        printf ">s_1\nA\n" | \
+    "${SWARM}" > /dev/null 2>&1 && \
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
 fi
