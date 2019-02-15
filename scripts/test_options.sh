@@ -322,7 +322,7 @@ printf ">s_1\nA\n" | \
 ## Swarm accepts the options -n and --no-otu-breaking
 for OPTION in "-n" "--no-otu-breaking" ; do
     DESCRIPTION="swarms accepts the option ${OPTION}"
-    printf ">a_10\nACGT\n>b_9\nCGGT\n>c_1\nCCGT\n" | \
+    printf ">s_1\nA\n" | \
         "${SWARM}" "${OPTION}" > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
@@ -330,12 +330,12 @@ done
 
 ## Deactivate the built-in OTU refinement
 DESCRIPTION="deactivate OTU breaking"
-LINENUMBER=$(printf ">a_10\nACGT\n>b_9\nCGGT\n>c_1\nCCGT\n" | \
-                    "${SWARM}" -n 2> /dev/null | wc -l)
-(( ${LINENUMBER} == 1 )) && \
+printf ">s1_9\nAA\n>s2_8\nCC\n>s3_1\nAC\n" | \
+    "${SWARM}" -n 2> /dev/null | \
+    wc -l | \
+    grep -q "^1$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-unset LINENUMBER
 
 
 #*****************************************************************************#
