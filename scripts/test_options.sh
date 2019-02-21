@@ -19,12 +19,6 @@ success () {
     printf "${GREEN}PASS${NO_COLOR}: ${1}\n"
 }       
 
-## Create a test file with 10 identical sequences (different headers)
-ALL_IDENTICAL=$(mktemp)
-for ((i=0 ; i<=9 ; i++)) ; do
-    printf ">%s%d_1\nACGT\n" "seq" ${i}
-done > "${ALL_IDENTICAL}"
-
 ## use the first swarm binary in $PATH by default, unless user wants
 ## to test another binary
 SWARM=$(which swarm)
@@ -926,7 +920,8 @@ rm "${OUTPUT}"
 ## Swarm accepts the options -l and --log
 for OPTION in "-l" "--log" ; do
     DESCRIPTION="swarms accepts the option ${OPTION}"
-    "${SWARM}" "${OPTION}" /dev/null < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
+    printf ">s_1\nA\n" | \
+        "${SWARM}" "${OPTION}" /dev/null > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
@@ -934,7 +929,8 @@ done
 ## Swarm does not write on standard error when using -l
 ERRORINPUT=$(mktemp)
 DESCRIPTION="-l writes on standard error"
-"${SWARM}" -l /dev/null < "${ALL_IDENTICAL}" > /dev/null 2> "${ERRORINPUT}"
+printf ">s_1\nA\n" | \
+    "${SWARM}" -l /dev/null > /dev/null 2> "${ERRORINPUT}"
 [[ ! -s "${ERRORINPUT}" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -944,7 +940,8 @@ rm "${ERRORINPUT}"
 ERRORINPUT=$(mktemp)
 DESCRIPTION="-l writes on standard error, except for errors"
 # voluntary error (missing d value) to create an error message
-"${SWARM}" -d -l /dev/null < "${ALL_IDENTICAL}" &> "${ERRORINPUT}"
+printf ">s_1\nA\n" | \
+    "${SWARM}" -d -l /dev/null &> "${ERRORINPUT}"
 [[ -s "${ERRORINPUT}" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1147,7 +1144,8 @@ unset OTU
 ## Swarm accepts the options -s and --statistics-file
 for OPTION in "-s" "--statistics-file" ; do
     DESCRIPTION="swarms accepts the option ${OPTION}"
-    "${SWARM}" "${OPTION}" /dev/null < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
+    printf ">s_1\nA\n" | \
+        "${SWARM}" "${OPTION}" /dev/null > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
@@ -1155,7 +1153,8 @@ done
 ## Swarm -s create and fill given filename
 DESCRIPTION="-s create and fill filename given"
 OUTPUT=$(mktemp)
-"${SWARM}" -s "${OUTPUT}" < "${ALL_IDENTICAL}" > /dev/null 2>&1
+printf ">s1_1\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -s "${OUTPUT}" > /dev/null 2>&1
 [[ -s "${OUTPUT}" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1163,7 +1162,8 @@ rm "${OUTPUT}"
 
 ## Swarm -s fails if no filename given
 DESCRIPTION="-s fails if no filename given"
-"${SWARM}" -s  < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
+printf ">s_1\nA\n" | \
+    "${SWARM}" -s  > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -2711,8 +2711,5 @@ if which valgrind > /dev/null ; then
             failure "${DESCRIPTION}"
 fi
 
-
-## Clean
-rm "${ALL_IDENTICAL}"
 
 exit 0
