@@ -614,7 +614,6 @@ for OPTION in "-a" "--append-abundance" ; do
 done
 
 ## Swarm -a appends an abundance value to OTU members
-OUTPUT=$(mktemp)
 DESCRIPTION="-a appends an abundance number to OTU members (-o output)"
 printf ">s\nA\n" | \
     "${SWARM}" -a 2 -o - 2> /dev/null | \
@@ -623,7 +622,6 @@ printf ">s\nA\n" | \
         failure "${DESCRIPTION}"
 
 ## Swarm -a appends an abundance value to OTU members (-z)
-OUTPUT=$(mktemp)
 DESCRIPTION="-a appends an abundance number to OTU members (-o output, -z)"
 printf ">s\nA\n" | \
     "${SWARM}" -z -a 2 -o - 2> /dev/null | \
@@ -632,7 +630,6 @@ printf ">s\nA\n" | \
         failure "${DESCRIPTION}"
 
 ## Swarm append an abundance value to representative sequences
-OUTPUT=$(mktemp)
 DESCRIPTION="-a appends an abundance value (-w output)"
 printf ">s\nA\n" | \
     "${SWARM}" -a 2 -o /dev/null -w - 2> /dev/null | \
@@ -641,7 +638,6 @@ printf ">s\nA\n" | \
         failure "${DESCRIPTION}"
 
 ## Swarm append the abundance number set with -a for swarm notation
-OUTPUT=$(mktemp)
 DESCRIPTION="-a appends an abundance value (-w output, -z)"
 printf ">s\nA\n" | \
     "${SWARM}" -z -a 2 -o /dev/null -w - 2> /dev/null | \
@@ -650,47 +646,39 @@ printf ">s\nA\n" | \
         failure "${DESCRIPTION}"
 
 ## Swarm append the abundance number set with -a for usearch notation
-OUTPUT=$(mktemp)
 DESCRIPTION="-a appends the abundance number (usearch notation)"
-printf ">a;size=3\nACGT\n>b\nACGT\n" | \
-    "${SWARM}" -z -a 2 -w "${OUTPUT}" > /dev/null 2>&1
-SUMABUNDANCES=$(awk -F "[;=]" '/^>/ {print $3}' "${OUTPUT}")
-(( "${SUMABUNDANCES}" == 5 )) && \
+printf ">s1;size=3;\nA\n>s2\nC\n" | \
+    "${SWARM}" -z -a 2 -o /dev/null -w - 2> /dev/null | \
+    grep -qE "^>s1;size=5;?$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset SUMABUNDANCE
 
 ## Swarm does not overwrite the abundance number with -a for swarm notation
-OUTPUT=$(mktemp)
 DESCRIPTION="-a does not overwrite the abundance number (swarm notation)"
-printf ">b_3\nACGT\n" | "${SWARM}" -a 2 -w "${OUTPUT}" > /dev/null 2>&1
-SUMABUNDANCES=$(sed -n '/^>/ s/.*_//p' "${OUTPUT}")
-(( "${SUMABUNDANCES}" == 3 )) && \
+printf ">s_3\nA\n" | \
+    "${SWARM}" -a 2 -o /dev/null -w - 2> /dev/null | \
+    grep -q "^>s_3$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset SUMABUNDANCE
 
 ## Swarm does not overwrite the abundance number with -a for usearch notation
-OUTPUT=$(mktemp)
 DESCRIPTION="-a does not overwrite the abundance number (usearch notation)"
-printf ">b;size=3\nACGT\n" | "${SWARM}" -z -a 2 -w "${OUTPUT}" > /dev/null 2>&1
-SUMABUNDANCES=$(awk -F "[;=]" '/^>/ {print $3}' "${OUTPUT}")
-(( "${SUMABUNDANCES}" == 3 )) && \
+printf ">s;size=3;\nA\n" | \
+    "${SWARM}" -z -a 2 -o /dev/null -w - 2> /dev/null | \
+    grep -qE "^>s;size=3;?$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset SUMABUNDANCE
 
 ## when using -a, check if the added abundance annotation appears in -o output
-OUTPUT=$(mktemp)
 DESCRIPTION="-a abundance annotation appears in -o output"
-printf ">s1\nA\n" | "${SWARM}" -a 1 -o "${OUTPUT}" > /dev/null 2>&1
-awk '{exit $1 == "s1_1" ? 0 : 1}' "${OUTPUT}" && \
+printf ">s\nA\n" | \
+    "${SWARM}" -a 2 -o - 2> /dev/null | \
+    grep -q "^s_2$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
+
+exit
+# stop here ------------------------------------------------------------------------------- !!
 
 ## when using -a, check if the added abundance annotation appears in -i output
 OUTPUT=$(mktemp)
@@ -743,25 +731,27 @@ rm "${OUTPUT}"
 ## Swarm accepts the options -i and --internal-structure
 for OPTION in "-i" "--internal-structure" ; do
     DESCRIPTION="swarms accepts the option ${OPTION}"
-    "${SWARM}" "${OPTION}" /dev/null < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
+    printf ">s_1\nA\n" | \
+        "${SWARM}" "${OPTION}" /dev/null > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
 
 ## Swarm -i fails if no output file given
 DESCRIPTION="-i fails if no output file given"
-"${SWARM}" -i  < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
+printf ">s_1\nA\n" | \
+    "${SWARM}" -i > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Swarm -i create and fill given output file
-OUTPUT=$(mktemp)
 DESCRIPTION="-i creates and fill given output file"
-"${SWARM}" --internal-structure "${OUTPUT}" < "${ALL_IDENTICAL}" > /dev/null 2>&1
-[[ -s "${OUTPUT}" ]] && \
+printf ">s1_1\nA\n>s2_1\nT\n" | \
+    "${SWARM}" -o /dev/null -i - 2> /dev/null | \
+    tr "\t" "@" | \
+    grep -q "^s1@s2@1@1@1$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
 
 ## -i columns 1 and 2 contain sequence names
 OUTPUT=$(mktemp)
@@ -966,30 +956,27 @@ rm "${ERRORINPUT}"
 ## Swarm accepts the options -o and --output-file
 for OPTION in "-o" "--output-file" ; do
     DESCRIPTION="swarms accepts the option ${OPTION}"
-    "${SWARM}" "${OPTION}" /dev/null < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
+    printf ">s_1\nA\n" | \
+        "${SWARM}" "${OPTION}" /dev/null 2> /dev/null && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
 
 ## Swarm creates output file with -o option
-OUTPUT=$(mktemp)
 DESCRIPTION="-o writes to the specified output file"
-"${SWARM}" -o  "${OUTPUT}" < "${ALL_IDENTICAL}" > /dev/null 2>&1
-[[ -s "${OUTPUT}" ]] && \
+printf ">s_1\nA\n" | \
+    "${SWARM}" -o - 2> /dev/null | \
+    grep -q "." && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
 
 ## Swarm fills correctly output file with -o option
-OUTPUT=$(mktemp)
 DESCRIPTION="-o creates and fills the output file"
-"${SWARM}" -o  "${OUTPUT}" < "${ALL_IDENTICAL}" > /dev/null 2>&1
-EXPECTED=$(sed -n '/^>/ s/>//p' "${ALL_IDENTICAL}" | tr "\n" " " | sed 's/ $//')
-[[ $(< "${OUTPUT}") == "${EXPECTED}" ]] && \
+printf ">s_1\nA\n" | \
+    "${SWARM}" -o - 2> /dev/null | \
+    grep -q "^s_1$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset EXPECTED
 
 
 ## --------------------------------------------------------------------- mothur
@@ -997,7 +984,8 @@ unset EXPECTED
 ## Swarm accepts the options -r and --mothur
 for OPTION in "-r" "--mothur" ; do
     DESCRIPTION="swarms accepts the option ${OPTION}"
-    "${SWARM}" "${OPTION}" < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
+    printf ">s_1\nA\n" | \
+        "${SWARM}" "${OPTION}" > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
