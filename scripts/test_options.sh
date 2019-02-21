@@ -677,7 +677,7 @@ printf ">s\nA\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-exit
+
 # stop here ------------------------------------------------------------------------------- !!
 
 ## when using -a, check if the added abundance annotation appears in -i output
@@ -2164,37 +2164,43 @@ rm "${OUTPUT}"
 while read LONG SHORT ; do
     ## Using option when d = 1 should fail (or warning?)
     DESCRIPTION="swarm aborts when --${LONG} is specified and d = 1"
-    "${SWARM}" -d 1 ${SHORT} 1 < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
+    printf ">s_1\nA\n" | \
+        "${SWARM}" -d 1 ${SHORT} 1 > /dev/null 2>&1 && \
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
 
     ## option is empty
     DESCRIPTION="swarm aborts when --${LONG} is empty"
-    "${SWARM}" -d 2 ${SHORT} < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
+    printf ">s_1\nA\n" | \
+        "${SWARM}" -d 2 ${SHORT} > /dev/null 2>&1 && \
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
 
     ## option is negative
     DESCRIPTION="swarm aborts when --${LONG} is -1"
-    "${SWARM}" -d 2 ${SHORT} \-1 < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
+    printf ">s_1\nA\n" | \
+        "${SWARM}" -d 2 ${SHORT} \-1 > /dev/null 2>&1 && \
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
 
     ## option is non-numerical
     DESCRIPTION="swarm aborts when --${LONG} is not numerical"
-    "${SWARM}" -d 2 ${SHORT} "a" < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
+    printf ">s_1\nA\n" | \
+        "${SWARM}" -d 2 ${SHORT} "a" > /dev/null 2>&1 && \
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
 
     ## option is null (allowed for -m & -p, not for -g & -e)
     if [[ "${SHORT}" == "-m" || "${SHORT}" == "-p" ]] ; then
         DESCRIPTION="swarm aborts when --${LONG} is null"
-        "${SWARM}" -d 2 ${SHORT} 0 < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
+        printf ">s_1\nA\n" | \
+            "${SWARM}" -d 2 ${SHORT} 0 > /dev/null 2>&1 && \
             failure "${DESCRIPTION}" || \
                 success "${DESCRIPTION}"
     elif [[ "${SHORT}" == "-g" || "${SHORT}" == "-e" ]] ; then
         DESCRIPTION="swarm runs normally when --${LONG} is null"
-        "${SWARM}" -d 2 ${SHORT} 0 < "${ALL_IDENTICAL}" > /dev/null 2>&1 && \
+        printf ">s_1\nA\n" | \
+            "${SWARM}" -d 2 ${SHORT} 0 > /dev/null 2>&1 && \
             success "${DESCRIPTION}" || \
                 failure "${DESCRIPTION}"
     else
@@ -2207,7 +2213,8 @@ while read LONG SHORT ; do
     MAX=255
     DESCRIPTION="swarm runs normally when --${LONG} goes from ${MIN} to ${MAX}"
     for ((i=$MIN ; i<=$MAX ; i++)) ; do
-        "${SWARM}" -d 2 "${SHORT}" ${i} < "${ALL_IDENTICAL}" > /dev/null 2>&1 || \
+        printf ">s_1\nA\n" | \
+            "${SWARM}" -d 2 "${SHORT}" ${i} > /dev/null 2>&1 || \
             failure "swarm aborts when --${LONG} equals ${i}"
     done && success "${DESCRIPTION}"
     
