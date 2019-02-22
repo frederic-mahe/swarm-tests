@@ -150,14 +150,14 @@ SSE2=$(grep -io -m 1 "sse2" /proc/cpuinfo 2> /dev/null)
 if [[ -n "${SSE2}" ]] ; then
     DESCRIPTION="swarm runs normally when SSE2 instructions are available"
     printf ">s_1\nA\n" | \
-    "${SWARM}" > /dev/null 2>&1 && \
+        "${SWARM}" > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 else
     # swarm aborts with a non-zero status if SSE2 is missing (hardcoded)
     DESCRIPTION="swarm aborts when SSE2 instructions are not available"
-        printf ">s_1\nA\n" | \
-    "${SWARM}" > /dev/null 2>&1 && \
+    printf ">s_1\nA\n" | \
+        "${SWARM}" > /dev/null 2>&1 && \
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
 fi
@@ -199,9 +199,9 @@ MIN=1
 MAX=256
 DESCRIPTION="swarm runs normally when --threads goes from ${MIN} to ${MAX}"
 for ((t=$MIN ; t<=$MAX ; t++)) ; do
-        printf ">s_1\nA\n" | \
-            "${SWARM}" -t ${t} > /dev/null 2>&1 || \
-            failure "swarm aborts when --threads equals ${t}"
+    printf ">s_1\nA\n" | \
+        "${SWARM}" -t ${t} > /dev/null 2>&1 || \
+        failure "swarm aborts when --threads equals ${t}"
 done && success "${DESCRIPTION}"
 unset MIN MAX t
 
@@ -349,10 +349,10 @@ done
 
 ## Swarm performs a second clustering (aka fastidious)
 DESCRIPTION="swarm groups small OTUs with large OTUs (boundary = 3)"
-    printf ">s1_3\nAA\n>s2_1\nCC\n" | \
-        "${SWARM}" -f 2> /dev/null | \
-        wc -l | \
-        grep -q "^1$" && \
+printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" -f 2> /dev/null | \
+    wc -l | \
+    grep -q "^1$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -363,7 +363,7 @@ DESCRIPTION="swarm groups small OTUs with large OTUs (boundary = 3)"
 for OPTION in "-b" "--boundary" ; do
     DESCRIPTION="swarms accepts the option ${OPTION}"
     printf ">s1_3\nAA\n>s2_1\nCC\n" | \
-    "${SWARM}" -f "${OPTION}" 3 > /dev/null 2>&1 && \
+        "${SWARM}" -f "${OPTION}" 3 > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
@@ -602,7 +602,7 @@ printf ">s1_3\nAA\n>s2_1\nCC\n" | \
 for OPTION in "-a" "--append-abundance" ; do
     DESCRIPTION="swarms accepts the option ${OPTION}"
     printf ">s\nA\n" | \
-    "${SWARM}" "${OPTION}" 2 > /dev/null 2>&1 && \
+        "${SWARM}" "${OPTION}" 2 > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
@@ -671,53 +671,37 @@ printf ">s\nA\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-
-# stop here ------------------------------------------------------------------------------- !!
-
-## when using -a, check if the added abundance annotation appears in -i output
-OUTPUT=$(mktemp)
-DESCRIPTION="-a abundance annotation appears in -i output"
-printf ">s1_1\nA\n>s2\nT\n" | "${SWARM}" -a 1 -i "${OUTPUT}" > /dev/null 2>&1
-awk '{exit $2 == "s2" ? 0 : 1}' "${OUTPUT}" && \
+## when using -a, check if the added abundance annotation does not appear in -i output
+DESCRIPTION="-a abundance annotation does not appear in -i output"
+printf ">s1_1\nA\n>s2\nT\n" | \
+    "${SWARM}" -a 1 -o /dev/null -i - 2> /dev/null | \
+    awk '{exit $2 == "s2" ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
 
 ## when using -a and -r, check if the added abundance annotation appears in -o output
-OUTPUT=$(mktemp)
 DESCRIPTION="-a abundance annotation appears in -o output when using -r"
-printf ">s1_1\nA\n>s2\nT\n" | "${SWARM}" -a 1 -r -o "${OUTPUT}" > /dev/null 2>&1
-grep -q "s2_1$" "${OUTPUT}" && \
+printf ">s1_1\nA\n>s2\nT\n" | \
+    "${SWARM}" -a 1 -r -o - 2> /dev/null | \
+    grep -q "s2_1$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
 
-## when using -a, check if the added abundance annotation appears in -s output
-OUTPUT=$(mktemp)
-DESCRIPTION="-a abundance annotation appears in -s output"
-printf ">s1\nA\n>s2_1\nT\n" | "${SWARM}" -a 2 -s "${OUTPUT}" > /dev/null 2>&1
-awk '{exit $3 == "s1" ? 0 : 1}' "${OUTPUT}" && \
+## when using -a, check if the added abundance annotation influences -s output
+DESCRIPTION="-a abundance annotation influences -s output"
+printf ">s1\nA\n>s2_1\nT\n" | \
+    "${SWARM}" -a 2 -o /dev/null -s - 2> /dev/null | \
+    awk '{exit $3 == "s1" ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
 
 ## when using -a, check if the added abundance annotation appears in -u output
-OUTPUT=$(mktemp)
 DESCRIPTION="-a abundance annotation appears in -u output"
-printf ">s1\nT\n>s2_1\nT\n" | "${SWARM}" -a 2 -u "${OUTPUT}" > /dev/null 2>&1
-grep -q "s1_2" "${OUTPUT}" && \
+printf ">s1\nT\n>s2_1\nT\n" | \
+    "${SWARM}" -a 2 -o /dev/null -u - 2> /dev/null | \
+    grep -q "s1_2" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-
-## when using -a, check if the added abundance annotation appears in -w output
-OUTPUT=$(mktemp)
-DESCRIPTION="-a abundance annotation appears in -w output"
-printf ">s1\nT\n" | "${SWARM}" -a 1 -w "${OUTPUT}" > /dev/null 2>&1
-grep -q "s1_1" "${OUTPUT}" && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
 
 
 ## --------------------------------------------------------- internal structure
@@ -742,128 +726,112 @@ printf ">s_1\nA\n" | \
 DESCRIPTION="-i creates and fill given output file"
 printf ">s1_1\nA\n>s2_1\nT\n" | \
     "${SWARM}" -o /dev/null -i - 2> /dev/null | \
+    grep -q "." && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## Swarm -i output is tab-separated
+DESCRIPTION="-i output is tab-separated"
+printf ">s1_1\nA\n>s2_1\nT\n" | \
+    "${SWARM}" -o /dev/null -i - 2> /dev/null | \
     tr "\t" "@" | \
     grep -q "^s1@s2@1@1@1$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
 ## -i columns 1 and 2 contain sequence names
-OUTPUT=$(mktemp)
 DESCRIPTION="-i columns 1 and 2 contain sequence names"
-printf ">a_1\nAAAA\n>b_1\nAAAA\n" | \
-    "${SWARM}" -i "${OUTPUT}" > /dev/null 2>&1
-awk '{exit ($1 == "a" && $2 == "b") ? 0 : 1}' "${OUTPUT}" && \
+printf ">s1_1\nA\n>s2_1\nT\n" | \
+    "${SWARM}" -o /dev/null -i - 2> /dev/null | \
+    awk '{exit ($1 == "s1" && $2 == "s2") ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
 
 ## -i number of differences is correct (0 expected)
-OUTPUT=$(mktemp)
 DESCRIPTION="-i number of differences is correct (0 expected)"
-printf ">a_1\nAAAA\n>b_1\nAAAA\n" | \
-    "${SWARM}" -i "${OUTPUT}" > /dev/null 2>&1
-NUMBER_OF_DIFFERENCES=$(awk -F "\t" '{print $3}' "${OUTPUT}")
-(( "${NUMBER_OF_DIFFERENCES}" == 0 )) && \
+printf ">s1_1\nA\n>s2_1\nA\n" | \
+    "${SWARM}" -o /dev/null -i - 2> /dev/null | \
+    awk '{exit ($3 == 0) ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset NUMBER_OF_DIFFERENCES
 
 ## -i number of differences is correct when -d 2 (2 expected)
-OUTPUT=$(mktemp)
 DESCRIPTION="-i number of differences is correct when -d 2 (2 expected)"
-printf ">a_1\nAAAA\n>b_1\nAACC\n" | \
-    "${SWARM}" -d 2 -i "${OUTPUT}" > /dev/null 2>&1
-NUMBER_OF_DIFFERENCES=$(awk -F "\t" '{print $3}' "${OUTPUT}")
-(( "${NUMBER_OF_DIFFERENCES}" == 2 )) && \
+printf ">s1_1\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" -d 2 -o /dev/null -i - 2> /dev/null | \
+    awk '{exit ($3 == 2) ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset NUMBER_OF_DIFFERENCES
 
-## -i number of differences is correct while -d 2 (1 expected)
-OUTPUT=$(mktemp)
-DESCRIPTION="-i number of differences is correct while -d 2 (1 expected)"
-printf ">a_1\nAAAA\n>b_1\nAAAC\n" | \
-    "${SWARM}" -d 2 -i "${OUTPUT}" > /dev/null 2>&1
-NUMBER_OF_DIFFERENCES=$(awk -F "\t" '{print $3}' "${OUTPUT}")
-(( "${NUMBER_OF_DIFFERENCES}" == 1 )) && \
+## -i number of differences is correct when -d 2 (1 expected)
+DESCRIPTION="-i number of differences is correct when -d 2 (1 expected)"
+printf ">s1_1\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -d 2 -o /dev/null -i - 2> /dev/null | \
+    awk '{exit ($3 == 1) ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset NUMBER_OF_DIFFERENCES
 
 ## -i number of the OTU is correct #1
-OUTPUT=$(mktemp)
 DESCRIPTION="-i number of the OTU is correct #1"
-printf ">a_1\nAAAA\n>b_1\nAAAC\n" | \
-    "${SWARM}" -i "${OUTPUT}" > /dev/null 2>&1
-NUMBER_OF_OTUs=$(awk -F "\t" '{print $4}' "${OUTPUT}")
-(( "${NUMBER_OF_OTUs}" == 1 )) && \
+printf ">s1_1\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -d 2 -o /dev/null -i - 2> /dev/null | \
+    awk '{exit ($4 == 1) ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset NUMBER_OF_OTUs
+
+## -i outputs one line per OTU
+DESCRIPTION="-i outputs one line per OTU"
+printf ">s1_1\nAA\n>s2_1\nAC\n>s3_1\nGG\n>s4_1\nGT\n" | \
+    "${SWARM}" -o /dev/null -i - 2> /dev/null | \
+    wc -l | \
+    grep -q "^2$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 ## -i number of the OTU is correct #2
-OUTPUT=$(mktemp)
 DESCRIPTION="-i number of the OTU is correct #2"
-printf ">a_1\nAA\n>b_1\nAC\n>c_1\nGG\n>d_1\nGT\n" | \
-    "${SWARM}" -i "${OUTPUT}" > /dev/null 2>&1
-NUMBER_OF_OTUs=$(awk '{n = $4} END {print n}' "${OUTPUT}")
-(( "${NUMBER_OF_OTUs}" == 2 )) && \
+printf ">s1_1\nAA\n>s2_1\nAC\n>s3_1\nGG\n>s4_1\nGT\n" | \
+    "${SWARM}" -o /dev/null -i - 2> /dev/null | \
+    awk 'NR == 2 {exit ($4 == 2) ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset NUMBER_OF_OTUs
 
 ## -i number of steps is correct (1 expected)
-OUTPUT=$(mktemp)
 DESCRIPTION="-i number of steps is correct (1 expected)"
-printf ">a_1\nAAAA\n>b_1\nAAAC\n" | \
-    "${SWARM}" -i "${OUTPUT}" > /dev/null 2>&1
-NUMBER_OF_STEPS=$(awk -F "\t" '{print $5}' "${OUTPUT}")
-(( "${NUMBER_OF_STEPS}" == 1 )) && \
+printf ">s1_1\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -o /dev/null -i - 2> /dev/null | \
+    awk '{exit ($5 == 1) ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset NUMBER_OF_STEPS
 
 ## -i number of steps is correct (3 expected)
-OUTPUT=$(mktemp)
 DESCRIPTION="-i number of steps is correct (3 expected)"
-printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nAACC\n>d_1\nACCC\n" | \
-    "${SWARM}" -i "${OUTPUT}" > /dev/null 2>&1
-NUMBER_OF_STEPS=$(awk -F "\t" '{print $5}' "${OUTPUT}" | sed '3q;d' )
-(( "${NUMBER_OF_STEPS}" == 3 )) && \
+printf ">s1_1\nAA\n>s2_1\nAC\n>s3_1\nCC\n>s4_1\nCT\n" | \
+    "${SWARM}" -o /dev/null -i - 2> /dev/null | \
+    awk 'NR == 3 {exit ($5 == 3) ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset NUMBER_OF_STEPS
 
-## -i number of steps is correct while -d 2 (1 expected)
-OUTPUT=$(mktemp)
-DESCRIPTION="-i number of steps is correct while -d 2 (1 expected)"
-printf ">a_1\nAAAA\n>c_1\nAACC\n" | \
-    "${SWARM}" -d 2 -i "${OUTPUT}" > /dev/null 2>&1
-NUMBER_OF_STEPS=$(awk -F "\t" '{print $5}' "${OUTPUT}" )
-(( "${NUMBER_OF_STEPS}" == 1 )) && \
+## -i number of steps is correct when -d 2 (1 expected)
+DESCRIPTION="-i number of steps is correct when -d 2 (1 expected)"
+printf ">s1_1\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -d 2 -o /dev/null -i - 2> /dev/null | \
+    awk '{exit ($5 == 1) ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset NUMBER_OF_STEPS
 
 ## -i number of steps is correct while -d 2 (2 expected)
-OUTPUT=$(mktemp)
 DESCRIPTION="-i number of steps is correct while -d 2 (2 expected)"
-printf ">a_1\nAAAA\n>b_1\nAACC\n>c_1\nACCC\n" | \
-    "${SWARM}" -d 2 -i "${OUTPUT}" > /dev/null 2>&1
-NUMBER_OF_STEPS=$(awk -F "\t" 'NR == 2 {print $5}' "${OUTPUT}")
-(( "${NUMBER_OF_STEPS}" == 2 )) && \
+printf ">s1_1\nAAAA\n>s2_1\nAACC\n>s3_1\nCCCC\n" | \
+    "${SWARM}" -d 2 -o /dev/null -i - 2> /dev/null | \
+    awk 'NR == 2 {exit ($5 == 2) ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset NUMBER_OF_STEPS
+
+
+# stop here ------------------------------------------------------------------------------- !!
+
+exit
 
 ## -i -f OTU numbering is updated (2nd line, col. 4 should be 1)
 # a	b	1	1	1
@@ -1537,7 +1505,7 @@ OUTPUT=$(mktemp)
 printf ">a_3\nGGGG\n>b_3\nAAAA\n>c_3\nAAAC\n" | \
     "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 CLUSTER_SIZE=$(grep "^C" "${OUTPUT}" | \
-               awk -F "\t" '{if (NR == 2) {print $2}}')
+                   awk -F "\t" '{if (NR == 2) {print $2}}')
 [[ "${CLUSTER_SIZE}" == "1" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1610,9 +1578,9 @@ unset SIMILARITY_PERCENTAGE
 ## abundance ties.
 DESCRIPTION="-u similarity percentage is correct in 4th column #2"
 SIMILARITY_PERCENTAGE=$(\
-    printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nACCC\n>e_3\nCCCC\n" | \
-        "${SWARM}" -o /dev/null -u - 2> /dev/null | \
-        awk '/^H/ {v = $4} END {print v}')
+                        printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nACCC\n>e_3\nCCCC\n" | \
+                            "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+                            awk '/^H/ {v = $4} END {print v}')
 [[ "${SIMILARITY_PERCENTAGE}" == "0.0" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1636,7 +1604,7 @@ OUTPUT=$(mktemp)
 printf ">a_3\nGGGG\n>b_3\nAAAA\n>c_3\nAAAC\n" | \
     "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 SIMILARITY_PERCENTAGE=$(grep "^S" "${OUTPUT}" | \
-               awk -F "\t" '{if (NR == 1) {print $4}}')
+                            awk -F "\t" '{if (NR == 1) {print $4}}')
 [[ "${SIMILARITY_PERCENTAGE}" == "*" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1733,7 +1701,7 @@ OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nAGCC\n" | \
     "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 COLUMN_7=$(grep "^S" "${OUTPUT}" | \
-                  awk -F "\t" '{if (NR == 1) {print $7}}')
+               awk -F "\t" '{if (NR == 1) {print $7}}')
 [[ "${COLUMN_7}" == "*" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -2045,7 +2013,7 @@ printf ">s1;size=1;\nA\n>s2;size=1;\nA\n" | \
     "${SWARM}" -z -o /dev/null -i - 2> /dev/null | \
     grep -qE "^s1[[:blank:]]s2[[:blank:]]" && \
     success "${DESCRIPTION}" || \
-    failure "${DESCRIPTION}"
+        failure "${DESCRIPTION}"
 
 ## output created by the -l option is not modified by the option -z
 DESCRIPTION="in -l ouput, -z has no visible effect"
@@ -2053,7 +2021,7 @@ printf ">s;size=1;\nA\n" | \
     "${SWARM}" -z -o /dev/null -l - 2> /dev/null | \
     grep -E ";size=[0-9]+" && \
     failure "${DESCRIPTION}" || \
-    success "${DESCRIPTION}"
+        success "${DESCRIPTION}"
 
 ## output created by the -o option is not modified by the option -z
 DESCRIPTION="in -o ouput, -z has no direct effect"
@@ -2061,7 +2029,7 @@ printf ">s;size=1;\nA\n" | \
     "${SWARM}" -z -o - 2> /dev/null | \
     grep -q "^s;size=1;$" && \
     success "${DESCRIPTION}" || \
-    failure "${DESCRIPTION}"
+        failure "${DESCRIPTION}"
 
 ## output created by the -o option is not modified by the option -z
 DESCRIPTION="in -o ouput, -z has no direct effect (-o reports headers)"
@@ -2069,7 +2037,7 @@ printf ">s;size=1\nA\n" | \
     "${SWARM}" -z -o - 2> /dev/null | \
     grep -q "^s;size=1$" && \
     success "${DESCRIPTION}" || \
-    failure "${DESCRIPTION}"
+        failure "${DESCRIPTION}"
 
 ## output created by the -r option is not modified by the option -z
 DESCRIPTION="in -r ouput, -z has no direct effect"
@@ -2077,7 +2045,7 @@ printf ">s1;size=1;\nA\n>s2;size=1;\nC\n" | \
     "${SWARM}" -z -r -o - 2> /dev/null | \
     grep -q "s1;size=1;,s2;size=1;$" && \
     success "${DESCRIPTION}" || \
-    failure "${DESCRIPTION}"
+        failure "${DESCRIPTION}"
 
 ## output created by the -r option is not modified by the option -z
 DESCRIPTION="in -r ouput, -z has no direct effect (-r reports headers)"
@@ -2085,7 +2053,7 @@ printf ">s1;size=1\nA\n>s2;size=1\nC\n" | \
     "${SWARM}" -z -r -o - 2> /dev/null | \
     grep -q "s1;size=1,s2;size=1$" && \
     success "${DESCRIPTION}" || \
-    failure "${DESCRIPTION}"
+        failure "${DESCRIPTION}"
 
 ## output created by the -s option is not modified by the option -z
 DESCRIPTION="in -s ouput, -z has no direct effect (-s reports labels)"
@@ -2093,7 +2061,7 @@ printf ">s;size=1;\nA\n" | \
     "${SWARM}" -z -o /dev/null -s - 2> /dev/null | \
     grep -qE "[[:blank:]]s[[:blank:]]" && \
     success "${DESCRIPTION}" || \
-    failure "${DESCRIPTION}"
+        failure "${DESCRIPTION}"
 
 ## output created by the -u option is not modified by the option -z
 DESCRIPTION="in -u ouput, -z has no direct effect"
@@ -2101,7 +2069,7 @@ printf ">s;size=1;\nA\n" | \
     "${SWARM}" -z -o /dev/null -u - 2> /dev/null | \
     grep -qE "[[:blank:]]s;size=1;[[:blank:]]" && \
     success "${DESCRIPTION}" || \
-    failure "${DESCRIPTION}"
+        failure "${DESCRIPTION}"
 
 ## output created by the -u option is not modified by the option -z
 DESCRIPTION="in -u ouput, -z has no direct effect (-s reports headers)"
@@ -2109,7 +2077,7 @@ printf ">s;size=1\nA\n" | \
     "${SWARM}" -z -o /dev/null -u - 2> /dev/null | \
     grep -qE "[[:blank:]]s;size=1[[:blank:]]" && \
     success "${DESCRIPTION}" || \
-    failure "${DESCRIPTION}"
+        failure "${DESCRIPTION}"
 
 ## in the output created by the -w option, -z modifies the header format
 DESCRIPTION="in -w ouput, -z modifies the header format"
@@ -2117,7 +2085,7 @@ printf ">s;size=1;\nA\n" | \
     "${SWARM}" -z -o /dev/null -w - 2> /dev/null | \
     grep -q "^>s;size=1;$" && \
     success "${DESCRIPTION}" || \
-    failure "${DESCRIPTION}"
+        failure "${DESCRIPTION}"
 
 ## a semi-colon is added if it is not in the input
 DESCRIPTION="in -w ouput, -z adds a terminal ';' to sequence headers"
@@ -2125,7 +2093,7 @@ printf ">s;size=1\nA\n" | \
     "${SWARM}" -z -o /dev/null -w - 2> /dev/null | \
     grep -q "^>s;size=1;$" && \
     success "${DESCRIPTION}" || \
-    failure "${DESCRIPTION}"
+        failure "${DESCRIPTION}"
 
 
 #*****************************************************************************#
@@ -2135,24 +2103,20 @@ printf ">s;size=1\nA\n" | \
 #*****************************************************************************#
 
 ## Swarm sorts amplicons in an OTU by decreasing abundance
-OUTPUT=$(mktemp)
 DESCRIPTION="swarm sorts amplicons in an OTU by decreasing abundance"
-printf ">c_1\nAAAA\n>a_3\nAAAC\n>b_2\nAACC\n" | \
-    "${SWARM}" > "${OUTPUT}" 2> /dev/null
-grep -q "^a_3 b_2 c_1$" "${OUTPUT}" && \
+printf ">s3_1\nA\n>s1_3\nC\n>s2_2\nC\n" | \
+    "${SWARM}" 2> /dev/null | \
+    grep -q "^s1_3 s2_2 s3_1$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"  
 
 ## Swarm sorts fasta output by decreasing abundance
-OUTPUT=$(mktemp)
 DESCRIPTION="swarm sorts fasta output by decreasing abundance"
-printf ">c_1\nAAAA\n>a_3\nGGGG\n>b_2\nTTTT\n" | \
-    "${SWARM}" > "${OUTPUT}" 2> /dev/null
-[[ $(< "${OUTPUT}") == $(printf "a_3\nb_2\nc_1") ]] && \
+printf ">s1_1\nAA\n>s2_3\nCC\n" | \
+    "${SWARM}" 2> /dev/null | \
+    awk 'NR == 1 {exit ($1 == "s2_3") ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"  
 
 
 #*****************************************************************************#
@@ -2255,6 +2219,9 @@ if which valgrind > /dev/null ; then
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 
+    
+    ## options available when d = 1
+    
     DESCRIPTION="valgrind check for errors: default"
     valgrind \
         --log-fd=3 \
@@ -2376,6 +2343,7 @@ if which valgrind > /dev/null ; then
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 
+    
     ## fastidious options (Bloom filter requires much more memory when using valgrind)
 
     DESCRIPTION="valgrind check for errors: -f"
@@ -2418,6 +2386,7 @@ if which valgrind > /dev/null ; then
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 
+    
     ## options available when d > 1
 
     DESCRIPTION="valgrind check for errors: -d 2"
@@ -2495,6 +2464,9 @@ if which valgrind > /dev/null ; then
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 
+    
+    ## options available when d = 1
+    
     DESCRIPTION="valgrind check for unfreed memory: default"
     valgrind \
         --log-fd=3 \
@@ -2616,6 +2588,7 @@ if which valgrind > /dev/null ; then
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 
+    
     ## fastidious options (Bloom filter requires much more memory when using valgrind)
 
     DESCRIPTION="valgrind check for unfreed memory: -f"
@@ -2658,6 +2631,7 @@ if which valgrind > /dev/null ; then
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 
+    
     ## options available when d > 1
 
     DESCRIPTION="valgrind check for unfreed memory: -d 2"
