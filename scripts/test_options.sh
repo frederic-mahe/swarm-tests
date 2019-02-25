@@ -739,6 +739,14 @@ printf ">s1_1\nA\n>s2_1\nT\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+## Swarm -i output has 5 columns
+DESCRIPTION="-i output has 5 columns"
+printf ">s1_1\nA\n>s2_1\nT\n" | \
+    "${SWARM}" -o /dev/null -i - 2> /dev/null | \
+    awk '{exit (NF == 5) ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 ## -i columns 1 and 2 contain sequence names
 DESCRIPTION="-i columns 1 and 2 contain sequence names"
 printf ">s1_1\nA\n>s2_1\nT\n" | \
@@ -828,23 +836,16 @@ printf ">s1_1\nAAAA\n>s2_1\nAACC\n>s3_1\nCCCC\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-
-# stop here ------------------------------------------------------------------------------- !!
-
-exit
-
 ## -i -f OTU numbering is updated (2nd line, col. 4 should be 1)
 # a	b	1	1	1
 # b	c	2	1	2
 # c	d	1	1	1
 DESCRIPTION="-i -f OTU numbering is updated"
-OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_1\nAAAT\n>c_1\nATTT\n>d_1\nTTTT\n" | \
-    "${SWARM}" -f -i "${OUTPUT}" > /dev/null 2>&1
-awk 'NR == 2 {exit $4 == 1 ? 0 : 1}' "${OUTPUT}" && \
+    "${SWARM}" -f -o /dev/null -i - 2> /dev/null | \
+    awk 'NR == 2 {exit $4 == 1 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
 
 ## -i -f OTU numbering is contiguous (no gap) (4th line, col. 4 should be 2)
 # a	b	1	1	1
@@ -852,13 +853,11 @@ rm "${OUTPUT}"
 # c	d	1	1	1
 # e	f	1	2	1
 DESCRIPTION="-i -f OTU numbering is contiguous (no gap)"
-OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_1\nAAAT\n>c_1\nATTT\n>d_1\nTTTT\n>e_1\nGGGG\n>f_1\nGGGA\n" | \
-    "${SWARM}" -f -i "${OUTPUT}" > /dev/null 2>&1
-awk 'NR == 4 {exit $4 == 2 ? 0 : 1}' "${OUTPUT}" && \
+    "${SWARM}" -f -o /dev/null -i "${OUTPUT}" 2> /dev/null | \
+    awk 'NR == 4 {exit $4 == 2 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
 
 ## -i -f number of steps between grafted amplicon and its new seed is
 ## not updated (3rd line, col. 5 is set to 1)
@@ -874,14 +873,11 @@ rm "${OUTPUT}"
 ## c	d	1	1	1
 ##
 DESCRIPTION="-i -f number of steps between grafted amplicon and its new seed is not updated"
-OUTPUT=$(mktemp)
 printf ">a_3\nAAAA\n>b_1\nAAAT\n>c_2\nTTTT\n>d_1\nATTT\n" | \
-    "${SWARM}" -f -b 4 -i "${OUTPUT}" > /dev/null 2>&1
-awk 'NR == 3 {exit $5 == 1 ? 0 : 1}' "${OUTPUT}" && \
+    "${SWARM}" -f -b 4 -o /dev/null -i - 2> /dev/null | \
+    awk 'NR == 3 {exit $5 == 1 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-
 
 ## ------------------------------------------------------------------------ log
 
@@ -894,26 +890,35 @@ for OPTION in "-l" "--log" ; do
             failure "${DESCRIPTION}"
 done
 
-## Swarm does not write on standard error when using -l
-ERRORINPUT=$(mktemp)
-DESCRIPTION="-l writes on standard error"
+## Swarm -l writes to the specified output file
+DESCRIPTION="-l writes to the specified output file"
 printf ">s_1\nA\n" | \
-    "${SWARM}" -l /dev/null > /dev/null 2> "${ERRORINPUT}"
-[[ ! -s "${ERRORINPUT}" ]] && \
+    "${SWARM}" -o /dev/null -l - 2> /dev/null | \
+    grep -q "." && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${ERRORINPUT}"
+
+## Swarm does not write on standard error when using -l
+DESCRIPTION="swarm does not write on stderr when using -l"
+printf ">s_1\nA\n" | \
+    "${SWARM}" -o /dev/null -l /dev/null 2>&1 | \
+    grep -q "." && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
 
 ## Swarm does write on standard error when using -l, except for errors
-ERRORINPUT=$(mktemp)
-DESCRIPTION="-l writes on standard error, except for errors"
+DESCRIPTION="swarm does not write on stderr when using -l, except for errors"
 # voluntary error (missing d value) to create an error message
 printf ">s_1\nA\n" | \
-    "${SWARM}" -d -l /dev/null &> "${ERRORINPUT}"
-[[ -s "${ERRORINPUT}" ]] && \
+    "${SWARM}" -d -o /dev/null -l /dev/null 2>&1 | \
+    grep -q "." && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${ERRORINPUT}"
+
+# stop here ------------------------------------------------------------------------------- !!
+
+exit
+
 
 
 ## ---------------------------------------------------------------- output-file
