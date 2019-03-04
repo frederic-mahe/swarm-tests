@@ -115,6 +115,18 @@ printf ">b_1\nA\n>a_1\nT\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+# subseeds of a seed are sorted per generation, not globally (sorting
+# is done inside a "layer" or "generation": s3 is more abundant than
+# s3 and s4, but it belongs to the second generation, not the
+# first. That's why it appears after s4, even if its abundance is
+# higher)
+DESCRIPTION="subseeds of a seed are sorted per generation, not globally"
+printf ">s1_9\nA\n>s2_5\nAA\n>s3_4\nAAA\n>s4_3\nAT\n" | \
+    "${SWARM}" 2> /dev/null | \
+    grep -q "^s1_9 s2_5 s4_3 s3_4$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 
 #*****************************************************************************#
 #                                                                             #
