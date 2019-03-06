@@ -914,7 +914,7 @@ microvariants() {
     done    
 }
 
-## produce a fasta set with a seed and all its L1 microvariants
+## produce a fasta set with a seed and all its unique L1 microvariants
 ## (output should contain only one cluster)
 DESCRIPTION="issue 53 --- swarm correctly computes all microvariants"
 microvariants "ACGT" | \
@@ -925,8 +925,8 @@ microvariants "ACGT" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## produce a fasta set with a seed, all its L2 microvariants but no L1
-## microvariants (output should contain only one cluster)
+## produce a fasta set with a seed, all its unique L2 microvariants
+## but no L1 microvariants (output should contain only one cluster)
 DESCRIPTION="issue 53 --- fastidious links L2 microvariants and the seed"
 SEQUENCE="ACGT"
 MICROVARIANTS_L1=$(microvariants ${SEQUENCE} | sort -du | grep -v "^${SEQUENCE}$")
