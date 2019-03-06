@@ -2115,6 +2115,142 @@ printf ">s;size=1\nA\n" | \
 
 #*****************************************************************************#
 #                                                                             #
+#                dereplication options and behavior (-d 0)                    #
+#                                                                             #
+#*****************************************************************************#
+
+## see https://github.com/torognes/swarm/issues/125
+
+## check that swarm behaves as expected when d = 0:
+# swarm -d 0 [-rz] [-a int] [-l filename] [-o filename]
+#     [-s filename] [-u filename] [-w filename] [filename]
+
+## d = 0 identical sequences are merged
+DESCRIPTION="swarm merges identical sequences (-d 0)"
+printf ">s1_1\nA\n>s2_5\nA\n" | \
+    "${SWARM}" -d 0 2> /dev/null | \
+    grep -qx "s2_5 s1_1" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## d = 0 different sequences are not merged
+DESCRIPTION="swarm does not merge different sequences (-d 0)"
+printf ">s1_1\nA\n>s2_5\nT\n" | \
+    "${SWARM}" -d 0 2> /dev/null | \
+    wc -l | \
+    grep -qx "2" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## d = 0 outputs clusters (stdout)
+DESCRIPTION="swarm outputs clusters to stdout (-d 0)"
+printf ">s1_1\nA\n>s2_5\nA\n" | \
+    "${SWARM}" -d 0 2> /dev/null | \
+    grep -q "." && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## d = 0 outputs clusters (file)
+DESCRIPTION="swarm outputs clusters to file (-d 0)"
+printf ">s1_1\nA\n>s2_5\nA\n" | \
+    "${SWARM}" -d 0 -o - 2> /dev/null | \
+    grep -q "." && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## d = 0 produces a fasta output
+DESCRIPTION="swarm produces a fasta output (-d 0)"
+printf ">s1_1\nA\n>s2_5\nA\n" | \
+    "${SWARM}" -d 0 -o /dev/null -w - 2> /dev/null | \
+    grep -q "." && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## d = 0 identical sequences are merged in fasta output (merged abundances)
+DESCRIPTION="swarm merges identical sequences in fasta output (-d 0)"
+printf ">s1_1\nA\n>s2_5\nA\n" | \
+    "${SWARM}" -d 0 -o /dev/null -w - 2> /dev/null | \
+    grep -qx ">s2_6" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## d = 0 identical sequences are merged (;size=)
+DESCRIPTION="swarm merges identical sequences (-z) (-d 0)"
+printf ">s1;size=1\nA\n>s2;size=5\nA\n" | \
+    "${SWARM}" -d 0 -z 2> /dev/null | \
+    grep -qx "s2;size=5 s1;size=1" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## d = 0 identical sequences are merged in fasta output (merged abundances)
+DESCRIPTION="swarm merges identical sequences in fasta output (-z) (-d 0)"
+printf ">s1;size=1\nA\n>s2;size=5\nA\n" | \
+    "${SWARM}" -d 0 -z -o /dev/null -w - 2> /dev/null | \
+    grep -qx ">s2;size=6;" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## d = 0 outputs to a log file
+DESCRIPTION="swarm outputs to a log file (-d 0)"
+printf ">s1_1\nA\n>s2_5\nA\n" | \
+    "${SWARM}" -d 0 -o /dev/null -l - 2> /dev/null | \
+    grep -q "." && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## d = 0 outputs a stats file
+DESCRIPTION="swarm outputs stats to file (-d 0)"
+printf ">s1_1\nA\n>s2_5\nA\n" | \
+    "${SWARM}" -d 0 -o /dev/null -s - 2> /dev/null | \
+    grep -q "." && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## d = 0 produces stats output
+DESCRIPTION="swarm produces a correct stats output (-d 0)"
+printf ">s1_1\nA\n>s2_5\nA\n" | \
+    "${SWARM}" -d 0 -o /dev/null -s - 2> /dev/null | \
+    tr "\t" "@" | \
+    grep -qx "2@6@s2@5@1@0@0" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## d = 0 outputs a uclust file
+DESCRIPTION="swarm outputs uclust-format to file (-d 0)"
+printf ">s1_1\nA\n>s2_5\nA\n" | \
+    "${SWARM}" -d 0 -o /dev/null -u - 2> /dev/null | \
+    grep -q "." && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## d = 0 produces uclust output
+DESCRIPTION="swarm produces a correct uclust output (-d 0)"
+printf ">s1_1\nA\n>s2_5\nA\n" | \
+    "${SWARM}" -d 0 -o /dev/null -u - 2> /dev/null | \
+    awk 'END {exit NR == 3 && NF == 10 ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## d = 0 produces mothur-like output
+DESCRIPTION="swarm produces a mothur-like output (-d 0)"
+printf ">s1_1\nA\n>s2_5\nA\n" | \
+    "${SWARM}" -d 0 -r 2> /dev/null | \
+    tr "\t" "@" | \
+    grep -qx "swarm_0@1@s2_5,s1_1" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## d = 0 missing abundances are replaced as expected
+DESCRIPTION="swarm missing abundances are replaced as expected (-a) (-d 0)"
+printf ">s1\nA\n>s2_5\nA\n" | \
+    "${SWARM}" -d 0 -a 1 -o /dev/null -w - 2> /dev/null | \
+    grep -qx ">s2_6" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+
+#*****************************************************************************#
+#                                                                             #
 #                              Output sorting                                 #
 #                                                                             #
 #*****************************************************************************#
