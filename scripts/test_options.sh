@@ -17,7 +17,7 @@ failure () {
 
 success () {
     printf "${GREEN}PASS${NO_COLOR}: ${1}\n"
-}       
+}
 
 ## use the first swarm binary in $PATH by default, unless user wants
 ## to test another binary
@@ -927,11 +927,6 @@ printf ">s_1\nA\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-# stop here ------------------------------------------------------------------------------- !!
-
-exit
-
-
 
 ## ---------------------------------------------------------------- output-file
 
@@ -960,6 +955,8 @@ printf ">s_1\nA\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+
+# stop here ------------------------------------------------------------------------------- !!
 
 ## --------------------------------------------------------------------- mothur
 
@@ -1406,7 +1403,7 @@ printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
 [[ -s "${OUTPUT}" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"  
+rm "${OUTPUT}"
 
 ## -u number of hits is correct in 1st column #1
 DESCRIPTION="-u number of hits is correct in the first column #1"
@@ -1985,7 +1982,7 @@ printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG\n" | \
 [[ -s "${OUTPUT}" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"  
+rm "${OUTPUT}"
 
 ## Swarm -w fails if no output file given
 DESCRIPTION="-w fails if no output file given"
@@ -2122,7 +2119,7 @@ printf ">s;size=1\nA\n" | \
 ## see https://github.com/torognes/swarm/issues/125
 
 ## check that swarm behaves as expected when d = 0:
-# swarm -d 0 [-rz] [-a int] [-l filename] [-o filename]
+# swarm -d 0 [-rz] [-a int] [-i filename] [-l filename] [-o filename]
 #     [-s filename] [-u filename] [-w filename] [filename]
 
 ## d = 0 identical sequences are merged
@@ -2195,6 +2192,23 @@ DESCRIPTION="swarm outputs to a log file (-d 0)"
 printf ">s1_1\nA\n>s2_5\nA\n" | \
     "${SWARM}" -d 0 -o /dev/null -l - 2> /dev/null | \
     grep -q "." && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## d = 0 outputs a structure file
+DESCRIPTION="swarm outputs struct to file (-d 0)"
+printf ">s1_1\nA\n>s2_5\nA\n" | \
+    "${SWARM}" -d 0 -o /dev/null -i - 2> /dev/null | \
+    grep -q "." && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## d = 0 produces structure output
+DESCRIPTION="swarm produces a correct struct output (-d 0)"
+printf ">s1_1\nA\n>s2_5\nA\n" | \
+    "${SWARM}" -d 0 -o /dev/null -i - 2> /dev/null | \
+    tr "\t" "@" | \
+    grep -qx "s2@s1@0@1@0" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -2324,7 +2338,7 @@ while read LONG SHORT ; do
         DESCRIPTION="unknown option"
         failure "${DESCRIPTION}"
     fi
-    
+
     ## Accepted values for the option goes from 1 to 255
     MIN=1
     MAX=255
@@ -2334,7 +2348,7 @@ while read LONG SHORT ; do
             "${SWARM}" -d 2 "${SHORT}" ${i} > /dev/null 2>&1 || \
             failure "swarm aborts when --${LONG} equals ${i}"
     done && success "${DESCRIPTION}"
-    
+
 done <<EOF
 match-reward -m
 mismatch-penalty -p
@@ -2372,9 +2386,9 @@ if which valgrind > /dev/null ; then
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 
-    
+
     ## options available when d = 1
-    
+
     DESCRIPTION="valgrind check for errors: default"
     valgrind \
         --log-fd=3 \
@@ -2417,7 +2431,7 @@ if which valgrind > /dev/null ; then
     valgrind \
         --log-fd=3 \
         --leak-check=full \
-        "${SWARM}" -n <(printf ">s1_2\nAA\n>s2_1\nAC\n") \
+        "${SWARM}" -r <(printf ">s1_2\nAA\n>s2_1\nAC\n") \
         3>&1 1> /dev/null 2> /dev/null | \
         grep -q "ERROR SUMMARY: 0 errors" && \
         success "${DESCRIPTION}" || \
@@ -2496,7 +2510,7 @@ if which valgrind > /dev/null ; then
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 
-    
+
     ## fastidious options (Bloom filter requires much more memory when using valgrind)
 
     DESCRIPTION="valgrind check for errors: -f"
@@ -2539,7 +2553,7 @@ if which valgrind > /dev/null ; then
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 
-    
+
     ## options available when d > 1
 
     DESCRIPTION="valgrind check for errors: -d 2"
@@ -2591,6 +2605,119 @@ if which valgrind > /dev/null ; then
         grep -q "ERROR SUMMARY: 0 errors" && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
+
+
+    ## options available when d = 0 (dereplication)
+
+    DESCRIPTION="valgrind check for errors (-d 0): default"
+    valgrind \
+        --log-fd=3 \
+        --leak-check=full \
+        "${SWARM}" -d 0 <(printf ">s1_1\nA\n>s2_1\nA\n") \
+        3>&1 1> /dev/null 2> /dev/null | \
+        grep -q "ERROR SUMMARY: 0 errors" && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
+    DESCRIPTION="valgrind check for errors (-d 0): -a 1"
+    valgrind \
+        --log-fd=3 \
+        --leak-check=full \
+        "${SWARM}" -d 0 -a 1 <(printf ">s1\nA\n>s2\nA\n") \
+        3>&1 1> /dev/null 2> /dev/null | \
+        grep -q "ERROR SUMMARY: 0 errors" && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
+    DESCRIPTION="valgrind check for errors (-d 0): -r"
+    valgrind \
+        --log-fd=3 \
+        --leak-check=full \
+        "${SWARM}" -d 0 -r <(printf ">s1_1\nA\n>s2_1\nA\n") \
+        3>&1 1> /dev/null 2> /dev/null | \
+        grep -q "ERROR SUMMARY: 0 errors" && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
+    DESCRIPTION="valgrind check for errors (-d 0): -t 1"
+    valgrind \
+        --log-fd=3 \
+        --leak-check=full \
+        "${SWARM}" -d 0 -t 1 <(printf ">s1_1\nA\n>s2_1\nA\n") \
+        3>&1 1> /dev/null 2> /dev/null | \
+        grep -q "ERROR SUMMARY: 0 errors" && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
+    DESCRIPTION="valgrind check for errors (-d 0): -z"
+    valgrind \
+        --log-fd=3 \
+        --leak-check=full \
+        "${SWARM}" -d 0 -z <(printf ">s1;size=1\nA\n>s2;size=1\nA\n") \
+        3>&1 1> /dev/null 2> /dev/null | \
+        grep -q "ERROR SUMMARY: 0 errors" && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
+    DESCRIPTION="valgrind check for errors (-d 0): -i"
+    valgrind \
+        --log-fd=3 \
+        --leak-check=full \
+        "${SWARM}" -d 0 -i - <(printf ">s1_1\nA\n>s2_1\nA\n") \
+        3>&1 1> /dev/null 2> /dev/null | \
+        grep -q "ERROR SUMMARY: 0 errors" && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
+    DESCRIPTION="valgrind check for errors (-d 0): -l"
+    valgrind \
+        --log-fd=3 \
+        --leak-check=full \
+        "${SWARM}" -d 0 -l - <(printf ">s1_1\nA\n>s2_1\nA\n") \
+        3>&1 1> /dev/null 2> /dev/null | \
+        grep -q "ERROR SUMMARY: 0 errors" && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
+    DESCRIPTION="valgrind check for errors (-d 0): -o"
+    valgrind \
+        --log-fd=3 \
+        --leak-check=full \
+        "${SWARM}" -d 0 -o - <(printf ">s1_1\nA\n>s2_1\nA\n") \
+        3>&1 1> /dev/null 2> /dev/null | \
+        grep -q "ERROR SUMMARY: 0 errors" && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
+    DESCRIPTION="valgrind check for errors (-d 0): -s"
+    valgrind \
+        --log-fd=3 \
+        --leak-check=full \
+        "${SWARM}" -d 0 -s - <(printf ">s1_1\nA\n>s2_1\nA\n") \
+        3>&1 1> /dev/null 2> /dev/null | \
+        grep -q "ERROR SUMMARY: 0 errors" && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
+    DESCRIPTION="valgrind check for errors (-d 0): -u"
+    valgrind \
+        --log-fd=3 \
+        --leak-check=full \
+        "${SWARM}" -d 0 -u - <(printf ">s1_1\nA\n>s2_1\nA\n") \
+        3>&1 1> /dev/null 2> /dev/null | \
+        grep -q "ERROR SUMMARY: 0 errors" && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
+    DESCRIPTION="valgrind check for errors (-d 0): -w"
+    valgrind \
+        --log-fd=3 \
+        --leak-check=full \
+        "${SWARM}" -d 0 -w - <(printf ">s1_1\nA\n>s2_1\nA\n") \
+        3>&1 1> /dev/null 2> /dev/null | \
+        grep -q "ERROR SUMMARY: 0 errors" && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
 fi
 
 
@@ -2617,9 +2744,9 @@ if which valgrind > /dev/null ; then
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 
-    
+
     ## options available when d = 1
-    
+
     DESCRIPTION="valgrind check for unfreed memory: default"
     valgrind \
         --log-fd=3 \
@@ -2662,7 +2789,7 @@ if which valgrind > /dev/null ; then
     valgrind \
         --log-fd=3 \
         --leak-check=full \
-        "${SWARM}" -n <(printf ">s1_2\nAA\n>s2_1\nAC\n") \
+        "${SWARM}" -r <(printf ">s1_2\nAA\n>s2_1\nAC\n") \
         3>&1 1> /dev/null 2> /dev/null | \
         grep -q "in use at exit: 0 bytes" && \
         success "${DESCRIPTION}" || \
@@ -2741,7 +2868,7 @@ if which valgrind > /dev/null ; then
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 
-    
+
     ## fastidious options (Bloom filter requires much more memory when using valgrind)
 
     DESCRIPTION="valgrind check for unfreed memory: -f"
@@ -2784,7 +2911,7 @@ if which valgrind > /dev/null ; then
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 
-    
+
     ## options available when d > 1
 
     DESCRIPTION="valgrind check for unfreed memory: -d 2"
@@ -2832,6 +2959,119 @@ if which valgrind > /dev/null ; then
         --log-fd=3 \
         --leak-check=full \
         "${SWARM}" -d 2 -p 3 <(printf ">s1_2\nAA\n>s2_1\nCC\n") \
+        3>&1 1> /dev/null 2> /dev/null | \
+        grep -q "in use at exit: 0 bytes" && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
+
+    ## options available when d = 0 (dereplication)
+
+    DESCRIPTION="valgrind check for unfreed memory (-d 0): default"
+    valgrind \
+        --log-fd=3 \
+        --leak-check=full \
+        "${SWARM}" -d 0 <(printf ">s1_1\nA\n>s2_1\nA\n") \
+        3>&1 1> /dev/null 2> /dev/null | \
+        grep -q "in use at exit: 0 bytes" && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
+    DESCRIPTION="valgrind check for unfreed memory (-d 0): -a 1"
+    valgrind \
+        --log-fd=3 \
+        --leak-check=full \
+        "${SWARM}" -d 0 -a 1 <(printf ">s1\nA\n>s2\nA\n") \
+        3>&1 1> /dev/null 2> /dev/null | \
+        grep -q "in use at exit: 0 bytes" && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
+    DESCRIPTION="valgrind check for unfreed memory (-d 0): -r"
+    valgrind \
+        --log-fd=3 \
+        --leak-check=full \
+        "${SWARM}" -d 0 -r <(printf ">s1_1\nA\n>s2_1\nA\n") \
+        3>&1 1> /dev/null 2> /dev/null | \
+        grep -q "in use at exit: 0 bytes" && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
+    DESCRIPTION="valgrind check for unfreed memory (-d 0): -t 1"
+    valgrind \
+        --log-fd=3 \
+        --leak-check=full \
+        "${SWARM}" -d 0 -t 1 <(printf ">s1_1\nA\n>s2_1\nA\n") \
+        3>&1 1> /dev/null 2> /dev/null | \
+        grep -q "in use at exit: 0 bytes" && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
+    DESCRIPTION="valgrind check for unfreed memory (-d 0): -z"
+    valgrind \
+        --log-fd=3 \
+        --leak-check=full \
+        "${SWARM}" -d 0 -z <(printf ">s1;size=1\nA\n>s2;size=1\nA\n") \
+        3>&1 1> /dev/null 2> /dev/null | \
+        grep -q "in use at exit: 0 bytes" && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
+    DESCRIPTION="valgrind check for unfreed memory (-d 0): -i"
+    valgrind \
+        --log-fd=3 \
+        --leak-check=full \
+        "${SWARM}" -d 0 -i - <(printf ">s1_1\nA\n>s2_1\nA\n") \
+        3>&1 1> /dev/null 2> /dev/null | \
+        grep -q "in use at exit: 0 bytes" && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
+    DESCRIPTION="valgrind check for unfreed memory (-d 0): -l"
+    valgrind \
+        --log-fd=3 \
+        --leak-check=full \
+        "${SWARM}" -d 0 -l - <(printf ">s1_1\nA\n>s2_1\nA\n") \
+        3>&1 1> /dev/null 2> /dev/null | \
+        grep -q "in use at exit: 0 bytes" && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
+    DESCRIPTION="valgrind check for unfreed memory (-d 0): -o"
+    valgrind \
+        --log-fd=3 \
+        --leak-check=full \
+        "${SWARM}" -d 0 -o - <(printf ">s1_1\nA\n>s2_1\nA\n") \
+        3>&1 1> /dev/null 2> /dev/null | \
+        grep -q "in use at exit: 0 bytes" && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
+    DESCRIPTION="valgrind check for unfreed memory (-d 0): -s"
+    valgrind \
+        --log-fd=3 \
+        --leak-check=full \
+        "${SWARM}" -d 0 -s - <(printf ">s1_1\nA\n>s2_1\nA\n") \
+        3>&1 1> /dev/null 2> /dev/null | \
+        grep -q "in use at exit: 0 bytes" && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
+    DESCRIPTION="valgrind check for unfreed memory (-d 0): -u"
+    valgrind \
+        --log-fd=3 \
+        --leak-check=full \
+        "${SWARM}" -d 0 -u - <(printf ">s1_1\nA\n>s2_1\nA\n") \
+        3>&1 1> /dev/null 2> /dev/null | \
+        grep -q "in use at exit: 0 bytes" && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
+    DESCRIPTION="valgrind check for unfreed memory (-d 0): -w"
+    valgrind \
+        --log-fd=3 \
+        --leak-check=full \
+        "${SWARM}" -d 0 -w - <(printf ">s1_1\nA\n>s2_1\nA\n") \
         3>&1 1> /dev/null 2> /dev/null | \
         grep -q "in use at exit: 0 bytes" && \
         success "${DESCRIPTION}" || \
