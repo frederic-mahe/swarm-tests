@@ -107,6 +107,33 @@ DESCRIPTION="swarm reads from a process substitution (unseekable)"
 #                                                                             #
 #*****************************************************************************#
 
+## Test empty input
+DESCRIPTION="swarm handles empty input"
+printf "" | \
+    "${SWARM}" > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## output files are still created, even when input is empty
+## (check if file is created)
+DESCRIPTION="empty input yields empty output (-o)"
+TMP=$(mktemp --dry-run)
+printf "" | \
+    "${SWARM}" -o ${TMP} 2> /dev/null
+[[ -e ${TMP} ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm -f ${TMP}
+
+DESCRIPTION="empty input yields empty output (-w)"
+TMP=$(mktemp --dry-run)
+printf "" | \
+    "${SWARM}" -w ${TMP} 2> /dev/null
+[[ -e ${TMP} ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm -f ${TMP}
+
 ## Test empty sequence
 DESCRIPTION="swarm handles empty sequences"
 printf ">s_1\n\n" | \
