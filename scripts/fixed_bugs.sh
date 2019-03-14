@@ -606,7 +606,7 @@ printf ">a_1\nAAAA\n>b_1\nAACC\n" | \
 DESCRIPTION="issue 33 --- subseeds are sorted by decreasing abundant"
 cmp -s \
     <(printf ">a_5\nAA\n>d_1\nGC\n>b_2\nAC\n>c_1\nGA\n" | \
-             "${SWARM}" -o /dev/null -i - 2> /dev/null) \
+          "${SWARM}" -o /dev/null -i - 2> /dev/null) \
     <(printf "a\tb\t1\t1\t1\na\tc\t1\t1\t1\nb\td\t1\t1\t2\n") && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -957,7 +957,7 @@ comm -23 <(echo "${MICROVARIANTS_L2}") <(echo "${MICROVARIANTS_L1}") | \
     while read MICROVARIANT_L2 ; do
         printf ">seed_10\n%s\n>m_1\n%s\n" ${SEQUENCE} ${MICROVARIANT_L2} | \
             "${SWARM}" -d 1 -f -o - 2> /dev/null | \
-        awk 'END {exit NR == 1 ? 0 : 1}' || \
+            awk 'END {exit NR == 1 ? 0 : 1}' || \
             failure "${DESCRIPTION}"
     done && success "${DESCRIPTION}"
 unset SEQUENCE MICROVARIANTS_L1 MICROVARIANTS_L2
@@ -1024,7 +1024,7 @@ printf ">a_3\nAAAA\n>b_1\nAAAT\n>c_1\nATTT\n>d_1\nTTTT\n" | \
 DESCRIPTION="issue 55 --- 2 differences between the grafted amplicon and the grafting point"
 printf ">a_3\nAAAA\n>b_1\nAAAT\n>c_1\nATTT\n>d_1\nTTTT\n" | \
     "${SWARM}" -f -o /dev/null -i - 2> /dev/null | \
-        awk '$2 == "c" && $3 == 2 {s++} END {exit s ? 0 : 1}' && \
+    awk '$2 == "c" && $3 == 2 {s++} END {exit s ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -1129,7 +1129,7 @@ printf ">s1\nA\n>s2_1\nC\n>s3\nG\n" | \
 ## issue 59 --- first line of abundance notation missing is correct in error message
 DESCRIPTION="issue 59 --- first line of abundance notation missing is correct in error message"
 printf ">s1_1\nA\n>s2\nT\n" | \
-        "${SWARM}" 2>&1 | \
+    "${SWARM}" 2>&1 | \
     grep -q "^Error.*starting on line 3." && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1259,7 +1259,7 @@ printf ">s1;size=1\nAA\n>s2;size=2\nAA\n" | \
 for i in {1..3} ; do
     DESCRIPTION="issue 67 --- name of the representative is tshe name of the seed (-d ${i})"
     printf ">s1_3\nA\n>s2_1\nT\n" | \
-       "${SWARM}" -d ${i} -o /dev/null -w - 2> /dev/null | \
+        "${SWARM}" -d ${i} -o /dev/null -w - 2> /dev/null | \
         grep -q "^>s1_4$" && \
 	    success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
@@ -1489,9 +1489,9 @@ printf ">s_1\n\n" | \
 DESCRIPTION="issue 80 --- clustering results are not affected by input order"
 cmp -s \
     <(printf ">a_2\nAA\n>b_2\nTT\n>c_1\nAT\n" | \
-             "${SWARM}" -o - 2> /dev/null) \
+          "${SWARM}" -o - 2> /dev/null) \
     <(printf ">b_2\nTT\n>a_2\nAA\n>c_1\nAT\n" | \
-             "${SWARM}" -o - 2> /dev/null) && \
+          "${SWARM}" -o - 2> /dev/null) && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -1618,7 +1618,7 @@ printf ">s_1\nT\n" | \
 ## better error message to help to fix the problem
 DESCRIPTION="issue 90 --- better error message to help to fix the problem"
 CURRENT_MESSAGE=$(printf ">s\nT\n" | \
-                         "${SWARM}" 2>&1 | sed -n '/^Error/,/first.$/ p')
+                      "${SWARM}" 2>&1 | sed -n '/^Error/,/first.$/ p')
 ## read is a Bash built-in so it doesn't require calling an external
 ## command such as cat. Putting quotes around the sentinal (EOF)
 ## prevents the text from undergoing parameter expansion. The -d ''
@@ -1924,10 +1924,10 @@ printf ">s\nT\n" | \
 
 DESCRIPTION="issue 108 --- (fastidious) wrong cluster number in the UC output"
 printf ">a_1\nTGGA\n>b_2\nTTTT\n>c_1\nTTGA\n>d_1\nCTGA\n" | \
-        "${SWARM}" -f -o /dev/null -u - 2> /dev/null | \
-        awk '$2 != 0 {exit 1}' && \
-        success "${DESCRIPTION}" || \
-            failure "${DESCRIPTION}"
+    "${SWARM}" -f -o /dev/null -u - 2> /dev/null | \
+    awk '$2 != 0 {exit 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 
 #*****************************************************************************#
@@ -1969,16 +1969,16 @@ DESCRIPTION="issue 109 --- segmentation fault error with undereplicated dataset 
 for ((i=1 ; i<=23 ; i++)) ; do
     printf ">s%d_1\nA\n" ${i}
 done | "${SWARM}" > /dev/null 2>&1 && \
-        success "${DESCRIPTION}" || \
-            failure "${DESCRIPTION}"
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 ## This test should fail on swarm 2.2.0 and pass on more recent versions
 DESCRIPTION="issue 109 --- segmentation fault error with undereplicated dataset #2"
 for ((i=1 ; i<=24 ; i++)) ; do
     printf ">s%d_1\nA\n" ${i}
 done | "${SWARM}" > /dev/null 2>&1 && \
-        success "${DESCRIPTION}" || \
-            failure "${DESCRIPTION}"
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 
 #*****************************************************************************#
@@ -2105,8 +2105,8 @@ done | "${SWARM}" > /dev/null 2>&1 && \
 DESCRIPTION="issue 121 --- segmentation fault when there are only 1 or 2 input sequences"
 printf ">s1_1\nA\n>s2_1\nT\n" | \
     "${SWARM}" > /dev/null 2>&1 && \
-        success "${DESCRIPTION}" || \
-            failure "${DESCRIPTION}"
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 
 #*****************************************************************************#
@@ -2174,17 +2174,18 @@ fi
 ## https://github.com/torognes/swarm/issues/125
 
 ## swarm 3.0 stops on duplicated sequences, where swarm 2.0 used to
-## dereplicate silently. Besides that, there is a bug in swarm 3.0
-## when counting the duplicated sequences. For an input with n times
-## the same sequence, swarm should indicate (n - 1) duplicates. So,
-## for an input with 4 times the same sequence, swarm should indicate
-## 3 duplicates (not 6):
-DESCRIPTION="issue 125 --- report the correct number of duplicated sequences"
-printf ">s1_1\nA\n>s2_1\nA\n>s3_1\nA\n>s4_1\nA\n" | \
-    "${SWARM}" -o /dev/null 2>&1 | \
-    grep -q "^WARNING: 3 duplicated sequences detected.$" && \
-        success "${DESCRIPTION}" || \
-            failure "${DESCRIPTION}"
+## dereplicate silently
+DESCRIPTION="issue 125 --- swarm only accepts dereplicated sequences (-d 1)"
+printf ">s1_2\nA\n>s2_1\nA\n" | \
+    "${SWARM}" -d 1 > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+DESCRIPTION="issue 125 --- swarm only accepts dereplicated sequences (-d 2)"
+printf ">s1_2\nA\n>s2_1\nA\n" | \
+    "${SWARM}" -d 2 > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
 
 
 #*****************************************************************************#
