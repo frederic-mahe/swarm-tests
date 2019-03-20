@@ -956,8 +956,6 @@ printf ">s_1\nA\n" | \
         failure "${DESCRIPTION}"
 
 
-# stop here ------------------------------------------------------------------------------- !!
-
 ## --------------------------------------------------------------------- mothur
 
 ## Swarm accepts the options -r and --mothur
@@ -971,157 +969,135 @@ done
 
 ## -r first row is correct
 DESCRIPTION="-r first row is correct"
-OUTPUT=$(mktemp)
-printf ">a_5\nAAAA\n" | "${SWARM}" -r  > "${OUTPUT}" 2> /dev/null
-FIRST_ROW=$(awk -F "\t" '{print $1}' "${OUTPUT}")
-[[ "${FIRST_ROW}" == "swarm_1" ]] && \
+printf ">s_1\nA\n" | \
+    "${SWARM}" -r 2> /dev/null | \
+    grep -q "^swarm_1" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset FIRST_ROW
 
 ## -r first row is correct with -d 2
-DESCRIPTION="-r first row is correct with -d 2"
-OUTPUT=$(mktemp)
-printf ">a_5\nAAAA\n" | "${SWARM}" -r -d 2 > "${OUTPUT}" 2> /dev/null
-FIRST_ROW=$(awk -F "\t" '{print $1}' "${OUTPUT}")
-[[ "${FIRST_ROW}" == "swarm_2" ]] && \
+DESCRIPTION="-r first row is correct (d = 2)"
+printf ">s_1\nA\n" | \
+    "${SWARM}" -d 2 -r 2> /dev/null | \
+    grep -q "^swarm_2" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset FIRST_ROW
 
-## -r number of OTUs is correct (1 expected)
-DESCRIPTION="-r number of OTUs is correct (1 expected)"
-OUTPUT=$(mktemp)
-printf ">a_5\nAAAA\n" | "${SWARM}" -r -d 2 > "${OUTPUT}" 2> /dev/null
-NUMBER_OF_OTUs=$(awk -F "\t" '{print $2}' "${OUTPUT}")
-(( "${NUMBER_OF_OTUs}" == 1 )) && \
+## -r number of OTUs is correct (1 OTU)
+DESCRIPTION="-r number of OTUs is correct (1 line expected)"
+printf ">s_1\nA\n" | \
+    "${SWARM}" -r 2> /dev/null | \
+    wc -l | \
+    grep -q "^1$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset NUMBER_OF_OTUs
 
-## -r number of OTUs is correct (2 expected)
-DESCRIPTION="-r number of OTUs is correct (2 expected)"
-OUTPUT=$(mktemp)
-printf ">a_5\nAAAA\n>b_5\nAAAA\n>c_5\nAACC\n" | \
-    "${SWARM}" -r > "${OUTPUT}" 2> /dev/null
-NUMBER_OF_OTUs=$(awk -F "\t" '{print $2}' "${OUTPUT}")
-(( "${NUMBER_OF_OTUs}" == 2 )) && \
+DESCRIPTION="-r number of OTUs is correct (2nd field is 1)"
+printf ">s_1\nA\n" | \
+    "${SWARM}" -r 2> /dev/null | \
+    awk '{exit $2 == 1 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset NUMBER_OF_OTUs
+
+DESCRIPTION="-r number of OTUs is correct (last field is s_1)"
+printf ">s_1\nA\n" | \
+    "${SWARM}" -r 2> /dev/null | \
+    awk '{exit $NF == "s_1" ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -r number of OTUs is correct (2 OTUs)
+DESCRIPTION="-r number of OTUs is correct (2nd field is 2)"
+printf ">s1_1\nAA\n>s2_1\nTT\n" | \
+    "${SWARM}" -r 2> /dev/null | \
+    awk '{exit $2 == 2 ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="-r number of OTUs is correct (last field is s2_1)"
+printf ">s1_1\nAA\n>s2_1\nTT\n" | \
+    "${SWARM}" -r 2> /dev/null | \
+    awk '{exit $NF == "s2_1" ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 ## -r number of fields is correct (4 fields expected)
 DESCRIPTION="-r number of fields is correct (4 fields expected)"
-OUTPUT=$(mktemp)
-printf ">a_5\nAAAA\n>b_5\nAAAA\n>c_5\nAACC\n" | \
-    "${SWARM}" -r > "${OUTPUT}" 2> /dev/null
-NUMBER_OF_FIELDS=$(awk -F "\t" '{print NF}' "${OUTPUT}")
-(( "${NUMBER_OF_FIELDS}" == 4 )) && \
+printf ">s1_1\nAA\n>s2_1\nAT\n>s3_1\nGG\n" | \
+    "${SWARM}" -r 2> /dev/null | \
+    awk '{exit NF == 4 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset NUMBER_OF_FIELDS
 
 ## -r composition of OTUs is correct #1
-DESCRIPTION="-r composition of OTUs is correct #1"
-OUTPUT=$(mktemp)
-printf ">a_5\nAAAA\n>b_5\nAAAA\n>c_5\nAACC\n" | \
-    "${SWARM}" -r > "${OUTPUT}" 2> /dev/null
-OTU=$(awk -F "\t" '{print $3}' "${OUTPUT}")
-[[ "${OTU}" == "a_5,b_5" ]] && \
+DESCRIPTION="-r composition of OTUs is correct (1 OTU)"
+printf ">s1_1\nAA\n>s2_1\nAT\n" | \
+    "${SWARM}" -r 2> /dev/null | \
+    awk '{exit $NF == "s1_1,s2_1" ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset OTU
 
 ## -r composition of OTUs is correct #2
-DESCRIPTION="-r composition of OTUs is correct #2"
-OUTPUT=$(mktemp)
-printf ">a_5\nAAAA\n>b_5\nACCC\n>c_5\nAAAC\n" | \
-    "${SWARM}" -r > "${OUTPUT}" 2> /dev/null
-OTU=$(awk -F "\t" '{print $3}' "${OUTPUT}")
-[[ "${OTU}" == "a_5,c_5" ]] && \
+DESCRIPTION="-r composition of OTUs is correct (2 OTUs #1)"
+printf ">s1_1\nAA\n>s2_1\nAT\n>s3_1\nGG\n" | \
+    "${SWARM}" -r 2> /dev/null | \
+    awk '{exit $NF == "s3_1" ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
 
 ## -r composition of OTUs is correct #3
-DESCRIPTION="-r composition of OTUs is correct #3"
-OUTPUT=$(mktemp)
-printf ">a_5\nAAAA\n>b_5\nACCC\n>c_5\nAACC\n" | \
-    "${SWARM}" -r > "${OUTPUT}" 2> /dev/null
-OTU=$(awk -F "\t" '{print $3}' "${OUTPUT}")
-[[ "${OTU}" == "a_5" ]] && \
+DESCRIPTION="-r composition of OTUs is correct (2 OTUs #2)"
+printf ">s1_1\nAA\n>s2_1\nGG\n>s3_1\nGC\n" | \
+    "${SWARM}" -r 2> /dev/null | \
+    awk '{exit $NF == "s2_1,s3_1" ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset OTU
 
-## -r composition of OTUs is correct with -a 2 #1
-DESCRIPTION="-r composition of OTUs is correct with -a 2 #1"
-OUTPUT=$(mktemp)
-printf ">a_5\nAAAA\n>b\nAAAC\n>c\nACCC\n" | \
-    "${SWARM}" -r -a 2 > "${OUTPUT}" 2> /dev/null
-OTU=$(awk -F "\t" '{print $3}' "${OUTPUT}")
-[[ "${OTU}" == "a_5,b_2" ]] && \
+## -r output takes into account -a
+DESCRIPTION="-r output takes into account -a"
+printf ">s\nA\n" | \
+    "${SWARM}" -a 2 -r 2> /dev/null | \
+    awk '{exit $NF == "s_2" ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset OTU
 
-## -r composition of OTUs is correct with -a 2 #2
-DESCRIPTION="-r composition of OTUs is correct with -a 2 #2"
-OUTPUT=$(mktemp)
-printf ">a_5\nAAAA\n>b\nACCC\n>c\nAAAC\n" | \
-    "${SWARM}" -r -a 2 > "${OUTPUT}" 2> /dev/null
-OTU=$(awk -F "\t" '{print $3}' "${OUTPUT}")
-[[ "${OTU}" == "a_5,c_2" ]] && \
+## -r composition of OTUs is correct with -a
+DESCRIPTION="-r composition of OTUs is correct with -a"
+printf ">s1_1\nA\n>s2\nT\n" | \
+    "${SWARM}" -a 2 -r 2> /dev/null | \
+    awk '{exit $NF == "s2_2,s1_1" ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset OTU
 
 ## -r composition of OTUs is correct with -z
-DESCRIPTION="-r composition of OTUs is correct with -z"
-OUTPUT=$(mktemp)
-printf ">a;size=5\nAAAA\n>b;size=4\nAAAC\n>c;size=5\nACCC\n" | \
-    "${SWARM}" -r -z > "${OUTPUT}" 2> /dev/null
-OTU=$(awk -F "\t" '{print $3}' "${OUTPUT}")
-[[ "${OTU}" == "a;size=5,b;size=4" ]] && \
+DESCRIPTION="-r OTUs is correct with -z"
+printf ">s;size=1\nA\n" | \
+    "${SWARM}" -z -r 2> /dev/null | \
+    awk '{exit $NF == "s;size=1" ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset OTU
 
-## -r composition of OTUs is correct with -z -a 2 #1
-DESCRIPTION="-r composition of OTUs is correct with -z -a 2 #1"
-OUTPUT=$(mktemp)
-printf ">a;size=5;\nAAAA\n>b\nAAAC\n>c\nACCC\n" | \
-    "${SWARM}" -z -r -a 2 > "${OUTPUT}" 2> /dev/null
-OTU=$(awk -F "\t" '{print $3}' "${OUTPUT}")
-[[ "${OTU}" == "a;size=5;,b;size=2;" ]] && \
+## -r OTU is correct with -z -a (adds ;size=INT;, with a terminal ";")
+DESCRIPTION="-r OTU is correct with -z -a"
+printf ">s\nA\n" | \
+    "${SWARM}" -z -a 1 -r 2> /dev/null | \
+    awk '{exit $NF == "s;size=1;" ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset OTU
 
-## -r composition of OTUs is correct with -z -a 2 #2
-DESCRIPTION="-r composition of OTUs is correct with -z -a 2 #2"
-OUTPUT=$(mktemp)
-printf ">a;size=5\nAAAA\n>b\nACCC\n>c\nAAAC\n" | \
-    "${SWARM}" -z -r -a 2 > "${OUTPUT}" 2> /dev/null
-OTU=$(awk -F "\t" '{print $3}' "${OUTPUT}")
-[[ "${OTU}" == "a;size=5,c;size=2;" ]] && \
+## -r composition of OTUs is correct with -z -a (2 sequences)
+## note the mix of ;size=INT and ;size=INT;
+DESCRIPTION="-r OTUs is correct with -z -a (2 sequences)"
+printf ">s1\nA\n>s2;size=2\nT\n" | \
+    "${SWARM}" -z -a 1 -r 2> /dev/null | \
+    awk '{exit $NF == "s2;size=2,s1;size=1;" ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset OTU
+
 
 ## ------------------------------------------------------------ statistics-file
+
+# stop here ------------------------------------------------------------------------------- !!
 
 ## Swarm accepts the options -s and --statistics-file
 for OPTION in "-s" "--statistics-file" ; do
