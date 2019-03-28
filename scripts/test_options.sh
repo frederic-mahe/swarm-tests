@@ -1097,8 +1097,6 @@ printf ">s1\nA\n>s2;size=2\nT\n" | \
 
 ## ------------------------------------------------------------ statistics-file
 
-# stop here ------------------------------------------------------------------------------- !!
-
 ## Swarm accepts the options -s and --statistics-file
 for OPTION in "-s" "--statistics-file" ; do
     DESCRIPTION="swarms accepts the option ${OPTION}"
@@ -1118,6 +1116,7 @@ printf ">s1_1\nA\n>s2_1\nC\n" | \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
 
+
 ## Swarm -s fails if no filename given
 DESCRIPTION="-s fails if no filename given"
 printf ">s_1\nA\n" | \
@@ -1125,76 +1124,49 @@ printf ">s_1\nA\n" | \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
-## Number of unique amplicons is correct with -s (1 expected)
+## Number of unique amplicons is correct (1 expected)
 DESCRIPTION="-s number of unique amplicons is correct (1 expected)"
-OUTPUT=$(mktemp)
-printf ">a_5\nAAAA\n" | "${SWARM}" -s "${OUTPUT}" > /dev/null 2>&1
-UNIQUE_AMPLICONS=$(awk -F "\t" '{print $1}' "${OUTPUT}")
-(( "${UNIQUE_AMPLICONS}" == 1 )) && \
+printf ">s_1\nA\n" | \
+    "${SWARM}" -o /dev/null -s - 2> /dev/null | \
+    awk '{exit $1 == 1 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset UNIQUE_AMPLICONS
 
-## Number of unique amplicons is correct with -s (2 expected)
+## Number of unique amplicons is correct (2 expected)
 DESCRIPTION="-s number of unique amplicons is correct (2 expected)"
-OUTPUT=$(mktemp)
-printf ">a_5\nAAAA\n>b_1\nAAAC\n" | \
-    "${SWARM}" -s "${OUTPUT}" > /dev/null 2>&1
-UNIQUE_AMPLICONS=$(awk -F "\t" '{print $1}' "${OUTPUT}")
-(( "${UNIQUE_AMPLICONS}" == 2 )) && \
+printf ">s1_1\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -o /dev/null -s - 2> /dev/null | \
+    awk '{exit $1 == 2 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset UNIQUE_AMPLICONS
 
-## Number of unique amplicons is still correct with -s (2 expected)
-DESCRIPTION="-s number of unique amplicons is still correct (2 expected)"
-OUTPUT=$(mktemp)
-printf ">a_5\nAAAA\n>b_5\nAAAC\n>c_1\nGGGG\n" | \
-    "${SWARM}" -s "${OUTPUT}" > /dev/null 2>&1
-UNIQUE_AMPLICONS=$(awk -F "\t" 'NR == 1 {print $1}' "${OUTPUT}")
-(( "${UNIQUE_AMPLICONS}" == 2 )) && \
+## Number of unique amplicons is correct (1 expected)
+DESCRIPTION="-s number of unique amplicons is correct (1 expected)"
+printf ">s1_1\nA\n>s2_1\nC\n>s3_1\nGG\n" | \
+    "${SWARM}" -o /dev/null -s - 2> /dev/null | \
+    awk 'NR == 2 {exit $1 == 1 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset UNIQUE_AMPLICONS
 
-## Total abundance of amplicons is correct with -s (1 expected)
+## Total abundance of amplicons is correct (1 expected)
 DESCRIPTION="-s total abundance of amplicons is correct (1 expected)"
-OUTPUT=$(mktemp)
-printf ">a_1\nAAAA\n" | \
-    "${SWARM}" -s "${OUTPUT}" > /dev/null 2>&1
-TOTAL_ABUNDANCE=$(awk -F "\t" '{print $2}' "${OUTPUT}")
-(( "${TOTAL_ABUNDANCE}" == 1 )) && \
+printf ">s_5\nA\n" | \
+    "${SWARM}" -o /dev/null -s - 2> /dev/null | \
+    awk '{exit $2 == 5 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset TOTAL_ABUNDANCE
 
-## Total abundance of amplicons is correct with -s (5 expected)
-DESCRIPTION="-s total abundance of amplicons is correct (5 expected)"
-OUTPUT=$(mktemp)
-printf ">a_5\nAAAA\n" | \
-    "${SWARM}" -s "${OUTPUT}" > /dev/null 2>&1
-TOTAL_ABUNDANCE=$(awk -F "\t" 'NR == 1 {print $2}' "${OUTPUT}")
-(( "${TOTAL_ABUNDANCE}" == 5 )) && \
+## Total abundance of amplicons is correct (2 expected)
+DESCRIPTION="-s total abundance of amplicons is correct (2 expected)"
+printf ">s1_1\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -o /dev/null -s - 2> /dev/null | \
+    awk '{exit $2 == 2 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset TOTAL_ABUNDANCE
 
-## Total abundance of amplicons is still correct with -s (5 expected)
-DESCRIPTION="-s total abundance of amplicons is still correct (5 expected)"
-OUTPUT=$(mktemp)
-printf ">a_3\nAAAA\n>b_2\nAAAC\n>c_1\nGGGG\n" | \
-    "${SWARM}" -s "${OUTPUT}" > /dev/null 2>&1
-TOTAL_ABUNDANCE=$(awk -F "\t" 'NR == 1 {print $2}' "${OUTPUT}")
-(( "${TOTAL_ABUNDANCE}" == 5 )) && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset TOTAL_ABUNDANCE
+exit
+
+# stop here ------------------------------------------------------------------------------- !!
 
 ## Id of initial seed is correct with -s
 DESCRIPTION="-s ID of initial seed is correct"
