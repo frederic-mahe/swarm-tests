@@ -1822,7 +1822,7 @@ printf ">s_1\nA\n" | \
 ## issue 102 --- bug in abundance value parsing?
 ## swarm accepts abundance values equal to 2^32
 DESCRIPTION="issue 102 --- abundance values can be equal or greater than 2^32"
-printf ">s1_%d\nA\n" $(( 1 << 32 )) | \
+printf ">s1_4294967296\nA\n" | \
     "${SWARM}" > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1864,12 +1864,12 @@ printf ">s1_%d\nA\n" $(( 1 << 32 )) | \
 ##
 ## swarm waits when it receives no input data (no file, no pipe, no
 ## redirection). That's normal. See also issue 36.
-DESCRIPTION="issue 105 --- when no filename is given, swarm says it is waiting for data on stdin"
-(cmdpid=${BASHPID}
- (sleep 1 ; kill -PIPE ${cmdpid} > /dev/null 2>&1) & "${SWARM}" 2>&1) | \
-    grep -q "^Waiting" && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
+# DESCRIPTION="issue 105 --- when no filename is given, swarm says it is waiting for data on stdin"
+# (cmdpid=${BASHPID}
+#  (sleep 1 ; kill -PIPE ${cmdpid} > /dev/null 2>&1) & "${SWARM}" 2>&1) | \
+#     grep -q "^Waiting" && \
+#     success "${DESCRIPTION}" || \
+#         failure "${DESCRIPTION}"
 
 
 #*****************************************************************************#
