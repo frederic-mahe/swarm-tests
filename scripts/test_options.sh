@@ -1116,13 +1116,22 @@ printf ">s1_1\nA\n>s2_1\nC\n" | \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
 
-
 ## Swarm -s fails if no filename given
 DESCRIPTION="-s fails if no filename given"
 printf ">s_1\nA\n" | \
     "${SWARM}" -s  > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
+
+## Swarm -s fails if file is not writable
+DESCRIPTION="-s fails if file is not writable"
+OUTPUT=$(mktemp)
+chmod -w "${OUTPUT}"
+printf ">s_1\nA\n" | \
+    "${SWARM}" -s "${OUTPUT}" > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+rm -f "${OUTPUT}"
 
 ## Number of unique amplicons is correct (1 expected)
 DESCRIPTION="-s number of unique amplicons is correct (1 expected)"
@@ -1164,21 +1173,16 @@ printf ">s1_1\nA\n>s2_1\nC\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-exit
 
 # stop here ------------------------------------------------------------------------------- !!
 
 ## Id of initial seed is correct with -s
 DESCRIPTION="-s ID of initial seed is correct"
-OUTPUT=$(mktemp)
-printf ">a_3\nAAAA\n>b_2\nAAAC\n>c_1\nGGGG\n" | \
-    "${SWARM}" -s "${OUTPUT}" > /dev/null 2>&1
-SEED_ID=$(awk -F "\t" 'NR == 1 {print $3}' "${OUTPUT}")
-[[ "${SEED_ID}" == "a" ]] && \
+printf ">s_1\nA\n" | \
+    "${SWARM}" -o /dev/null -s - 2> /dev/null | \
+    awk '{exit $3 == "s" ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset SEED_ID
 
 ## Id of initial seed is still correct with -s
 DESCRIPTION="-s ID of initial seed is still correct"
@@ -1352,6 +1356,16 @@ printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm "${OUTPUT}"
+
+## Swarm -u fails if file is not writable
+DESCRIPTION="-u fails if file is not writable"
+OUTPUT=$(mktemp)
+chmod -w "${OUTPUT}"
+printf ">s1_1\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+rm -f "${OUTPUT}"
 
 ## -u number of hits is correct in 1st column #1
 DESCRIPTION="-u number of hits is correct in the first column #1"
