@@ -1863,7 +1863,8 @@ printf ">s1_4294967296\nA\n" | \
 ## https://github.com/torognes/swarm/issues/105
 ##
 ## swarm waits when it receives no input data (no file, no pipe, no
-## redirection). That's normal. See also issue 36.
+## redirection). That's normal. See also issue 36. Commented as it
+## does not work on MacOS.
 # DESCRIPTION="issue 105 --- when no filename is given, swarm says it is waiting for data on stdin"
 # (cmdpid=${BASHPID}
 #  (sleep 1 ; kill -PIPE ${cmdpid} > /dev/null 2>&1) & "${SWARM}" 2>&1) | \
@@ -2250,6 +2251,28 @@ unset c
 ## https://github.com/torognes/swarm/issues/128
 
 ## not testable
+
+
+#*****************************************************************************#
+#                                                                             #
+#                Makefile: add an "install" recipe (issue 129)                #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/129
+
+## not testable
+
+
+#*****************************************************************************#
+#                                                                             #
+#                     Measure code coverage (issue 130)                       #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/130
+
+## not a single issue, many tests necessary
 
 
 exit 0
