@@ -1930,52 +1930,85 @@ unset OTU_NUMBER
 ## Swarm accepts the options -w and --seeds
 for OPTION in "-w" "--seeds" ; do
     DESCRIPTION="swarms accepts the option ${OPTION}"
-    printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
-        "${SWARM}" "${OPTION}" /dev/null > /dev/null 2>&1 && \
+    printf ">s_1\nA\n" | \
+        "${SWARM}" "${OPTION}" - > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
 
 ## -w creates and fills file given in argument
-OUTPUT=$(mktemp)
 DESCRIPTION="swarm -w create and fill file given in argument"
-printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG\n" | \
-    "${SWARM}" -w "${OUTPUT}" > /dev/null 2>&1
-[[ -s "${OUTPUT}" ]] && \
+printf ">s_1\nA\n" | \
+    "${SWARM}" -o /dev/null -w - 2> /dev/null | \
+    grep -q "." && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
 
 ## Swarm -w fails if no output file given
 DESCRIPTION="-w fails if no output file given"
-printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
-    "${SWARM}" -w > /dev/null 2>&1 && \
+printf ">s_1\nA\n" | \
+    "${SWARM}" -o /dev/null -w 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
-## -w gives expected output
-OUTPUT=$(mktemp)
-DESCRIPTION="-w gives expected output"
-EXPECTED=$(printf ">a_2\nAAAA\n>c_1\nGGGG\n")
-printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
-    "${SWARM}" -w "${OUTPUT}" > /dev/null 2>&1
-[[ "$(sed '/^>/! y/acgt/ACGT/' "${OUTPUT}")" == "${EXPECTED}" ]] && \
+## -w gives expected output (1 cluster)
+DESCRIPTION="-w gives expected output (1 cluster)"
+printf ">s1_2\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -o /dev/null -w - 2> /dev/null | \
+    tr -d "\n" | \
+    grep -q "^>s1_3A$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset EXPECTED
 
-## -w can sum up large abundance values (2 * (2^32 + 1))
-OUTPUT=$(mktemp)
-DESCRIPTION="-w can sum up large abundance values (2 * (2^32 + 1))"
-EXPECTED=$(( ((1 << 32) + 1) * 2 ))
-printf ">s1_%d\nA\n>s2_%d\nT\n" $(( (1 << 32) + 1)) $(( (1 << 32) + 1)) | \
-    "${SWARM}" -w "${OUTPUT}" > /dev/null 2>&1
-(( "$(awk -F "_" '/^>/ {print $2}' "${OUTPUT}")" == ${EXPECTED} )) && \
+## -w gives expected output (1 cluster, seed is the most abundant sequence)
+DESCRIPTION="-w gives expected output (1 cluster, most abundant seed)"
+printf ">s1_1\nA\n>s2_2\nC\n" | \
+    "${SWARM}" -o /dev/null -w - 2> /dev/null | \
+    tr -d "\n" | \
+    grep -q "^>s2_3C$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset EXPECTED
+
+## -w gives expected output (2 clusters)
+DESCRIPTION="-w gives expected output (2 clusters)"
+printf ">s1_2\nAA\n>s2_1\nAC\n>s3_1\nGG\n" | \
+    "${SWARM}" -o /dev/null -w - 2> /dev/null | \
+    tr -d "\n" | \
+    grep -q "^>s1_3AA>s3_1GG$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## Check the output order (it should be sorted by abundance, then by
+## order of sequences (A, C, G and T). Sorting by alphabetical order
+## of headers is never necessary since sequences are always different
+## (even when d = 0).
+
+## -w gives expected output (2 clusters, ordered by abundance)
+DESCRIPTION="-w gives expected output (2 clusters, abundance)"
+printf ">s1_1\nAA\n>s2_2\nGG\n" | \
+    "${SWARM}" -o /dev/null -w - 2> /dev/null | \
+    tr -d "\n" | \
+    grep -q "^>s2_2GG>s1_1AA$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -w gives expected output (2 clusters, ordered by abundance, then by alpha sequences)
+DESCRIPTION="-w gives expected output (2 clusters, abundance, nucleotides)"
+printf ">s1_1\nGG\n>s2_1\nAA\n" | \
+    "${SWARM}" -o /dev/null -w - 2> /dev/null | \
+    tr -d "\n" | \
+    grep -q "^>s2_1AA>s1_1GG$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -w can sum up large abundance values (2 * (2^32 + 1) = 4294967297 * 2 = 8589934594)
+DESCRIPTION="-w can sum up large abundance values (2 * (2^32 + 1))"
+printf ">s1_4294967297\nA\n>s2_4294967297\nT\n" | \
+    "${SWARM}" -o /dev/null -w - 2> /dev/null | \
+    tr -d "\n" | \
+    grep -q "^>s1_8589934594A$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 
 ## ---------------------------------------------------------- usearch-abundance
