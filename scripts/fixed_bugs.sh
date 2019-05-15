@@ -2275,5 +2275,42 @@ unset c
 ## not a single issue, many tests necessary
 
 
+#*****************************************************************************#
+#                                                                             #
+#                abundance values generator? (issue 131)                      #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/131
+
+## swarm can read vsearch's abundance annotations (with option -z)
+if which vsearch > /dev/null ; then
+    DESCRIPTION="issue 131 --- swarm can read vsearch's abundance annotations"
+    printf ">s1;size=3\nA\n>s2;size=2\nA\n>s3;size=1\nT\n" | \
+        vsearch \
+            --derep_fulllength - \
+            --minseqlength 1 \
+            --sizein \
+            --sizeout \
+            --quiet \
+            --output - | \
+        "${SWARM}" -z -l /dev/null | \
+        grep -q "^s1;size=5 s3;size=1$"  && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+fi
+
+
+#*****************************************************************************#
+#                                                                             #
+#                       pooled samples? (issue 132)                           #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/132
+
+## not testable
+
+
 exit 0
 
