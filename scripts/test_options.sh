@@ -1173,10 +1173,7 @@ printf ">s1_1\nA\n>s2_1\nC\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-
-# stop here ------------------------------------------------------------------------------- !!
-
-## Id of initial seed is correct with -s
+## id of initial seed is correct with -s
 DESCRIPTION="-s ID of initial seed is correct"
 printf ">s_1\nA\n" | \
     "${SWARM}" -o /dev/null -s - 2> /dev/null | \
@@ -1184,150 +1181,112 @@ printf ">s_1\nA\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## Id of initial seed is still correct with -s
-DESCRIPTION="-s ID of initial seed is still correct"
-OUTPUT=$(mktemp)
-printf ">a_3\nAAAA\n>b_2\nAAAC\n>c_1\nGGGG\n" | \
-    "${SWARM}" -s "${OUTPUT}" > /dev/null 2>&1
-SEED_ID=$(awk -F "\t" 'NR == 2 {print $3}' "${OUTPUT}")
-[[ "${SEED_ID}" == "c" ]] && \
+## second seed id is correct with -s
+DESCRIPTION="-s ID of second seed is correct"
+printf ">s1_3\nAA\n>s2_2\nAC\n>s3_1\nGG\n" | \
+    "${SWARM}" -o /dev/null -s - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} NR == 2 {exit $3 == "s3" ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset SEED_ID
 
 ## Abundance of initial seed is correct with -s
 DESCRIPTION="-s abundance of initial seed is correct"
-OUTPUT=$(mktemp)
-printf ">a_3\nAAAA\n>b_2\nAAAC\n>c_1\nGGGG\n" | \
-    "${SWARM}" -s "${OUTPUT}" > /dev/null 2>&1
-SEED_ABUNDANCE=$(awk -F "\t" 'NR == 1 {print $4}' "${OUTPUT}")
-(( "${SEED_ABUNDANCE}" == 3 )) && \
+printf ">s1_3\nAA\n>s2_2\nAC\n" | \
+    "${SWARM}" -o /dev/null -s - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} NR == 1 {exit $4 == 3 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset SEED_ABUNDANCE
 
-## Abundance of initial seed is still correct with -s
-DESCRIPTION="-s abundance of initial seed is still correct"
-OUTPUT=$(mktemp)
-printf ">a_3\nAAAA\n>b_2\nAAAC\n>c_1\nGGGG\n" | \
-    "${SWARM}" -s "${OUTPUT}" > /dev/null 2>&1
-SEED_ABUNDANCE=$(awk -F "\t" 'NR == 2 {print $4}' "${OUTPUT}")
-(( "${SEED_ABUNDANCE}" == 1 )) && \
+## Abundance of second seed is correct with -s
+DESCRIPTION="-s abundance of second seed is correct"
+printf ">s1_3\nAA\n>s2_2\nAC\n>s3_1\nGG\n" | \
+    "${SWARM}" -o /dev/null -s - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} NR == 2 {exit $4 == 1 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset SEED_ABUNDANCE
 
 ## Number of amplicons with an abundance of 1 is correct with -s (0 exp)
-DESCRIPTION="-s number of amplicons with an abundance of 1 is correct (0 expected)"
-OUTPUT=$(mktemp)
-printf ">a_3\nAAAA\n>b_2\nAAAC\n>c_1\nGGGG\n" | \
-    "${SWARM}" -s "${OUTPUT}" > /dev/null 2>&1
-NUMBER_OF_AMPLICONS=$(awk -F "\t" 'NR == 1 {print $5}' "${OUTPUT}")
-(( "${NUMBER_OF_AMPLICONS}" == 0 )) && \
+DESCRIPTION="-s number of amplicons with an abundance of 1 (0 expected)"
+printf ">s1_3\nAA\n>s2_2\nAC\n" | \
+    "${SWARM}" -o /dev/null -s - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} NR == 1 {exit $5 == 0 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset NUMBER_OF_AMPLICONS
 
 ## Number of amplicons with an abundance of 1 is correct with -s (1 exp)
-DESCRIPTION="-s number of amplicons with an abundance of 1 is correct (1 expected)"
-OUTPUT=$(mktemp)
-printf ">a_3\nAAAA\n>b_2\nAAAC\n>c_1\nGGGG\n" | \
-    "${SWARM}" -s "${OUTPUT}" > /dev/null 2>&1
-NUMBER_OF_AMPLICONS=$(awk -F "\t" 'NR == 2 {print $5}' "${OUTPUT}")
-(( "${NUMBER_OF_AMPLICONS}" == 1 )) && \
+DESCRIPTION="-s number of amplicons with an abundance of 1 (1 expected)"
+printf ">s1_3\nAA\n>s2_1\nAC\n" | \
+    "${SWARM}" -o /dev/null -s - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} NR == 1 {exit $5 == 1 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset NUMBER_OF_AMPLICONS
 
 ## Number of iterations is correct with -s (0 expected)
 DESCRIPTION="-s number of iterations is correct (0 expected)"
-OUTPUT=$(mktemp)
-printf ">a_2\nAAAA\n" | \
-    "${SWARM}" -s "${OUTPUT}" > /dev/null 2>&1
-NUMBER_OF_ITERATIONS=$(awk -F "\t" 'NR == 1 {print $6}' "${OUTPUT}")
-(( "${NUMBER_OF_ITERATIONS}" == 0 )) && \
+printf ">s_1\nA\n" | \
+    "${SWARM}" -o /dev/null -s - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} NR == 1 {exit $6 == 0 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset NUMBER_OF_ITERATIONS
 
-## Number of iterations is correct with -s -d 2 (1 expected)
-DESCRIPTION="-s number of iterations is correct (1 expected)"
-OUTPUT=$(mktemp)
-printf ">a_2\nAAAA\n>c_1\nAACC\n" | \
-    "${SWARM}" -d 2 -s "${OUTPUT}" > /dev/null 2>&1
-NUMBER_OF_ITERATIONS=$(awk -F "\t" 'NR == 1 {print $6}' "${OUTPUT}")
-(( "${NUMBER_OF_ITERATIONS}" == 1 )) && \
+## Number of iterations is correct with (d = 1) (1 expected)
+DESCRIPTION="-s number of iterations is correct with d = 1 (1 expected)"
+printf ">s1_3\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -o /dev/null -s - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} NR == 1 {exit $6 == 1 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset NUMBER_OF_ITERATIONS
+
+## Number of iterations is correct with (d = 2) (1 expected)
+DESCRIPTION="-s number of iterations is correct with d = 2 (1 expected)"
+printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" -d 2 -o /dev/null -s - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} NR == 1 {exit $6 == 1 ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 ## Number of iterations is correct with -s -d 2 (2 expected)
-DESCRIPTION="-s number of iterations is correct (2 expected)"
-OUTPUT=$(mktemp)
-printf ">a_2\nAAAA\n>b_2\nAAAC\n>c_1\nACCC\n" | \
-    "${SWARM}" -d 2 -s "${OUTPUT}" > /dev/null 2>&1
-NUMBER_OF_ITERATIONS=$(awk -F "\t" 'NR == 1 {print $6}' "${OUTPUT}")
-(( "${NUMBER_OF_ITERATIONS}" == 2 )) && \
+DESCRIPTION="-s number of iterations is correct with d = 2 (2 expected)"
+printf ">s1_3\nAAA\n>s2_1\nAAC\n>s3_1\nCCC\n" | \
+    "${SWARM}" -d 2 -o /dev/null -s - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} NR == 1 {exit $6 == 2 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset NUMBER_OF_ITERATIONS
 
 ## Theorical radius is correct with -s (0 expected)
 DESCRIPTION="-s theorical maximum radius is correct (0 expected)"
-OUTPUT=$(mktemp)
-printf ">a_3\nAAAA\n" | \
-    "${SWARM}" -s "${OUTPUT}" > /dev/null 2>&1
-THEORICAL_RADIUS=$(awk -F "\t" 'NR == 1 {print $7}' "${OUTPUT}")
-(( "${THEORICAL_RADIUS}" == 0 )) && \
+printf ">s_1\nA\n" | \
+    "${SWARM}" -o /dev/null -s - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} NR == 1 {exit $7 == 0 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset THEORICAL_RADIUS
 
-## Theorical radius is correct with -s (2 expected)
-DESCRIPTION="-s theorical maximum radius is correct (2 expected)"
-OUTPUT=$(mktemp)
-printf ">a_3\nAAAA\n>b_2\nAAAC\n>c_1\nAACC\n" | \
-    "${SWARM}" -s "${OUTPUT}" > /dev/null 2>&1
-THEORICAL_RADIUS=$(awk -F "\t" 'NR == 1 {print $7}' "${OUTPUT}")
-(( "${THEORICAL_RADIUS}" == 2 )) && \
+## Theorical radius is correct with -s (1 expected)
+DESCRIPTION="-s theorical maximum radius is correct (1 expected)"
+printf ">s1_2\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -o /dev/null -s - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} NR == 1 {exit $7 == 1 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset THEORICAL_RADIUS
+
 
 ## Theorical radius is correct with -s -d 2 (2 expected)
 DESCRIPTION="-s theorical maximum radius is correct -d 2 (2 expected)"
-OUTPUT=$(mktemp)
-printf ">a_2\nAAAA\n>c_1\nAACC\n" | \
-    "${SWARM}" -d 2 -s "${OUTPUT}" > /dev/null 2>&1
-THEORICAL_RADIUS=$(awk -F "\t" 'NR == 1 {print $7}' "${OUTPUT}")
-(( "${THEORICAL_RADIUS}" == 2 )) && \
+printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" -d 2 -o /dev/null -s - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} NR == 1 {exit $7 == 2 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset THEORICAL_RADIUS
 
-## Theorical radius != actuel radius  with -s -d 2
-DESCRIPTION="-s theorical radius != actuel radius -d 2"
-OUTPUT=$(mktemp)
-printf ">a_3\nAAAAA\n>b_3\nAAACC\n>c_2\nACCCC\n>d_2\nACCAC\n" | \
-    "${SWARM}" -d 2 -s "${OUTPUT}" > /dev/null 2>&1
-THEORICAL_RADIUS=$(awk -F "\t" 'NR == 1 {print $7}' "${OUTPUT}")
-(( "${THEORICAL_RADIUS}" == 5 )) && \
+## reported radius != real radius  with -s -d 2 (actual radius is 3)
+DESCRIPTION="-s reported radius != real radius -d 2"
+printf ">s1_3\nAAAA\n>s2_3\nAACC\n>s3_2\nCCCC\n>s4_2\nCCAC\n" | \
+    "${SWARM}" -d 2 -o /dev/null -s - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} NR == 1 {exit $7 == 5 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset THEORICAL_RADIUS
 
+# stop here ------------------------------------------------------------------------------- !!
 
 ## ---------------------------------------------------------------- uclust-file
 
