@@ -434,7 +434,7 @@ printf ">s1_3\nAA\n>s2_1\nCC\n" | \
         failure "${DESCRIPTION}"
 
 ## Boundary value is taken into account by the fastidious option (-b 2)
-DESCRIPTION="boundary value is taken into account by the fastidious option (-b 2)"
+DESCRIPTION="boundary value taken into account by fastidious option (-b 2)"
 printf ">s1_3\nAA\n>s2_2\nCC\n" | \
     "${SWARM}" -f -b 2 2> /dev/null | \
     wc -l | \
@@ -683,7 +683,7 @@ printf ">s\nA\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## when using -a, check if the added abundance annotation does not appear in -i output
+## when using -a, the added abundance annotation should not appear in -i output
 DESCRIPTION="-a abundance annotation does not appear in -i output"
 printf ">s1_1\nA\n>s2\nT\n" | \
     "${SWARM}" -a 1 -o /dev/null -i - 2> /dev/null | \
@@ -691,7 +691,7 @@ printf ">s1_1\nA\n>s2\nT\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## when using -a and -r, check if the added abundance annotation appears in -o output
+## when using -a and -r, the added abundance annotation appears in -o output
 DESCRIPTION="-a abundance annotation appears in -o output when using -r"
 printf ">s1_1\nA\n>s2\nT\n" | \
     "${SWARM}" -a 1 -r -o - 2> /dev/null | \
@@ -884,7 +884,7 @@ printf ">a_3\nAAAA\n>b_1\nAAAT\n>c_1\nATTT\n>d_1\nTTTT\n>e_1\nGGGG\n>f_1\nGGGA\n
 ## b	d	2	1	2
 ## c	d	1	1	1
 ##
-DESCRIPTION="-i -f number of steps between grafted amplicon and its new seed is not updated"
+DESCRIPTION="-i -f # of steps between grafted amplicon and seed is not updated"
 printf ">a_3\nAAAA\n>b_1\nAAAT\n>c_2\nTTTT\n>d_1\nATTT\n" | \
     "${SWARM}" -f -b 4 -o /dev/null -i - 2> /dev/null | \
     awk 'NR == 3 {exit $5 == 1 ? 0 : 1}' && \
@@ -1286,14 +1286,13 @@ printf ">s1_3\nAAAA\n>s2_3\nAACC\n>s3_2\nCCCC\n>s4_2\nCCAC\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-# stop here ------------------------------------------------------------------------------- !!
 
 ## ---------------------------------------------------------------- uclust-file
 
 ## Swarm accepts the options -u and --uclust-file
 for OPTION in "-u" "--uclust-file" ; do
     DESCRIPTION="swarms accepts the option ${OPTION}"
-    printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
+    printf ">s1_1\nA\n>s2_1\nC\n" | \
         "${SWARM}" "${OPTION}" /dev/null > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
@@ -1301,7 +1300,7 @@ done
 
 ## Swarm -u fails if no output file given
 DESCRIPTION="-u fails if no output file given"
-printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
+printf ">s1_1\nA\n>s2_1\nC\n" | \
     "${SWARM}" -u > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
@@ -1309,7 +1308,7 @@ printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
 ## Swarm -u creates and fills file given as argument
 OUTPUT=$(mktemp)
 DESCRIPTION="-u creates and fills file given in argument"
-printf ">a_1\nAAAA\n>b_1\nAAAC\n>c_1\nGGGG" | \
+printf ">s1_1\nA\n>s2_1\nC\n" | \
     "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
 [[ -s "${OUTPUT}" ]] && \
     success "${DESCRIPTION}" || \
@@ -1326,174 +1325,160 @@ printf ">s1_1\nA\n>s2_1\nC\n" | \
         success "${DESCRIPTION}"
 rm -f "${OUTPUT}"
 
-## -u number of hits is correct in 1st column #1
-DESCRIPTION="-u number of hits is correct in the first column #1"
-OUTPUT=$(mktemp)
-printf ">a_3\nAAAA\n>b_3\nAAAC\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-NUMBER_OF_HITS=$(grep -c "^H" "${OUTPUT}")
-(( "${NUMBER_OF_HITS}" == 1 )) && \
+## -u number of hits is correct (1)
+DESCRIPTION="-u number of hits is 1"
+printf ">s1_1\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "H" {s += 1} END {exit s == 1 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset NUMBER_OF_HITS
 
-## -u number of hits is correct in 1st column #2
-DESCRIPTION="-u number of hits is correct in the first column #2"
-OUTPUT=$(mktemp)
-printf ">a_3\nGGGG\n>b_3\nAAAA\n>c_3\nAAAC\n>d_3\nAACC\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-NUMBER_OF_HITS=$(grep -c "^H" "${OUTPUT}")
-(( "${NUMBER_OF_HITS}" == 2 )) && \
+## -u number of hits is correct (2)
+DESCRIPTION="-u number of hits is 2"
+printf ">s1_1\nA\n>s2_1\nC\n>s3_1\nG\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "H" {s += 1} END {exit s == 2 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset NUMBER_OF_HITS
 
-## -u number of centroids is correct in 1st column #1
-DESCRIPTION="-u number of centroids is correct in the first column #1"
-OUTPUT=$(mktemp)
-printf ">a_3\nGGGG\n>b_3\nAAAA\n>c_3\nAAAC\n>d_3\nAACC\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-NUMBER_OF_CENTROIDS=$(grep -c "^S" "${OUTPUT}")
-(( "${NUMBER_OF_CENTROIDS}" == 2 )) && \
+## -u number of centroids is correct (1)
+DESCRIPTION="-u number of centroids is 1"
+printf ">s1_1\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "S" {s += 1} END {exit s == 1 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset NUMBER_OF_CENTROIDS
 
-## -u number of centroids is correct in 1st column #2
-DESCRIPTION="-u number of centroids is correct in the first column #2"
-OUTPUT=$(mktemp)
-printf ">a_3\nGGGG\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-NUMBER_OF_CENTROIDS=$(grep -c "^S" "${OUTPUT}")
-(( "${NUMBER_OF_CENTROIDS}" == 1 )) && \
+## -u number of centroids is correct (2)
+DESCRIPTION="-u number of centroids is 2"
+printf ">s1_1\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "S" {s += 1} END {exit s == 2 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset NUMBER_OF_CENTROIDS
 
-## -u number of cluster records is correct in the first column #1
-DESCRIPTION="-u number of cluster records is correct in the first column #1"
-OUTPUT=$(mktemp)
-printf ">a_3\nGGGG\n>b_3\nAAAA\n>c_3\nAAAC\n>d_3\nAACC\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-NUMBER_OF_CLUSTERS=$(grep -c "^C" "${OUTPUT}")
-(( "${NUMBER_OF_CLUSTERS}" == 2 )) && \
+## -u number of clusters is correct (1)
+DESCRIPTION="-u number of clusters is 1"
+printf ">s1_1\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "C" {s += 1} END {exit s == 1 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset NUMBER_OF_CLUSTERS
 
-## -u number of cluster records is correct in the first column #2
-DESCRIPTION="-u number of cluster records is correct in the first column #2"
-OUTPUT=$(mktemp)
-printf ">a_3\nGGGG\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-NUMBER_OF_CLUSTERS=$(grep -c "^C" "${OUTPUT}")
-(( "${NUMBER_OF_CLUSTERS}" == 1 )) && \
+## -u number of clusters is correct (2)
+DESCRIPTION="-u number of clusters is 2"
+printf ">s1_1\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "C" {s += 1} END {exit s == 2 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset NUMBER_OF_CLUSTERS
 
-## -u cluster number is correct in 2nd column #1
-DESCRIPTION="-u cluster number is correct in 2nd column #1"
-OUTPUT=$(mktemp)
-printf ">a_3\nGGGG\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-CLUSTER_NUMBER=$(awk '/^C/ {v = $2} END {print v}' "${OUTPUT}")
-(( "${CLUSTER_NUMBER}" == 0 )) && \
+## -u cluster number is correct (2nd column)
+DESCRIPTION="-u cluster number is zero"
+printf ">s_1\nA\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "C" {v = $2} END {exit v == 0 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset CLUSTER_NUMBER
 
-## -u cluster number is correct in 2nd column #2
-DESCRIPTION="-u cluster number is correct in 2nd column #2"
-OUTPUT=$(mktemp)
-printf ">a_3\nGGGG\n>b_3\nAAAA\n>c_3\nAAAC\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-CLUSTER_NUMBER=$(awk '/^C/ {v = $2} END {print v}' "${OUTPUT}")
-(( "${CLUSTER_NUMBER}" == 1 )) && \
+## -u cluster number is correct (2nd column)
+DESCRIPTION="-u cluster number is 1 (for second cluster)"
+printf ">s1_1\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "C" {v = $2} END {exit v == 1 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset CLUSTER_NUMBER
 
-## -u cluster size is correct in 3rd column #1
-DESCRIPTION="-u cluster number is correct in 3rd column #1"
-OUTPUT=$(mktemp)
-printf ">a_3\nGGGG\n>b_3\nAAAA\n>c_3\nAAAC\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-CLUSTER_SIZE=$(awk '/^C/ {v = $3} END {print v}' "${OUTPUT}")
-(( "${CLUSTER_SIZE}" == 2 )) && \
+## -u cluster size is correct (3rd column)
+DESCRIPTION="-u cluster size is 1"
+printf ">s_1\nA\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "C" {exit $3 == 1 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset CLUSTER_SIZE
 
-## -u cluster size is correct in 3rd column #2
-DESCRIPTION="-u cluster number is correct in 3rd column #2"
-OUTPUT=$(mktemp)
-printf ">a_3\nGGGG\n>b_3\nAAAA\n>c_3\nAAAC\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-CLUSTER_SIZE=$(grep "^C" "${OUTPUT}" | \
-                   awk -F "\t" '{if (NR == 2) {print $2}}')
-[[ "${CLUSTER_SIZE}" == "1" ]] && \
+## -u cluster size is correct (3rd column)
+## usearch tallies amplicons, not reads:
+# printf ">s1;size=2;\nAAAA\n>s2;size=1;\nAAAA\n" > tmp.fas
+# usearch7 -cluster_fast tmp.fas -minseqlength 1 -id 0.5 -uc tmp.uc
+# cat tmp.uc
+# rm tmp.*
+DESCRIPTION="-u cluster size is 2 (2 amplicons in total)"
+printf ">s1_2\nA\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "C" {exit $3 == 1 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset CLUSTER_SIZE
 
-## -u centroid length is correct in 3rd column #1
-DESCRIPTION="-u centroid length is correct in 3rd column #1"
-OUTPUT=$(mktemp)
-printf ">a_3\nGGGG\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-CENTROID_LENGTH=$(awk '/^S/ {v = $3} END {print v}' "${OUTPUT}")
-(( "${CENTROID_LENGTH}" == 4 )) && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTIONz}"
-rm "${OUTPUT}"
-unset CENTROIS_LENGTH
-
-## -u centroid length is correct in 3rd column #2
-DESCRIPTION="-u centroid length is correct in 3rd column #2"
-OUTPUT=$(mktemp)
-printf ">a_3\nGGGG\n>b_3\nA\n>c_3\nC\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-CENTROID_LENGTH=$(awk '/^S/ {v = $3} END {print v}' "${OUTPUT}")
-[[ "${CENTROID_LENGTH}" == "1" ]] && \
+## -u cluster size is 2 (3rd column, second cluster)
+DESCRIPTION="-u cluster size is 2 (second cluster)"
+printf ">s1_3\nAA\n>s2_2\nCC\n>s3_1\nCT\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "C" {v = $3} END {exit v == 2 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset CENTROIS_LENGTH
 
-## -u query length is correct in 3rd column #1
-DESCRIPTION="-u query length is correct in 3rd column #1"
-OUTPUT=$(mktemp)
-printf ">a_3\nGGGG\n>b_3\nAA\n>c_3\nAAA\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-QUERY_LENGTH=$(awk '/^H/ {if (NR == 5) {print $3}}' "${OUTPUT}")
-[[ "${QUERY_LENGTH}" == "3" ]] && \
+## -u centroid length is 2 (3rd column)
+DESCRIPTION="-u centroid length is 2 (3rd column)"
+printf ">s_1\nAA\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "S" {exit $3 == 2 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset QUERY_LENGTH
 
-## -u query length is correct in 3rd column #2
-DESCRIPTION="-u query length is correct in 3rd column #2"
-OUTPUT=$(mktemp)
-printf ">a_3\nGGGG\n>b_3\nA\n>c_3\nA\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-QUERY_LENGTH=$(awk '/^H/ {v = $3} END {print v}' "${OUTPUT}")
-(( "${QUERY_LENGTH}" == 1 )) && \
+## -u centroid length is 1 (3rd column, second cluster)
+DESCRIPTION="-u centroid length is 1 (3rd column, second cluster)"
+printf ">s1_3\nAA\n>s2_2\nC\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "S" {v = $3} END {exit v == 1 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset QUERY_LENGTH
+
+## -u centroid length is 1 (3rd column, centroid is shorter than hit)
+DESCRIPTION="-u centroid length is 1 (3rd column, centroid shorter than hit)"
+printf ">s1_3\nA\n>s2_1\nAA\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "S" {exit $3 == 1 ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -u query length is 1 (3rd column)
+DESCRIPTION="-u query length is 1 (3rd column)"
+printf ">s1_2\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "H" {exit $3 == 1 ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -u query length is 2 (3rd column, second cluster)
+DESCRIPTION="-u query length is 2 (3rd column, second cluster)"
+printf ">s1_3\nA\n>s2_2\nCC\n>s3_1\nCG\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "H" {exit $3 == 2 ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -u query length is 2 (3rd column, query is longer than centroid)
+DESCRIPTION="-u query length is 2 (3rd column, query longer than centroid)"
+printf ">s1_2\nA\n>s2_1\nAA\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "H" {exit $3 == 2 ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+
+exit
+# stop here ------------------------------------------------------------------------------- !!
+
+printf ">s1_2\nAA\n>s2_2\nCC\n>s3_1\nCT\n" | swarm -o /dev/null -u - 2> /dev/null
+printf ">s1_1\nAA\n>s2_2\nCCC\n" | swarm -o /dev/null -u - 2> /dev/null
+printf ">s1_3\nAA\n>s2_2\nCC\n>s3_1\nCT\n" | swarm -o /dev/null -u - 2> /dev/null
+printf ">s_1\nAA\n" | swarm -o /dev/null -u - 2> /dev/null
+printf ">s1_2\nA\n>s2_1\nCC\n" | swarm -o /dev/null -u - 2> /dev/null
+printf ">s1_3\nA\n>s2_2\nCC\n>s3_1\nCG\n" | swarm -o /dev/null -u - 2> /dev/null
+# check if clusters are reported by decreasing abundance.
+
+
 
 ## -u similarity percentage is correct in 4th column #1
 DESCRIPTION="-u similarity percentage is correct in 4th column #1"
@@ -1951,7 +1936,7 @@ printf ">s1_1\nAA\n>s2_2\nGG\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## -w gives expected output (2 clusters, ordered by abundance, then by alpha sequences)
+## -w expected output (2 clusters, ordered by abundance, then by alpha seqs)
 DESCRIPTION="-w gives expected output (2 clusters, abundance, nucleotides)"
 printf ">s1_1\nGG\n>s2_1\nAA\n" | \
     "${SWARM}" -o /dev/null -w - 2> /dev/null | \
@@ -1960,7 +1945,8 @@ printf ">s1_1\nGG\n>s2_1\nAA\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## -w can sum up large abundance values (2 * (2^32 + 1) = 4294967297 * 2 = 8589934594)
+## -w can sum up large abundance values (2 * (2^32 + 1) = 4294967297)
+## 4294967297 * 2 = 8589934594
 DESCRIPTION="-w can sum up large abundance values (2 * (2^32 + 1))"
 printf ">s1_4294967297\nA\n>s2_4294967297\nT\n" | \
     "${SWARM}" -o /dev/null -w - 2> /dev/null | \
@@ -2405,7 +2391,8 @@ if which valgrind > /dev/null ; then
     valgrind \
         --log-fd=3 \
         --leak-check=full \
-        "${SWARM}" -z <(printf ">s;size=1\nA\n") 3>&1 1> /dev/null 2> /dev/null | \
+        "${SWARM}" -z <(printf ">s;size=1\nA\n") \
+        3>&1 1> /dev/null 2> /dev/null | \
         grep -q "ERROR SUMMARY: 0 errors" && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
@@ -2465,7 +2452,8 @@ if which valgrind > /dev/null ; then
             failure "${DESCRIPTION}"
 
 
-    ## fastidious options (Bloom filter requires much more memory when using valgrind)
+    ## fastidious options (Bloom filter requires more memory when
+    ## using valgrind)
 
     DESCRIPTION="valgrind check for errors: -f"
     valgrind \
@@ -2487,7 +2475,8 @@ if which valgrind > /dev/null ; then
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 
-    DESCRIPTION="valgrind check for errors: -f -c 100" # -c 8 is enough without valgrind
+    # -c 8 is enough without valgrind
+    DESCRIPTION="valgrind check for errors: -f -c 100"
     valgrind \
         --log-fd=3 \
         --leak-check=full \
@@ -2763,7 +2752,8 @@ if which valgrind > /dev/null ; then
     valgrind \
         --log-fd=3 \
         --leak-check=full \
-        "${SWARM}" -z <(printf ">s;size=1\nA\n") 3>&1 1> /dev/null 2> /dev/null | \
+        "${SWARM}" -z <(printf ">s;size=1\nA\n") \
+        3>&1 1> /dev/null 2> /dev/null | \
         grep -q "in use at exit: 0 bytes" && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
@@ -2823,7 +2813,8 @@ if which valgrind > /dev/null ; then
             failure "${DESCRIPTION}"
 
 
-    ## fastidious options (Bloom filter requires much more memory when using valgrind)
+    ## fastidious options (Bloom filter requires much more memory when
+    ## using valgrind)
 
     DESCRIPTION="valgrind check for unfreed memory: -f"
     valgrind \
@@ -2845,7 +2836,8 @@ if which valgrind > /dev/null ; then
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 
-    DESCRIPTION="valgrind check for unfreed memory: -f -c 100" # -c 8 is enough without valgrind
+    # -c 8 is enough without valgrind
+    DESCRIPTION="valgrind check for unfreed memory: -f -c 100"
     valgrind \
         --log-fd=3 \
         --leak-check=full \
