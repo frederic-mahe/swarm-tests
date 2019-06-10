@@ -1599,7 +1599,7 @@ printf ">s1_2\nA\n>s2_1\nC\n" | \
         failure "${DESCRIPTION}"
 
 ## -u column 8 (CIGAR) is 4M for hit
-## (alignment of length 4)
+## (4 matches/mismatches)
 DESCRIPTION="-u column 8 (CIGAR) is 4M for hit"
 printf ">s1_1\nAAAA\n>s2_1\nAAAC\n" | \
     "${SWARM}" -o /dev/null -u - 2> /dev/null | \
@@ -1608,7 +1608,7 @@ printf ">s1_1\nAAAA\n>s2_1\nAAAC\n" | \
         failure "${DESCRIPTION}"
 
 ## -u column 8 (CIGAR) is D3M for hit
-## (deletion, alignment of length 3)
+## (a deletion, 3 matches/mismatches)
 DESCRIPTION="-u column 8 (CIGAR) is D3M for hit"
 printf ">s1_1\nAAAA\n>s2_1\nAAA\n" | \
     "${SWARM}" -o /dev/null -u - 2> /dev/null | \
@@ -1617,7 +1617,7 @@ printf ">s1_1\nAAAA\n>s2_1\nAAA\n" | \
         failure "${DESCRIPTION}"
 
 ## -u column 8 (CIGAR) is 4MI for hit
-## (alignment of length 4, with a terminal insertion)
+## (4 matches/mismatches, with a terminal insertion)
 DESCRIPTION="-u column 8 (CIGAR) is D3M for hit"
 printf ">s1_1\nAAAA\n>s2_1\nAAAAA\n" | \
     "${SWARM}" -o /dev/null -u - 2> /dev/null | \
