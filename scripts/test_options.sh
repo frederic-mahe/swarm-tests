@@ -1535,10 +1535,10 @@ printf ">s1_2\nA\n>s2_1\nC\n" | \
         failure "${DESCRIPTION}"
 
 ## -u unused column 6 is * for hits
-DESCRIPTION="-u unused column 6 is * for hits"
+DESCRIPTION="-u unused column 6 is 0 for hits"
 printf ">s1_2\nA\n>s2_1\nC\n" | \
     "${SWARM}" -o /dev/null -u - 2> /dev/null | \
-    awk 'BEGIN {FS = "\t"} $1 == "H" {exit $6 == "*" ? 0 : 1}' && \
+    awk 'BEGIN {FS = "\t"} $1 == "H" {exit $6 == 0 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -1559,10 +1559,10 @@ printf ">s1_2\nA\n>s2_1\nC\n" | \
         failure "${DESCRIPTION}"
 
 ## -u unused column 7 is * for hits
-DESCRIPTION="-u unused column 7 is * for hits"
+DESCRIPTION="-u unused column 7 is 0 for hits"
 printf ">s1_2\nA\n>s2_1\nC\n" | \
     "${SWARM}" -o /dev/null -u - 2> /dev/null | \
-    awk 'BEGIN {FS = "\t"} $1 == "H" {exit $7 == "*" ? 0 : 1}' && \
+    awk 'BEGIN {FS = "\t"} $1 == "H" {exit $7 == 0 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
