@@ -1791,8 +1791,8 @@ printf ">s1_2\nAA\n>s2_1\nAC\n>s3_1\nGG\n" | \
 ## of headers is never necessary since sequences are always different
 ## (even when d = 0).
 
-## -w gives expected output (2 clusters, ordered by abundance)
-DESCRIPTION="-w gives expected output (2 clusters, abundance)"
+## -w expected output order (2 clusters, ordered by abundance)
+DESCRIPTION="-w expected output order (2 clusters, abundance)"
 printf ">s1_1\nAA\n>s2_2\nGG\n" | \
     "${SWARM}" -o /dev/null -w - 2> /dev/null | \
     tr -d "\n" | \
@@ -1800,8 +1800,8 @@ printf ">s1_1\nAA\n>s2_2\nGG\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## -w expected output (2 clusters, ordered by abundance, then by alpha seqs)
-DESCRIPTION="-w gives expected output (2 clusters, abundance, nucleotides)"
+## -w expected order (2 clusters, ordered by abundance, then by alpha seqs)
+DESCRIPTION="-w expected output order (2 clusters, abundance, nucleotides)"
 printf ">s1_1\nGG\n>s2_1\nAA\n" | \
     "${SWARM}" -o /dev/null -w - 2> /dev/null | \
     tr -d "\n" | \
