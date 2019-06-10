@@ -1467,6 +1467,57 @@ printf ">s1_2\nA\n>s2_1\nAA\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+## -u similarity percentage is zero in 4th column
+## Sequences s1 and s2 should be grouped inside the same OTU, with a
+## similarity of 0.0.
+DESCRIPTION="-u similarity percentage is 0.0"
+printf ">s1_2\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "H" {exit $4 == "0.0" ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -u similarity percentage is zero in 4th column and centroid is s1
+## Sequences are sorted by fasta identifier to break abundance ties.
+DESCRIPTION="-u similarity percentage is zero (sorted by fasta identifier)"
+printf ">s2_1\nC\n>s1_1\nA\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "H" {exit $10 == "s1_1" ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -u similarity percentage is 50% in 4th column
+DESCRIPTION="-u similarity percentage is 50.0"
+printf ">s1_2\nAA\n>s2_1\nAC\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "H" {exit $4 == "50.0" ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -u similarity percentage is * for the cluster centroid (S)
+DESCRIPTION="-u similarity percentage is * for cluster centroid"
+printf ">s1_2\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "S" {exit $4 == "*" ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -u similarity percentage is * for the cluster record (C)
+DESCRIPTION="-u similarity percentage is * for cluster record"
+printf ">s1_2\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "C" {exit $4 == "*" ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -u similarity percentage is * for the cluster centroid (S)
+DESCRIPTION="-u similarity percentage is * for cluster centroid"
+printf ">s1_2\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "S" {exit $4 == "*" ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 
 exit
 # stop here ------------------------------------------------------------------------------- !!
@@ -1481,56 +1532,6 @@ printf ">s1_3\nA\n>s2_2\nCC\n>s3_1\nCG\n" | swarm -o /dev/null -u - 2> /dev/null
 
 
 
-## -u similarity percentage is correct in 4th column #1
-DESCRIPTION="-u similarity percentage is correct in 4th column #1"
-OUTPUT=$(mktemp)
-printf ">a_3\nGGGG\n>b_3\nAAAA\n>c_3\nAAAC\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-SIMILARITY_PERCENTAGE=$(awk '/^H/ {v = $4} END {print v}' "${OUTPUT}")
-[[ "${SIMILARITY_PERCENTAGE}" == "75.0" ]] && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset SIMILARITY_PERCENTAGE
-
-## Sequence "a" and sequence "e" should be grouped inside the same
-## OTU, with a similarity of 0.0 between "a" and "e". Note that
-## sequences are now automatically sorted by fasta identifier to break
-## abundance ties.
-DESCRIPTION="-u similarity percentage is correct in 4th column #2"
-SIMILARITY_PERCENTAGE=$(\
-                        printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nACCC\n>e_3\nCCCC\n" | \
-                            "${SWARM}" -o /dev/null -u - 2> /dev/null | \
-                            awk '/^H/ {v = $4} END {print v}')
-[[ "${SIMILARITY_PERCENTAGE}" == "0.0" ]] && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-unset SIMILARITY_PERCENTAGE
-
-## -u similarity percentage is correct in 4th column #3
-DESCRIPTION="-u similarity percentage is correct in 4th column #3"
-OUTPUT=$(mktemp)
-printf ">a_3\nAAAAAAAA\n>b_3\nAAAAAAAC\n>c_3\nAAAAAACC\n>d_3\nAAAAACCC\n>e_3\nAAAACCCC\n>f_3\nAAACCCCC\n>g_3\nAACCCCCC\n>h_3\nACCCCCCC\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-SIMILARITY_PERCENTAGE=$(awk '/^H/ {v = $4} END {print v}' "${OUTPUT}")
-[[ "${SIMILARITY_PERCENTAGE}" == "12.5" ]] && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset SIMILARITY_PERCENTAGE
-
-## -u similarity percentage is * in 4th column with S
-DESCRIPTION="-u similarity percentage is * in 4th column with S"
-OUTPUT=$(mktemp)
-printf ">a_3\nGGGG\n>b_3\nAAAA\n>c_3\nAAAC\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-SIMILARITY_PERCENTAGE=$(grep "^S" "${OUTPUT}" | \
-                            awk -F "\t" '{if (NR == 1) {print $4}}')
-[[ "${SIMILARITY_PERCENTAGE}" == "*" ]] && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset SIMILARITY_PERCENTAGE
 
 ## -u match orientation is correct in 5th column with H
 DESCRIPTION="-u match orientation is correct in 5th column with H"
