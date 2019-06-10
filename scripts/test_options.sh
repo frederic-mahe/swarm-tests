@@ -865,8 +865,9 @@ printf ">a_3\nAAAA\n>b_1\nAAAT\n>c_1\nATTT\n>d_1\nTTTT\n" | \
 # c	d	1	1	1
 # e	f	1	2	1
 DESCRIPTION="-i -f OTU numbering is contiguous (no gap)"
-printf ">a_3\nAAAA\n>b_1\nAAAT\n>c_1\nATTT\n>d_1\nTTTT\n>e_1\nGGGG\n>f_1\nGGGA\n" | \
-    "${SWARM}" -f -o /dev/null -i "${OUTPUT}" 2> /dev/null | \
+(printf ">a_3\nAAAA\n>b_1\nAAAT\n>c_1\nATTT\n"
+ printf ">d_1\nTTTT\n>e_1\nGGGG\n>f_1\nGGGA\n") | \
+    "${SWARM}" -f -o /dev/null -i - 2> /dev/null | \
     awk 'NR == 4 {exit $4 == 2 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
