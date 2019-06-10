@@ -1590,8 +1590,8 @@ printf ">s1_2\nA\n>s2_1\nC\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## -u column 8 (CIGAR) is * for the cluster  record (C)
-DESCRIPTION="-u column 8 (CIGAR) is * for cluster  record (C)"
+## -u column 8 (CIGAR) is * for the cluster record (C)
+DESCRIPTION="-u column 8 (CIGAR) is * for cluster record (C)"
 printf ">s1_2\nA\n>s2_1\nC\n" | \
     "${SWARM}" -o /dev/null -u - 2> /dev/null | \
     awk 'BEGIN {FS = "\t"} $1 == "C" {exit $8 == "*" ? 0 : 1}' && \
@@ -1657,137 +1657,80 @@ printf ">s1_1\nAAAA\n>s2_1\nACGTTT\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-exit
-# stop here ------------------------------------------------------------------------------- !!
-
-
-printf ">s1_2\nAA\n>s2_2\nCC\n>s3_1\nCT\n" | swarm -o /dev/null -u - 2> /dev/null
-printf ">s1_1\nAA\n>s2_2\nCCC\n" | swarm -o /dev/null -u - 2> /dev/null
-printf ">s1_3\nAA\n>s2_2\nCC\n>s3_1\nCT\n" | swarm -o /dev/null -u - 2> /dev/null
-printf ">s_1\nAA\n" | swarm -o /dev/null -u - 2> /dev/null
-printf ">s1_2\nA\n>s2_1\nCC\n" | swarm -o /dev/null -u - 2> /dev/null
-printf ">s1_3\nA\n>s2_2\nCC\n>s3_1\nCG\n" | swarm -o /dev/null -u - 2> /dev/null
-# -u: check if clusters are reported by decreasing abundance.
-
-## -u query sequence's label is correct in 9th column with H #1
-DESCRIPTION="-u query sequence's label is correct in 9th column with H #1"
-OUTPUT=$(mktemp)
-printf ">a_3\nAAAA\n>b_3\nAAAC\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-QUERY_LABEL=$(awk '/^H/ {v = $9} END {print v}' "${OUTPUT}")
-[[ "${QUERY_LABEL}" == "b_3" ]] && \
+## -u query's label is s2_1 for hit
+DESCRIPTION="-u query's label is s2_1 for hit"
+printf ">s1_2\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "H" {exit $9 == "s2_1" ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset QUERY_LABEL
 
-## -u query sequence's label is correct in 9th column with H #2
-DESCRIPTION="-u query sequence's label is correct in 9th column with H #2"
-OUTPUT=$(mktemp)
-printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_1\nAACC\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-QUERY_LABEL=$(awk '/^H/ {v = $9} END {print v}' "${OUTPUT}")
-[[ "${QUERY_LABEL}" == "c_1" ]] && \
+## -u query's label is s1_2 for the cluster centroid (S)
+DESCRIPTION="-u query's label is s1_2 for the cluster centroid (S)"
+printf ">s1_2\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "S" {exit $9 == "s1_2" ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset QUERY_LABEL
 
-## -u centroid sequence's label is correct in 9th column with S #1
-DESCRIPTION="-u centroid sequence's label is correct in 9th column with S #1"
-OUTPUT=$(mktemp)
-printf ">a_2\nGGGG\n>b_3\nAAAA\n>c_2\nAAAC\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-CENTROID_LABEL=$(awk '/^S/ {v = $9} END {print v}' "${OUTPUT}")
-[[ "${CENTROID_LABEL}" == "a_2" ]] && \
+## -u query's label is s1_2 for the cluster record (C)
+DESCRIPTION="-u query's label is s1_2 for the cluster record (C)"
+printf ">s1_2\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "C" {exit $9 == "s1_2" ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset CENTROID_LABEL
 
-## -u centroid sequence's label is correct in 9th column with S #2
-DESCRIPTION="-u centroid sequence's label is correct in 9th column with S #2"
-OUTPUT=$(mktemp)
-printf ">a_2\nAAAA\n>b_3\nAAAC\n>c_1\nAACC\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-CENTROID_LABEL=$(awk '/^S/ {v = $9} END {print v}' "${OUTPUT}")
-[[ "${CENTROID_LABEL}" == "b_3" ]] && \
+## -u centroid's label is s2_1 for hit (H)
+DESCRIPTION="-u centroid's label is s1_2 for hit"
+printf ">s1_2\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "H" {exit $10 == "s1_2" ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset CENTROID_LABEL
 
-## -u centroid sequence's label is correct in 9th column with C #1
-DESCRIPTION="-u centroid sequence's label is correct in 9th column with C #1"
-OUTPUT=$(mktemp)
-printf ">a_2\nGGGG\n>b_3\nAAAA\n>c_2\nAAAC\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-CENTROID_LABEL=$(awk '/^C/ {v = $9} END {print v}' "${OUTPUT}")
-[[ "${CENTROID_LABEL}" == "a_2" ]] && \
+## -u centroid's label is * for the cluster centroid (S)
+DESCRIPTION="-u centroid's label is * for the cluster centroid (S)"
+printf ">s1_2\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "S" {exit $10 == "*" ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset CENTROID_LABEL
 
-## -u centroid sequence's label is correct in 9th column with C #2
-DESCRIPTION="-u centroid sequence's label is correct in 9th column with C #2"
-OUTPUT=$(mktemp)
-printf ">a_2\nAAAA\n>b_3\nAAAC\n>c_1\nAACC\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-CENTROID_LABEL=$(awk '/^S/ {v = $9} END {print v}' "${OUTPUT}")
-[[ "${CENTROID_LABEL}" == "b_3" ]] && \
+## -u centroid's label is * for the cluster record (C)
+DESCRIPTION="-u centroid's label is * for the cluster record (C)"
+printf ">s1_2\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "C" {exit $10 == "*" ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset CENTROID_LABEL
-
-## -u centroid sequence's label is correct in 10th column with H
-DESCRIPTION="-u centroid sequence's label is correct in 10th column with H"
-OUTPUT=$(mktemp)
-printf ">a_2\nAAAA\n>b_3\nAAAC\n>c_1\nAACC\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-CENTROID_LABEL=$(awk '/^H/ {v = $10} END {print v}' "${OUTPUT}")
-[[ "${CENTROID_LABEL}" == "b_3" ]] && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset CENTROID_LABEL
-
-## -u 10th column is * with C
-DESCRIPTION="-u 10th column is * with C"
-OUTPUT=$(mktemp)
-printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nAGCC\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-CENTROID_LABEL=$(awk '/^C/ {v = $10} END {print v}' "${OUTPUT}")
-[[ "${CENTROID_LABEL}" == "*" ]] && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset CENTROID_LABEL
-
-## -u 10th column is * with S
-DESCRIPTION="-u 10th column is * with S"
-OUTPUT=$(mktemp)
-printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nAGCC\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-CENTROID_LABEL=$(awk '/^S/ {v = $10} END {print v}' "${OUTPUT}")
-[[ "${CENTROID_LABEL}" == "*" ]] && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset CENTROID_LABEL
 
 ## -u -f OTU numbering is contiguous (no gap)
+## s3-s4 is grafted onto s1-s2, so s5 becomes the second OTU
 DESCRIPTION="-u -f OTU numbering is contiguous (no gap)"
-OUTPUT=$(mktemp)
-printf ">a_3\nAAAA\n>b_1\nAAAT\n>c_1\nATTT\n>d_1\nTTTT\n>e_1\nGGGG\n" | \
-    "${SWARM}" -f -u "${OUTPUT}" > /dev/null 2>&1
-OTU_NUMBER=$(awk '/^C/ {v = $2} END {print v}' "${OUTPUT}")
-(( "${OTU_NUMBER}" == 1 )) && \
+printf ">s1_3\nAAAA\n>s2_1\nAAAT\n>s3_1\nATTT\n>s4_1\nTTTT\n>s5_1\nGGGG\n" | \
+    "${SWARM}" -f -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"}
+         $1 == "C" && $9 == "s5_1" {exit $2 == 1 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset OTU_NUMBER
+
+## -u clusters are reported by decreasing (seed) abundance
+DESCRIPTION="-u clusters are reported by decreasing (seed) abundance"
+printf ">s1_1\nAA\n>s2_2\nCC\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "C" {exit $9 == "s2_2" ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -u clusters are reported by decreasing total abundance
+## s1_2 + s3_2 = 4 reads, bigger than the 3 reads in s2_3
+DESCRIPTION="-u clusters are reported by decreasing total abundance"
+printf ">s1_2\nAA\n>s2_3\nCC\n>s3_2\nAG\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "C" {exit $9 == "s1_2" ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 
 ## ---------------------------------------------------------------------- seeds
