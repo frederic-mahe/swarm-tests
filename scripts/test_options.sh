@@ -1582,9 +1582,84 @@ printf ">s1_2\nA\n>s2_1\nC\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+## -u column 8 (CIGAR) is * for the cluster centroid (S)
+DESCRIPTION="-u column 8 (CIGAR) is * for cluster centroid (S)"
+printf ">s1_2\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "S" {exit $8 == "*" ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -u column 8 (CIGAR) is * for the cluster  record (C)
+DESCRIPTION="-u column 8 (CIGAR) is * for cluster  record (C)"
+printf ">s1_2\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "C" {exit $8 == "*" ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -u column 8 (CIGAR) is 4M for hit
+## (alignment of length 4)
+DESCRIPTION="-u column 8 (CIGAR) is 4M for hit"
+printf ">s1_1\nAAAA\n>s2_1\nAAAC\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "H" {exit $8 == "4M" ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -u column 8 (CIGAR) is D3M for hit
+## (deletion, alignment of length 3)
+DESCRIPTION="-u column 8 (CIGAR) is D3M for hit"
+printf ">s1_1\nAAAA\n>s2_1\nAAA\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "H" {exit $8 == "D3M" ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -u column 8 (CIGAR) is 4MI for hit
+## (alignment of length 4, with a terminal insertion)
+DESCRIPTION="-u column 8 (CIGAR) is D3M for hit"
+printf ">s1_1\nAAAA\n>s2_1\nAAAAA\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "H" {exit $8 == "4MI" ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -u column 8 (CIGAR) is = for hit (perfect alignment)
+DESCRIPTION="-u column 8 (CIGAR) is = for hit"
+printf ">s1_1\nAAAA\n>s2_1\nAAAA\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "H" {exit $8 == "=" ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -u column 8 (CIGAR) is 4M for hit (d = 4)
+DESCRIPTION="-u column 8 (CIGAR) is 4M for hit (d = 4)"
+printf ">s1_1\nAAAA\n>s2_1\nACGT\n" | \
+    "${SWARM}" -d 4 -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "H" {exit $8 == "4M" ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -u column 8 (CIGAR) is 2D2M for hit (d = 4)
+DESCRIPTION="-u column 8 (CIGAR) is 2D2M for hit (d = 4)"
+printf ">s1_1\nAAAA\n>s2_1\nCG\n" | \
+    "${SWARM}" -d 4 -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "H" {exit $8 == "2D2M" ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -u column 8 (CIGAR) is 4M2I for hit (d = 4)
+DESCRIPTION="-u column 8 (CIGAR) is 4M2I for hit (d = 4)"
+printf ">s1_1\nAAAA\n>s2_1\nACGTTT\n" | \
+    "${SWARM}" -d 4 -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "H" {exit $8 == "4M2I" ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 exit
 # stop here ------------------------------------------------------------------------------- !!
+
 
 printf ">s1_2\nAA\n>s2_2\nCC\n>s3_1\nCT\n" | swarm -o /dev/null -u - 2> /dev/null
 printf ">s1_1\nAA\n>s2_2\nCCC\n" | swarm -o /dev/null -u - 2> /dev/null
@@ -1592,116 +1667,7 @@ printf ">s1_3\nAA\n>s2_2\nCC\n>s3_1\nCT\n" | swarm -o /dev/null -u - 2> /dev/nul
 printf ">s_1\nAA\n" | swarm -o /dev/null -u - 2> /dev/null
 printf ">s1_2\nA\n>s2_1\nCC\n" | swarm -o /dev/null -u - 2> /dev/null
 printf ">s1_3\nA\n>s2_2\nCC\n>s3_1\nCG\n" | swarm -o /dev/null -u - 2> /dev/null
-# check if clusters are reported by decreasing abundance.
-
-
-## -u CIGAR is * with S
-DESCRIPTION="-u CIGAR is * with S"
-OUTPUT=$(mktemp)
-printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nAGCC\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-CIGAR=$(awk '/^S/ {v = $8} END {print v}' "${OUTPUT}")
-[[ "${CIGAR}" == "*" ]] && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset CIGAR
-
-## -u CIGAR is * with C
-DESCRIPTION="-u CIGAR is * with C"
-OUTPUT=$(mktemp)
-printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nAGCC\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-CIGAR=$(awk '/^C/ {v = $8} END {print v}' "${OUTPUT}")
-[[ "${CIGAR}" == "*" ]] && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset CIGAR
-
-## -u CIGAR notation is correct in 8th column is with H #1
-DESCRIPTION="-u CIGAR notation is correct in 8th column is with H #1"
-OUTPUT=$(mktemp)
-printf ">a_3\nAAAA\n>b_3\nAAAC\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-CIGAR=$(awk '/^H/ {v = $8} END {print v}' "${OUTPUT}")
-[[ "${CIGAR}" == "4M" ]] && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset CIGAR
-
-## -u CIGAR notation is correct in 8th column is with H #2
-DESCRIPTION="-u CIGAR notation is correct in 8th column is with H #2"
-OUTPUT=$(mktemp)
-printf ">a_3\nAAAA\n>b_3\nAAA\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-CIGAR=$(awk '/^H/ {v = $8} END {print v}' "${OUTPUT}")
-[[ "${CIGAR}" == "D3M" ]] && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset CIGAR
-
-## -u CIGAR notation is correct in 8th column is with H #3
-DESCRIPTION="-u CIGAR notation is correct in 8th column is with H #3"
-OUTPUT=$(mktemp)
-printf ">a_3\nAAAA\n>b_3\nAAAAA\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-CIGAR=$(awk '/^H/ {v = $8} END {print v}' "${OUTPUT}")
-[[ "${CIGAR}" == "4MI" ]] && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset CIGAR
-
-## -u CIGAR notation is correct in 8th column is with H #4
-DESCRIPTION="-u CIGAR notation is correct in 8th column is with H #4"
-OUTPUT=$(mktemp)
-printf ">a_3\nACGT\n>b_3\nACGT\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-CIGAR=$(awk '/^H/ {v = $8} END {print v}' "${OUTPUT}")
-[[ "${CIGAR}" == "=" ]] && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset CIGAR
-
-## -u CIGAR notation is correct in 8th column is with H using -d 5 #1
-DESCRIPTION="-u CIGAR notation is correct in 8th column is with H using -d 5 #1"
-OUTPUT=$(mktemp)
-printf ">a_3\nAAAA\n>b_3\nACGT\n" | \
-    "${SWARM}" -d 5 -u "${OUTPUT}" > /dev/null 2>&1
-CIGAR=$(awk '/^H/ {v = $8} END {print v}' "${OUTPUT}")
-[[ "${CIGAR}" == "4M" ]] && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset CIGAR
-
-## -u CIGAR notation is correct in 8th column is with H using -d 5 #2
-DESCRIPTION="-u CIGAR notation is correct in 8th column is with H using -d 5 #2"
-OUTPUT=$(mktemp)
-printf ">a_3\nAAAA\n>b_3\nCG\n" | \
-    "${SWARM}" -d 5 -u "${OUTPUT}" > /dev/null 2>&1
-CIGAR=$(awk '/^H/ {v = $8} END {print v}' "${OUTPUT}")
-[[ "${CIGAR}" == "2D2M" ]] && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset CIGAR
-
-## -u CIGAR notation is correct in 8th column is with H using -d 5 #3
-DESCRIPTION="-u CIGAR notation is correct in 8th column is with H using -d 5 #3"
-OUTPUT=$(mktemp)
-printf ">a_3\nAAAA\n>b_3\nACGTTT\n" | \
-    "${SWARM}" -d 5 -u "${OUTPUT}" > /dev/null 2>&1
-CIGAR=$(awk '/^H/ {v = $8} END {print v}' "${OUTPUT}")
-[[ "${CIGAR}" == "4M2I" ]] && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset CIGAR
+# -u: check if clusters are reported by decreasing abundance.
 
 ## -u query sequence's label is correct in 9th column with H #1
 DESCRIPTION="-u query sequence's label is correct in 9th column with H #1"
