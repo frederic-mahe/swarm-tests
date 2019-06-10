@@ -1510,11 +1510,75 @@ printf ">s1_2\nA\n>s2_1\nC\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## -u similarity percentage is * for the cluster centroid (S)
-DESCRIPTION="-u similarity percentage is * for cluster centroid"
+## -u match orientation is + for hits
+DESCRIPTION="-u match orientation is + for hits"
 printf ">s1_2\nA\n>s2_1\nC\n" | \
     "${SWARM}" -o /dev/null -u - 2> /dev/null | \
-    awk 'BEGIN {FS = "\t"} $1 == "S" {exit $4 == "*" ? 0 : 1}' && \
+    awk 'BEGIN {FS = "\t"} $1 == "H" {exit $5 == "+" ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -u match orientation is * for the cluster centroid (S)
+DESCRIPTION="-u match orientation is * for the cluster centroid (S)"
+printf ">s1_2\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "S" {exit $5 == "*" ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -u match orientation is * for the cluster record (C)
+DESCRIPTION="-u match orientation is * for the cluster record (C)"
+printf ">s1_2\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "C" {exit $5 == "*" ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -u unused column 6 is * for hits
+DESCRIPTION="-u unused column 6 is * for hits"
+printf ">s1_2\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "H" {exit $6 == "*" ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -u unused column 6 is * for the cluster centroid (S)
+DESCRIPTION="-u unused column 6 is * for the cluster centroid (S)"
+printf ">s1_2\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "S" {exit $6 == "*" ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -u unused column 6 is * for the cluster record (C)
+DESCRIPTION="-u unused column 6 is * for the cluster record (C)"
+printf ">s1_2\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "C" {exit $6 == "*" ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -u unused column 7 is * for hits
+DESCRIPTION="-u unused column 7 is * for hits"
+printf ">s1_2\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "H" {exit $7 == "*" ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -u unused column 7 is * for the cluster centroid (S)
+DESCRIPTION="-u unused column 7 is * for the cluster centroid (S)"
+printf ">s1_2\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "S" {exit $7 == "*" ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -u unused column 7 is * for the cluster record (C)
+DESCRIPTION="-u unused column 7 is * for the cluster record (C)"
+printf ">s1_2\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "C" {exit $7 == "*" ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -1530,117 +1594,6 @@ printf ">s1_2\nA\n>s2_1\nCC\n" | swarm -o /dev/null -u - 2> /dev/null
 printf ">s1_3\nA\n>s2_2\nCC\n>s3_1\nCG\n" | swarm -o /dev/null -u - 2> /dev/null
 # check if clusters are reported by decreasing abundance.
 
-
-
-
-## -u match orientation is correct in 5th column with H
-DESCRIPTION="-u match orientation is correct in 5th column with H"
-OUTPUT=$(mktemp)
-printf ">a_3\nGGGG\n>b_3\nAAAA\n>c_3\nAAAC\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-MATCH_ORIENTATION=$(awk '/^H/ {v = $5} END {print v}' "${OUTPUT}")
-[[ "${MATCH_ORIENTATION}" == "+" ]] && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset MATCH_ORIENTATION
-
-## -u match orientation is * in 5th column with S
-DESCRIPTION="-u match orientation is correct in 5th column with S"
-OUTPUT=$(mktemp)
-printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nAGCC\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-MATCH_ORIENTATION=$(awk '/^S/ {v = $5} END {print v}' "${OUTPUT}")
-[[ "${MATCH_ORIENTATION}" == "*" ]] && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset MATCH_ORIENTATION
-
-## -u match orientation is * in 5th column with C
-DESCRIPTION="-u match orientation is correct in 5th column with C"
-OUTPUT=$(mktemp)
-printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nAGCC\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-MATCH_ORIENTATION=$(awk '/^C/ {v = $5} END {print v}' "${OUTPUT}")
-[[ "${MATCH_ORIENTATION}" == "*" ]] && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset MATCH_ORIENTATION
-
-## -u 6th column is * with C
-DESCRIPTION="-u 6th column is * with C"
-OUTPUT=$(mktemp)
-printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nAGCC\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-COLUMN_6=$(awk '/^C/ {v = $6} END {print v}' "${OUTPUT}")
-[[ "${COLUMN_6}" == "*" ]] && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset COLUMN_6
-
-## -u 6th column is * with S
-DESCRIPTION="-u 6th column is * with S"
-OUTPUT=$(mktemp)
-printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nAGCC\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-COLUMN_6=$(awk '/^S/ {v = $6} END {print v}' "${OUTPUT}")
-[[ "${COLUMN_6}" == "*" ]] && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset COLUMN_6
-
-## -u 6th column is 0 with H
-DESCRIPTION="-u 6th column is 0 with H"
-OUTPUT=$(mktemp)
-printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nAGCC\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-COLUMN_6=$(awk '/^H/ {v = $6} END {print v}' "${OUTPUT}")
-(( "${COLUMN_6}" == 0 )) && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset COLUMN_6
-
-## -u 7th column is * with C
-DESCRIPTION="-u 7th column is * with C"
-OUTPUT=$(mktemp)
-printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nAGCC\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-COLUMN_7=$(awk '/^C/ {v = $7} END {print v}' "${OUTPUT}")
-[[ "${COLUMN_7}" == "*" ]] && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset COLUMN_7
-
-## -u 7th column is * with S
-DESCRIPTION="-u 7th column is * with S"
-OUTPUT=$(mktemp)
-printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nAGCC\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-COLUMN_7=$(grep "^S" "${OUTPUT}" | \
-               awk -F "\t" '{if (NR == 1) {print $7}}')
-[[ "${COLUMN_7}" == "*" ]] && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset COLUMN_7
-
-## -u 7th column is 0 with H
-DESCRIPTION="-u 7th column is 0 with H"
-OUTPUT=$(mktemp)
-printf ">a_3\nAAAA\n>b_3\nAAAC\n>c_3\nAACC\n>d_3\nAGCC\n" | \
-    "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1
-COLUMN_7=$(awk '/^H/ {v = $7} END {print v}' "${OUTPUT}")
-[[ "${COLUMN_7}" == "0" ]] && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${OUTPUT}"
-unset COLUMN_7
 
 ## -u CIGAR is * with S
 DESCRIPTION="-u CIGAR is * with S"
