@@ -327,5 +327,12 @@ printf ">s_%d\nA\n" $(( (1 << 32) + 1 )) | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+## swarm ignores stdin output if file is given
+DESCRIPTION="swarm ignores stdin output if file is given"
+printf ">s1_1\nA\n" | \
+    "${SWARM}" <(printf ">s2_1\nT\n") 2> /dev/null | \
+    grep -q "^s1_1$" && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
 
 exit 0
