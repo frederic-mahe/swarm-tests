@@ -892,6 +892,21 @@ printf ">a_3\nAAAA\n>b_1\nAAAT\n>c_2\nTTTT\n>d_1\nATTT\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+
+## -i print semicolon if the abundance is not at either end (gcov)
+##
+## >s1;size=1;length=1 is parsed as s1 size=1 length=1, when printing
+## to ouput files, this function adds a semicolon to separate the
+## remaining header elements: "s1" + ";" + "length=1"
+##
+DESCRIPTION="-i print semicolon if the abundance is not at either end (gcov)"
+printf ">s1;size=1;length=1\nA\n>s2;size=1;length=1\nT\n" | \
+    "${SWARM}" -z -o /dev/null -i - 2> /dev/null | \
+    grep -Eq "^s1;length=1[[:blank:]]s2;length=1" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+
 ## ------------------------------------------------------------------------ log
 
 ## Swarm accepts the options -l and --log
@@ -1270,7 +1285,6 @@ printf ">s1_2\nA\n>s2_1\nC\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-
 ## Theorical radius is correct with -s -d 2 (2 expected)
 DESCRIPTION="-s theorical maximum radius is correct -d 2 (2 expected)"
 printf ">s1_3\nAA\n>s2_1\nCC\n" | \
@@ -1284,6 +1298,19 @@ DESCRIPTION="-s reported radius != real radius -d 2"
 printf ">s1_3\nAAAA\n>s2_3\nAACC\n>s3_2\nCCCC\n>s4_2\nCCAC\n" | \
     "${SWARM}" -d 2 -o /dev/null -s - 2> /dev/null | \
     awk 'BEGIN {FS = "\t"} NR == 1 {exit $7 == 5 ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -s print semicolon if the abundance is not at either end (gcov)
+##
+## >s;size=1;length=1 is parsed as s size=1 length=1, when printing
+## to ouput files, this function adds a semicolon to separate the
+## remaining header elements: "s" + ";" + "length=1"
+##
+DESCRIPTION="-s print semicolon if the abundance is not at either end (gcov)"
+printf ">s;size=1;length=1\nA\n" | \
+    "${SWARM}" -z -o /dev/null -s - 2> /dev/null | \
+    grep -Eq "[[:blank:]]s;length=1[[:blank:]]" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
