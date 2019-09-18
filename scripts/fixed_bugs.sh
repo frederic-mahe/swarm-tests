@@ -22,7 +22,7 @@ success () {
 
 ## use the first swarm binary in $PATH by default, unless user wants
 ## to test another binary
-SWARM=$(which swarm)
+SWARM=$(which swarm 2> /dev/null)
 [[ "${1}" ]] && SWARM="${1}"
 
 DESCRIPTION="check if swarm is executable"

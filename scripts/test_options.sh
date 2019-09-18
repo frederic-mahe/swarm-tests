@@ -21,7 +21,7 @@ success () {
 
 ## use the first swarm binary in $PATH by default, unless user wants
 ## to test another binary
-SWARM=$(which swarm)
+SWARM=$(which swarm 2> /dev/null)
 [[ "${1}" ]] && SWARM="${1}"
 
 DESCRIPTION="check if swarm is executable"
@@ -2190,12 +2190,12 @@ EOF
 
 #*****************************************************************************#
 #                                                                             #
-#                 search with leaks and errors with valgrind                  #
+#                 search for leaks and errors with valgrind                   #
 #                                                                             #
 #*****************************************************************************#
 
 ## valgrind errors
-if which valgrind > /dev/null ; then
+if which valgrind > /dev/null 2>&1 ; then
 
     ## basic options
 
@@ -2556,7 +2556,7 @@ fi
 
 
 ## valgrind leaks
-if which valgrind > /dev/null ; then
+if which valgrind > /dev/null 2>&1 ; then
 
     ## basic options
 
