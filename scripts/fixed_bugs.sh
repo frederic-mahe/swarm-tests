@@ -166,10 +166,9 @@ printf ">s\01a_1\nA\n" | \
 ## sequences are present.
 DESCRIPTION="issue 3 --- check for unique sequences"
 printf ">s1_1\nA\n>s2_1\nA\n" | \
-    "${SWARM}" 2>&1 | \
-    grep -q "^WARNING: 1 duplicated sequences detected." && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
+    "${SWARM}" > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
 
 
 #*****************************************************************************#
