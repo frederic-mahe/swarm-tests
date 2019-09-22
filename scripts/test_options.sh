@@ -1750,12 +1750,16 @@ printf ">s1_1\nAA\n>s2_2\nCC\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## -u clusters are reported by decreasing total abundance
-## s1_2 + s3_2 = 4 reads, bigger than the 3 reads in s2_3
-DESCRIPTION="-u clusters are reported by decreasing total abundance"
+## -u clusters are reported by decreasing seed abundance
+# C	0	1	*	*	*	*	*	s2_3	*
+# S	0	2	*	*	*	*	*	s2_3	*
+# C	1	2	*	*	*	*	*	s1_2	*
+# S	1	2	*	*	*	*	*	s1_2	*
+# H	1	2	50.0	+	0	0	2M	s3_2	s1_2
+DESCRIPTION="-u clusters are reported by decreasing seed abundance"
 printf ">s1_2\nAA\n>s2_3\nCC\n>s3_2\nAG\n" | \
     "${SWARM}" -o /dev/null -u - 2> /dev/null | \
-    awk 'BEGIN {FS = "\t"} $1 == "C" {exit $9 == "s1_2" ? 0 : 1}' && \
+    awk 'BEGIN {FS = "\t"} $1 == "C" {exit $9 == "s2_3" ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
