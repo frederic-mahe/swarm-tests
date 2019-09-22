@@ -1831,12 +1831,12 @@ printf ">s1_1\nAA\n>s2_2\nGG\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## -w expected order (2 clusters, ordered by abundance, then by alpha seqs)
-DESCRIPTION="-w expected output order (2 clusters, abundance, nucleotides)"
-printf ">s1_1\nGG\n>s2_1\nAA\n" | \
+## -w expected order (2 clusters, ordered by abundance, then by labels)
+DESCRIPTION="-w expected output order (2 clusters, abundance, labels)"
+printf ">s2_1\nAA\n>s1_1\nGG\n" | \
     "${SWARM}" -o /dev/null -w - 2> /dev/null | \
     tr -d "\n" | \
-    grep -q "^>s2_1AA>s1_1GG$" && \
+    grep -q "^>s1_1GG>s2_1AA$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
