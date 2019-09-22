@@ -1142,7 +1142,7 @@ printf ">s\nA\n" | \
 
 ## issue 59 --- swarm -a does not overwrite abundance in case of multiple _ with numbers
 DESCRIPTION="issue 59 --- -a does not overwrite abundance in case of multiple _ with numbers"
-printf ">s1_1_2\nA\n>s2_1_2\nA\n" | \
+printf ">s1_1_2\nA\n>s2_1_2\nT\n" | \
     "${SWARM}" -a 1 2> /dev/null | \
     grep -q "^s1_1_2 s2_1_2$" && \
     success "${DESCRIPTION}" || \
