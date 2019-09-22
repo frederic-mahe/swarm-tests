@@ -709,7 +709,7 @@ printf ">s1\nA\n>s2_1\nT\n" | \
 
 ## when using -a, check if the added abundance annotation appears in -u output
 DESCRIPTION="-a abundance annotation appears in -u output"
-printf ">s1\nT\n>s2_1\nT\n" | \
+printf ">s1\nA\n>s2_1\nT\n" | \
     "${SWARM}" -a 2 -o /dev/null -u - 2> /dev/null | \
     grep -q "s1_2" && \
     success "${DESCRIPTION}" || \
@@ -1854,7 +1854,7 @@ printf ">s1_4294967297\nA\n>s2_4294967297\nT\n" | \
 
 ## output created by the -i option is not modified by the option -z
 DESCRIPTION="in -i ouput, -z has no visible effect (-i reports only labels)"
-printf ">s1;size=1;\nA\n>s2;size=1;\nA\n" | \
+printf ">s1;size=1;\nA\n>s2;size=1;\nT\n" | \
     "${SWARM}" -z -o /dev/null -i - 2> /dev/null | \
     grep -qE "^s1[[:blank:]]s2[[:blank:]]" && \
     success "${DESCRIPTION}" || \
@@ -2102,7 +2102,7 @@ printf ">s1\nA\n>s2_5\nA\n" | \
 
 ## Swarm sorts amplicons in an OTU by decreasing abundance
 DESCRIPTION="swarm sorts amplicons in an OTU by decreasing abundance"
-printf ">s3_1\nA\n>s1_3\nC\n>s2_2\nC\n" | \
+printf ">s3_1\nA\n>s1_3\nC\n>s2_2\nG\n" | \
     "${SWARM}" 2> /dev/null | \
     grep -q "^s1_3 s2_2 s3_1$" && \
     success "${DESCRIPTION}" || \
