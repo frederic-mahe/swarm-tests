@@ -1957,27 +1957,29 @@ printf ">a_1\nTGGA\n>b_2\nTTTT\n>c_1\nTTGA\n>d_1\nCTGA\n" | \
 ##
 ## In the toy example below, all sequences are identical and of length
 ## 1 (equivalent of a undereplicated dataset). Previous versions of
-## swarm would create an array of that could hold 7l+4 matching
+## swarm would create an array that could hold 7l+4 matching
 ## sequences. That array could be doubled once, and having one more
 ## match would trigger a segmentation fault. That means we need 24
 ## input sequences of length 1 to trigger the bug: 1 seed + 2 * (7 +
 ## 4) + 1 excess match = 1 + 22 + 1 = 24
 
-## This test should pass on swarm 2.2.0
-DESCRIPTION="issue 109 --- segmentation fault error with undereplicated dataset #1"
-for ((i=1 ; i<=23 ; i++)) ; do
-    printf ">s%d_1\nA\n" ${i}
-done | "${SWARM}" > /dev/null 2>&1 && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
+# ## This test should pass on swarm 2.2.0
+# DESCRIPTION="issue 109 --- segmentation fault error with undereplicated dataset #1"
+# for ((i=1 ; i<=23 ; i++)) ; do
+#     printf ">s%d_1\nA\n" ${i}
+# done | "${SWARM}" > /dev/null 2>&1 && \
+#     success "${DESCRIPTION}" || \
+#         failure "${DESCRIPTION}"
 
-## This test should fail on swarm 2.2.0 and pass on more recent versions
-DESCRIPTION="issue 109 --- segmentation fault error with undereplicated dataset #2"
-for ((i=1 ; i<=24 ; i++)) ; do
-    printf ">s%d_1\nA\n" ${i}
-done | "${SWARM}" > /dev/null 2>&1 && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
+# ## This test should fail on swarm 2.2.0 and pass on more recent versions
+# DESCRIPTION="issue 109 --- segmentation fault error with undereplicated dataset #2"
+# for ((i=1 ; i<=24 ; i++)) ; do
+#     printf ">s%d_1\nA\n" ${i}
+# done | "${SWARM}" > /dev/null 2>&1 && \
+#     success "${DESCRIPTION}" || \
+#         failure "${DESCRIPTION}"
+
+## swarm 3.0 doesn't accept undereplicated data and cannot run these tests.
 
 
 #*****************************************************************************#
