@@ -2358,5 +2358,25 @@ printf ">s2_4\nAAA\n>s1_3\nCCC\n>s3_1\nCGG\n" | \
         failure "${DESCRIPTION}"
 
 
+#*****************************************************************************#
+#                                                                             #
+#   swarm 3.0 Floating point exception for low bloom-bits values (issue 137)  #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/137
+
+## Reject --bloom-bits values of four or less
+MIN=2
+MAX=4
+DESCRIPTION="swarm aborts when --bloom-bits is equal to 2, 3 or 4"
+for ((y=$MIN ; y<=$MAX ; y++)) ; do
+    printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+        "${SWARM}" -f -y ${y} > /dev/null 2>&1 && \
+        failure "swarm runs normally when --bloom-bits equals ${y}"
+done || success "${DESCRIPTION}"
+unset MIN MAX y
+
+
 exit 0
 
