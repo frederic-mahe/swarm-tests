@@ -1213,21 +1213,19 @@ printf ">s1_1_2\nA\n>s2_1_2\nT\n" | \
 ## https://github.com/torognes/swarm/issues/65
 ##
 ## issue 65 --- swarm complains if input sequences are not dereplicated
-DESCRIPTION="issue 65 --- swarm complains if input sequences are duplicated (d=2)"
+DESCRIPTION="issue 65 --- swarm fails if input sequences are duplicated (d=2)"
 printf ">s1;size=1\nAA\n>s2;size=2\nAA\n" | \
-    "${SWARM}" -z -d 2 2>&1 | \
-    grep -q "^WARNING: 1 duplicated sequences detected." && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
+    "${SWARM}" -z -d 2 > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
 
-DESCRIPTION="issue 65 --- swarm complains if input sequences are duplicated (d=1)"
+DESCRIPTION="issue 65 --- swarm fails if input sequences are duplicated (d=1)"
 printf ">s1;size=1\nAA\n>s2;size=2\nAA\n" | \
-    "${SWARM}" -z -d 1 2>&1 | \
-    grep -q "^WARNING: 1 duplicated sequences detected." && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
+    "${SWARM}" -z -d 1 > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
 
-DESCRIPTION="issue 65 --- swarm does not complain if input sequences are duplicated (d=0)"
+DESCRIPTION="issue 65 --- swarm accepts duplicated input sequences (d=0)"
 printf ">s1;size=1\nAA\n>s2;size=2\nAA\n" | \
     "${SWARM}" -z -d 0 2>&1 | \
     grep -q "^WARNING: 1 duplicated sequences detected." && \
