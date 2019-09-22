@@ -1915,7 +1915,8 @@ printf ">s\nT\n" | \
 ##
 ## Swarm shows the wrong cluster number on the H lines of UC files
 ## when using fastidious mode. The number shown is the original
-## cluster number, before the fastidious grafting (it should be zero).
+## cluster number, before the fastidious grafting. It should be zero
+## in this example:
 ##
 ## C	0	4	*	*	*	*	*	a_1	*
 ## S	0	4	*	*	*	*	*	a_1	*
@@ -2310,6 +2311,52 @@ fi
 ## https://github.com/torognes/swarm/issues/132
 
 ## not testable
+
+
+#*****************************************************************************#
+#                                                                             #
+#           Sort seeds by total mass before output (issue 133)                #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/133
+
+## fasta input is sorted by decreasing sequence abundance, --seed
+## output should be sorted by decreasing cluster abundance.
+
+# without fastidious
+DESCRIPTION="issue 133 --- seeds are sorted by decreasing cluster abundance"
+printf ">s1_4\nAA\n>s2_3\nCC\n>s3_2\nCG\n" | \
+    "${SWARM}" -o /dev/null -w - 2> /dev/null | \
+    tr -d "\n" | \
+    grep -qw ">s2_5CC>s1_4AA" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="issue 133 --- seeds are sorted by decreasing cluster abundance and label"
+printf ">s2_2\nAA\n>s1_1\nCC\n>s3_1\nCG\n" | \
+    "${SWARM}" -o /dev/null -w - 2> /dev/null | \
+    tr -d "\n" | \
+    grep -qw ">s1_2CC>s2_2AA" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+# with fastidious
+DESCRIPTION="issue 133 --- seeds are sorted by decreasing cluster abundance (-f)"
+printf ">s1_4\nAAA\n>s2_3\nCCC\n>s3_2\nCGG\n" | \
+    "${SWARM}" -f -o /dev/null -w - 2> /dev/null | \
+    tr -d "\n" | \
+    grep -qw ">s2_5CCC>s1_4AAA" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="issue 133 --- seeds are sorted by decreasing cluster abundance and label (-f)"
+printf ">s2_4\nAAA\n>s1_3\nCCC\n>s3_1\nCGG\n" | \
+    "${SWARM}" -f -o /dev/null -w - 2> /dev/null | \
+    tr -d "\n" | \
+    grep -qw ">s1_4CCC>s2_4AAA" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 
 exit 0
