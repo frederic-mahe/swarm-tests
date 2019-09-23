@@ -2366,16 +2366,14 @@ printf ">s2_4\nAAA\n>s1_3\nCCC\n>s3_1\nCGG\n" | \
 
 ## https://github.com/torognes/swarm/issues/137
 
-## Reject --bloom-bits values of four or less
-MIN=2
-MAX=4
-DESCRIPTION="swarm aborts when --bloom-bits is equal to 2, 3 or 4"
-for ((y=$MIN ; y<=$MAX ; y++)) ; do
+## swarm accepts --bloom-bits values of 2, 3 and 4
+DESCRIPTION="issue 137 --- swarm runs normally when --bloom-bits equals ${y}"
+for i in 2 3 4 ; do
     printf ">s1_3\nAA\n>s2_1\nCC\n" | \
-        "${SWARM}" -f -y ${y} > /dev/null 2>&1 && \
-        failure "swarm runs normally when --bloom-bits equals ${y}"
-done || success "${DESCRIPTION}"
-unset MIN MAX y
+        "${SWARM}" -f -y ${i} > /dev/null 2>&1 && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+done
 
 
 exit 0
