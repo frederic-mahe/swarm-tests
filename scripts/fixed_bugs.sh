@@ -2360,6 +2360,39 @@ printf ">s2_4\nAAA\n>s1_3\nCCC\n>s3_1\nCGG\n" | \
 
 #*****************************************************************************#
 #                                                                             #
+#                DNA base characters other than ACGT (issue 134)              #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/134
+
+## not testable
+
+
+#*****************************************************************************#
+#                                                                             #
+#           Code Quality Benchmark (softwipe) enhancement (issue 135)         #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/135
+
+## not testable
+
+
+#*****************************************************************************#
+#                                                                             #
+# avoid variable shadowing, same naming scheme as other local variables (136) #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/136
+
+## not testable
+
+
+#*****************************************************************************#
+#                                                                             #
 #   swarm 3.0 Floating point exception for low bloom-bits values (issue 137)  #
 #                                                                             #
 #*****************************************************************************#
@@ -2374,6 +2407,17 @@ for i in 2 3 4 ; do
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
+
+
+#*****************************************************************************#
+#                                                                             #
+#                   support ambigous nucleotides N (issue 138)                #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/138
+
+## not testable
 
 
 exit 0
