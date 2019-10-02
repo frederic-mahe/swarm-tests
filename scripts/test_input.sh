@@ -386,7 +386,7 @@ printf ">s1_1\nA\n" | \
 ## swarm d = 1 can process sequences with more than 32 nucleotides
 ## (zobrist.cc coverage)
 DESCRIPTION="swarm d = 1 accepts sequences with 32 nucleotides or more"
-MAX=32
+MAX=40
 printf ">s_1\n%s\n" $(head -c ${MAX} < /dev/zero | tr '\0' 'A') | \
     "${SWARM}" > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
