@@ -141,10 +141,17 @@ printf ">s_1\n\n" | \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
+## Test completely empty header
+DESCRIPTION="swarm aborts on empty fasta headers"
+printf ">\nA\n" | \
+    "${SWARM}" > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
 ## Test empty header
 DESCRIPTION="swarm aborts on empty fasta headers"
 printf ">_1\nA\n" | \
-    "${SWARM}" -z > /dev/null 2>&1 && \
+    "${SWARM}" > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -154,6 +161,15 @@ printf ">;size=1\nA\n" | \
     "${SWARM}" -z > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
+
+## Test very long header
+DESCRIPTION="swarm aborts on headers longer than INT_MAX (at least 32,767)"
+MAX=32767  # MAX=2044 is the last accepted value
+printf ">%s_1\nA\n" $(head -c ${MAX} < /dev/zero | tr '\0' 's') | \
+    "${SWARM}" > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+unset MAX
 
 ## Clustering with only one sequence is accepted
 DESCRIPTION="clustering with only one sequence is accepted"
@@ -293,6 +309,13 @@ printf ">s_n\nA\n" | \
 ## swarm aborts if abundance value is zero
 DESCRIPTION="swarm aborts if abundance value is zero"
 printf ">s_0\nA\n" | \
+    "${SWARM}" > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+## swarm aborts if abundance value is zero
+DESCRIPTION="swarm aborts if abundance value is zero"
+printf ">s_0\nA\n" | \
     "${SWARM}" 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
@@ -326,6 +349,13 @@ printf ">s_%d\nA\n" $(( (1 << 32) + 1 )) | \
     "${SWARM}" > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
+
+## swarm aborts if abundance value has more than 20 digits
+DESCRIPTION="swarm aborts if abundance value has more than 20 digits"
+printf ">s_123456789012345678901\nA\n" | \
+    "${SWARM}" > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
 
 ## swarm ignores stdin output if file is given
 DESCRIPTION="swarm ignores stdin output if file is given"
