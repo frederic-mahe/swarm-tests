@@ -318,6 +318,18 @@ printf ">s_1\nA\n" | \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
+## trigger pairwise alignment using 16 bits on 8 channels (-d >= 16)
+# pairwise alignment scores can be stored either on 8 or 16 bits. The
+# number of bits is chosen as such:
+# if d <= min(255 / mismatch penalty , 255 / gap open + extend) then 8 else 16
+# with default pairwise alignment parameters, 255 / 16 is the minimum
+# (almost 16), so -d 16 will force pairwise alignments using 16 bits.
+DESCRIPTION="trigger pairwise alignment using 16 bits on 8 channels (-d >= 16)"
+printf ">s1_1\nAAAAA\n>s2_1\nAAGGA\n" | \
+    "${SWARM}" -d 2 > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 
 #*****************************************************************************#
 #                                                                             #
