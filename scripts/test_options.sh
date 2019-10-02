@@ -326,7 +326,7 @@ printf ">s_1\nA\n" | \
 # (almost 16), so -d 16 will force pairwise alignments using 16 bits.
 DESCRIPTION="trigger pairwise alignment using 16 bits on 8 channels (-d >= 16)"
 printf ">s1_1\nAAAAA\n>s2_1\nAAGGA\n" | \
-    "${SWARM}" -d 2 > /dev/null 2>&1 && \
+    "${SWARM}" -d 16 > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
