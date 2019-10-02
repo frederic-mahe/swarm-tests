@@ -755,7 +755,7 @@ printf ">s_1\nA\n" | \
     "${SWARM}" -i ${TMP} > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
-rm -f ${TMP}
+chmod u+w ${TMP} && rm -f ${TMP}
 unset TMP
 
 ## Swarm -i create and fill given output file
@@ -957,7 +957,7 @@ printf ">s_1\nA\n" | \
     "${SWARM}" -l ${TMP} > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
-rm -f ${TMP}
+chmod u+w ${TMP} && rm -f ${TMP}
 unset TMP
 
 ## Swarm does not write on standard error when using -l
@@ -1012,7 +1012,7 @@ printf ">s_1\nA\n" | \
     "${SWARM}" -o ${TMP} > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
-rm -f ${TMP}
+chmod u+w ${TMP} && rm -f ${TMP}
 unset TMP
 
 ## Swarm fills correctly output file with -o option
@@ -1199,7 +1199,8 @@ printf ">s_1\nA\n" | \
     "${SWARM}" -s "${OUTPUT}" > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
-rm -f "${OUTPUT}"
+chmod +w "${OUTPUT}" && rm -f "${OUTPUT}"
+unset OUTPUT
 
 ## Number of unique amplicons is correct (1 expected)
 DESCRIPTION="-s number of unique amplicons is correct (1 expected)"
@@ -1403,7 +1404,8 @@ printf ">s1_1\nA\n>s2_1\nC\n" | \
     "${SWARM}" -u "${OUTPUT}" > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
-rm -f "${OUTPUT}"
+chmod +w "${OUTPUT}" && rm -f "${OUTPUT}"
+unset OUTPUT
 
 ## -u number of hits is correct (1)
 DESCRIPTION="-u number of hits is 1"
@@ -1849,7 +1851,7 @@ printf ">s_1\nA\n" | \
     "${SWARM}" -w ${TMP} > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
-rm -f ${TMP}
+chmod u+w ${TMP} && rm -f ${TMP}
 unset TMP
 
 ## -w gives expected output (1 cluster)
