@@ -359,6 +359,13 @@ for OPTION in "-f" "--fastidious" ; do
             failure "${DESCRIPTION}"
 done
 
+## Swarm fastidious option only works with d = 1
+DESCRIPTION="swarm fastidious only works with d = 1"
+printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" -d 2 -f > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
 ## Swarm performs a second clustering (aka fastidious)
 DESCRIPTION="swarm groups small OTUs with large OTUs (boundary = 3)"
 printf ">s1_3\nAA\n>s2_1\nCC\n" | \
@@ -619,6 +626,13 @@ for OPTION in "-a" "--append-abundance" ; do
             failure "${DESCRIPTION}"
 done
 
+## Swarm -a aborts if abundance value is zero
+DESCRIPTION="-a aborts if abundance value is zero"
+printf ">s\nA\n" | \
+    "${SWARM}" -a 0 > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
 ## Swarm -a appends an abundance value to OTU members
 DESCRIPTION="-a appends an abundance number to OTU members (-o output)"
 printf ">s\nA\n" | \
@@ -733,6 +747,16 @@ printf ">s_1\nA\n" | \
     "${SWARM}" -i > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
+
+## Swarm -i fails if unable to open output file for writing
+DESCRIPTION="-i fails if unable to open output file for writing"
+TMP=$(mktemp) && chmod u-w ${TMP}  # remove write permission
+printf ">s_1\nA\n" | \
+    "${SWARM}" -i ${TMP} > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+rm -f ${TMP}
+unset TMP
 
 ## Swarm -i create and fill given output file
 DESCRIPTION="-i creates and fill given output file"
@@ -926,6 +950,16 @@ printf ">s_1\nA\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+## Swarm -l fails if unable to open output file for writing
+DESCRIPTION="-l fails if unable to open output file for writing"
+TMP=$(mktemp) && chmod u-w ${TMP}  # remove write permission
+printf ">s_1\nA\n" | \
+    "${SWARM}" -l ${TMP} > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+rm -f ${TMP}
+unset TMP
+
 ## Swarm does not write on standard error when using -l
 DESCRIPTION="swarm does not write on stderr when using -l"
 printf ">s_1\nA\n" | \
@@ -962,6 +996,16 @@ printf ">s_1\nA\n" | \
     grep -q "." && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
+
+## Swarm -o fails if unable to open output file for writing
+DESCRIPTION="-o fails if unable to open output file for writing"
+TMP=$(mktemp) && chmod u-w ${TMP}  # remove write permission
+printf ">s_1\nA\n" | \
+    "${SWARM}" -o ${TMP} > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+rm -f ${TMP}
+unset TMP
 
 ## Swarm fills correctly output file with -o option
 DESCRIPTION="-o creates and fills the output file"
@@ -1790,6 +1834,16 @@ printf ">s_1\nA\n" | \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
+## Swarm -w fails if unable to open output file for writing
+DESCRIPTION="-w fails if unable to open output file for writing"
+TMP=$(mktemp) && chmod u-w ${TMP}  # remove write permission
+printf ">s_1\nA\n" | \
+    "${SWARM}" -w ${TMP} > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+rm -f ${TMP}
+unset TMP
+
 ## -w gives expected output (1 cluster)
 DESCRIPTION="-w gives expected output (1 cluster)"
 printf ">s1_2\nA\n>s2_1\nC\n" | \
@@ -2190,6 +2244,13 @@ mismatch-penalty -p
 gap-opening-penalty -g
 gap-extension-penalty -e
 EOF
+
+## swarm aborts if gap opening + gap extension is less than 1
+DESCRIPTION="swarm aborts if -g plus -e is zero"
+printf ">s_1\nA\n" | \
+    "${SWARM}" -d 2 -g 0 -e 0 > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
 
 
 #*****************************************************************************#
