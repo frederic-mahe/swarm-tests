@@ -114,6 +114,17 @@ printf "" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+## Swarm fails if input file is not readable
+DESCRIPTION="swarm fails if input file is not readable"
+TMP=$(mktemp)
+printf ">s_1\nA\n" > "${TMP}"
+chmod u-r "${TMP}"
+"${SWARM}" "${TMP}" > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+chmod +r "${TMP}" && rm -f "${TMP}"
+unset TMP
+
 ## output files are still created, even when input is empty
 ## (check if file is created)
 DESCRIPTION="empty input yields empty output (-o)"
