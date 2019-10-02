@@ -989,6 +989,14 @@ for OPTION in "-o" "--output-file" ; do
             failure "${DESCRIPTION}"
 done
 
+## Swarm outputs to stdout if -o is not used
+DESCRIPTION="swarm writes to stdout if -o is not used"
+printf ">s_1\nA\n" | \
+    "${SWARM}" 2> /dev/null | \
+    grep -q "." && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 ## Swarm creates output file with -o option
 DESCRIPTION="-o writes to the specified output file"
 printf ">s_1\nA\n" | \
