@@ -346,6 +346,13 @@ printf ">s1_3\nAAA\n>s2_2\nGGG\n>s3_1\nAAG\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+## swarm -d 2 -w ouputs cluster seeds (algo.cc:591)
+DESCRIPTION="swarm -w ouputs cluster seeds (d > 1)"
+printf ">s1_3\nAAA\n>s2_2\nGGG\n>s3_1\nAAG\n" | \
+    "${SWARM}" -d 2 -w - > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 
 #*****************************************************************************#
 #                                                                             #
