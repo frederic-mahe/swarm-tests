@@ -330,6 +330,13 @@ printf ">s1_1\nAAAAA\n>s2_1\nAAGGA\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+## trigger pairwise alignment backtracking (length > 8, insertion) (nw.cc:213)
+DESCRIPTION="trigger pairwise alignment backtracking (length > 8, insertion)"
+printf ">s1_1\nAAAAAAAAAA\n>s2_1\nAAAAAAAAAAGG\n" | \
+    "${SWARM}" -d 2 -u - > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 
 #*****************************************************************************#
 #                                                                             #
