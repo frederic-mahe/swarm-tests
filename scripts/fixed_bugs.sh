@@ -2420,5 +2420,32 @@ done
 ## not testable
 
 
+#*****************************************************************************#
+#                                                                             #
+#                  code coverage for derep.cc (issue 139)                     #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/139
+
+## not testable yet
+
+
+#*****************************************************************************#
+#                                                                             #
+#                    code coverage for db.cc (issue 140)                      #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/140
+
+## swarm aborts if abundance value is zero (-z)
+DESCRIPTION="swarm aborts if abundance value is zero (-z)"
+printf ">s;size=0\nA\n" | \
+    "${SWARM}" -z 2> /dev/null && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+
 exit 0
 
