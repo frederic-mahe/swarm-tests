@@ -2447,5 +2447,16 @@ printf ">s;size=0\nA\n" | \
         success "${DESCRIPTION}"
 
 
+#*****************************************************************************#
+#                                                                             #
+#                  db.cc: condition is always true (issue 141)                #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/141
+
+## not testable
+
+
 exit 0
 
