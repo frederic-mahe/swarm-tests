@@ -114,6 +114,13 @@ printf "" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+## Swarm fails if header does not start with '>'
+DESCRIPTION="swarm fails if header does not start with '>'"
+printf "@s_1\nA\n" | \
+    "${SWARM}" > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
 ## Swarm fails if input file is not readable
 DESCRIPTION="swarm fails if input file is not readable"
 TMP=$(mktemp)
