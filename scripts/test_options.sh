@@ -330,10 +330,19 @@ printf ">s1_1\nAAAAA\n>s2_1\nAAGGA\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## trigger pairwise alignment backtracking (length > 8, insertion) (nw.cc:213)
+## trigger pairwise alignment backtracking (d > 1, length > 8,
+## insertion) (nw.cc:213)
 DESCRIPTION="trigger pairwise alignment backtracking (length > 8, insertion)"
 printf ">s1_1\nAAAAAAAAAA\n>s2_1\nAAAAAAAAAAGG\n" | \
     "${SWARM}" -d 2 -u - > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## once down with a cluster, swarm goes back to the first unclustered
+## amplicon in the pool (d > 1, algo.cc:266)
+DESCRIPTION="swarm goes back to the 1st unclustered amplicon in the pool (d>1)"
+printf ">s1_3\nAAA\n>s2_2\nGGG\n>s3_1\nAAG\n" | \
+    "${SWARM}" -d 2 > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
