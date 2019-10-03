@@ -1949,6 +1949,24 @@ printf ">s1_4294967297\nA\n>s2_4294967297\nT\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+## -d 2 -w when seeds have the same abundance
+DESCRIPTION="-w when seeds have the same abundance (d > 1)"
+printf ">s1_1\nAAA\n>s2_1\nCCC\n" | \
+    "${SWARM}" -d 2 -o /dev/null -w - 2> /dev/null | \
+    tr -d "\n" | \
+    grep -q "^>s1_1AAA>s2_1CCC$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -d 2 -w when the second seed has a higher abundance
+DESCRIPTION="-w when the second seed has a higher abundance (d > 1)"
+printf ">s1_2\nAAA\n>s2_2\nCCC\n>s3_1\nCCCC\n" | \
+    "${SWARM}" -d 2 -o /dev/null -w - 2> /dev/null | \
+    tr -d "\n" | \
+    grep -q "^>s2_3CCC>s1_2AAA$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 
 ## ---------------------------------------------------------- usearch-abundance
 
