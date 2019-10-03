@@ -303,6 +303,13 @@ printf ">s_2_2_3\nA\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+## Fasta headers can contain more than one "size=" (-z)
+DESCRIPTION="fasta headers can contain more than one 'size=' (-z)"
+printf ">asize=;size=1\nA\n" | \
+    "${SWARM}" -z > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 ## Fasta header must contain an abundance value after being truncated
 DESCRIPTION="swarm aborts if fasta headers lacks abundance value"
 printf ">s s_1\nA\n" | \
