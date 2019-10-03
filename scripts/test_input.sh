@@ -414,4 +414,14 @@ printf ">s_1\n%s\n" $(head -c ${MAX} < /dev/zero | tr '\0' 'A') | \
         failure "${DESCRIPTION}"
 unset MAX
 
+## swarm can printout sequences with more than 1025 nucleotides
+## (db.cc coverage: default buffer can contain 1024 nucleotides)
+DESCRIPTION="swarm can output sequences with more than 1025 nucleotides (-w)"
+MAX=1025
+printf ">s_1\n%s\n" $(head -c ${MAX} < /dev/zero | tr '\0' 'A') | \
+    "${SWARM}" -w - > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+unset MAX
+
 exit 0
