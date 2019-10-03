@@ -2458,5 +2458,16 @@ printf ">s;size=0\nA\n" | \
 ## not testable
 
 
+#*****************************************************************************#
+#                                                                             #
+#           nw.cc: last lines not triggered by a test (issue 142)             #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/142
+
+## not testable
+
+
 exit 0
 
