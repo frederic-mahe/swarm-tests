@@ -352,6 +352,13 @@ printf ">s;size=0\nA\n" | \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
+## swarm aborts if abundance value is at the start of the header (-z)
+DESCRIPTION="swarm aborts if abundance value is at the start of the header (-z)"
+printf ">size=1;s\nA\n" | \
+    "${SWARM}" -z 2> /dev/null && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
 ## swarm accepts large abundance values (2^32 - 1)
 DESCRIPTION="swarm accepts large abundance values (up to 2^32 - 1)"
 for POWER in {2..32} ; do
