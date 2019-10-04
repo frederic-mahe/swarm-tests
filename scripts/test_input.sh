@@ -366,12 +366,89 @@ printf ">s;size=0\nA\n" | \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
-## swarm accepts abundance values at the start of the header (-z)
-DESCRIPTION="swarm accepts abundance values at the start of the header (-z)"
+## swarm accepts size= at the start of the header (-z)
+DESCRIPTION="swarm accepts size= at the start of the header (-z)"
 printf ">size=1;s\nA\n" | \
-    "${SWARM}" -z 2> /dev/null && \
+    "${SWARM}" -z > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
+
+## swarm accepts ;size= at the start of the header (-z)
+DESCRIPTION="swarm accepts ;size= at the start of the header (-z)"
+printf ">;size=1;s\nA\n" | \
+    "${SWARM}" -z > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## swarm accepts ;size= at the end of the header (-z)
+DESCRIPTION="swarm accepts ;size= at the end of the header (-z)"
+printf ">s;size=1\nA\n" | \
+    "${SWARM}" -z > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## swarm accepts ;size=INT; at the end of the header (-z)
+DESCRIPTION="swarm accepts ;size=INT; at the end of the header (-z)"
+printf ">s;size=1;\nA\n" | \
+    "${SWARM}" -z > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## swarm accepts text on both sides of ;size=INT; (-z)
+DESCRIPTION="swarm accepts text on both sides of ;size=INT; (-z)"
+printf ">s;size=1;s\nA\n" | \
+    "${SWARM}" -z > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## swarm aborts if header has no text at all besides size=INT (-z)
+DESCRIPTION="swarm aborts if header has no text at all besides size=INT (-z)"
+printf ">size=1\nA\n" | \
+    "${SWARM}" -z > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+## swarm aborts if header has no text at all besides ;size=INT (-z)
+DESCRIPTION="swarm aborts if header has no text at all besides ;size=INT (-z)"
+printf ">;size=1\nA\n" | \
+    "${SWARM}" -z > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+## swarm aborts if header has no text at all besides ;size=INT; (-z)
+DESCRIPTION="swarm aborts if header has no text at all besides ;size=INT; (-z)"
+printf ">;size=1;\nA\n" | \
+    "${SWARM}" -z > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+## swarm aborts if header has no text at all besides size=INT; (-z)
+DESCRIPTION="swarm aborts if header has no text at all besides size=INT; (-z)"
+printf ">size=1;\nA\n" | \
+    "${SWARM}" -z > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+## swarm aborts if text and size=INT are not ;-separated (-z)
+DESCRIPTION="swarm aborts if text and size=INT are not ;-separated 1 (-z)"
+printf ">ssize=1\nA\n" | \
+    "${SWARM}" -z > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+## swarm aborts if text and size=INT are not ;-separated (-z)
+DESCRIPTION="swarm aborts if text and size=INT are not ;-separated 2 (-z)"
+printf ">size=1s\nA\n" | \
+    "${SWARM}" -z > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+## swarm aborts if text and size=INT are not ;-separated (-z)
+DESCRIPTION="swarm aborts if text and size=INT are not ;-separated 3 (-z)"
+printf ">s;size=1s\nA\n" | \
+    "${SWARM}" -z > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
 
 ## swarm accepts large abundance values (2^32 - 1)
 DESCRIPTION="swarm accepts large abundance values (up to 2^32 - 1)"
