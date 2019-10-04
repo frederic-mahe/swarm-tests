@@ -2428,7 +2428,12 @@ done
 
 ## https://github.com/torognes/swarm/issues/139
 
-## not testable yet
+## trigger all dereplication comparison cases
+DESCRIPTION="issue 139 --- trigger all dereplication comparison cases (-d 0)"
+printf ">a_1\nA\n>b_1\nA\n>c_2\nC\n>d_2\nT\n" | \
+    "${SWARM}" -d 0 > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 
 #*****************************************************************************#
