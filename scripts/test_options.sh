@@ -410,6 +410,17 @@ printf ">s1_3\nAA\n>s2_1\nCC\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+## Swarm attaches small clusters to the largest (or first input) cluster
+# if amplicons forming a small cluster can be attached to different
+# big clusters, then the first attachment has priority
+DESCRIPTION="swarm attaches small clusters to the largest (or first input) cluster"
+printf ">s1_3\nAAA\n>s2_1\nACC\n>s3_1\nCCC\n>s4_3\nCGG\n" | \
+    "${SWARM}" -f 2> /dev/null | \
+    tr "\n" "@" | \
+    grep -q "^s1_3 s2_1 s3_1@s4_3@$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 
 ## Boundary -------------------------------------------------------------------
 
