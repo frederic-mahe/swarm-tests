@@ -135,7 +135,7 @@ unset TMP
 ## output files are still created, even when input is empty
 ## (check if file is created)
 DESCRIPTION="empty input yields empty output (-o)"
-TMP=$(mktemp --dry-run)
+TMP=$(mktemp -u)
 printf "" | \
     "${SWARM}" -o ${TMP} 2> /dev/null
 [[ -e ${TMP} ]] && \
@@ -144,7 +144,7 @@ printf "" | \
 rm -f ${TMP}
 
 DESCRIPTION="empty input yields empty output (-w)"
-TMP=$(mktemp --dry-run)
+TMP=$(mktemp -u)
 printf "" | \
     "${SWARM}" -w ${TMP} 2> /dev/null
 [[ -e ${TMP} ]] && \
