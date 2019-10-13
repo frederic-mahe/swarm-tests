@@ -942,6 +942,42 @@ DESCRIPTION="-i -f OTU numbering is contiguous (no gap)"
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+## -i -f small clusters can be grafted via a subseed
+##
+## If you run fastidious with boundary 4 you will first get a and b
+## clustered with a as the seed and then c and d clustered with c as
+## the seed. In the fastidious phase b will be connected to d. Here is
+## the expected resulting structure:
+##
+## a	b	1	1	1
+## b	d	2	1	2
+## c	d	1	1	1
+##
+DESCRIPTION="-i -f small clusters can be grafted via a subseed"
+printf ">a_3\nAAAA\n>b_1\nAAAT\n>c_2\nTTTT\n>d_1\nATTT\n" | \
+    "${SWARM}" -f -b 4 -o /dev/null -i - 2> /dev/null | \
+    awk 'NR == 2 {exit $1 == "b" && $2 == "d" ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -i -f small cluster internal links are always given after the graft link
+##
+## If you run fastidious with boundary 4 you will first get a and b
+## clustered with a as the seed and then c and d clustered with c as
+## the seed. In the fastidious phase b will be connected to d. Here is
+## the expected resulting structure:
+##
+## a	b	1	1	1
+## b	d	2	1	2
+## c	d	1	1	1
+##
+DESCRIPTION="-i -f small cluster internal links are always given after the graft link"
+printf ">a_3\nAAAA\n>b_1\nAAAT\n>c_2\nTTTT\n>d_1\nATTT\n" | \
+    "${SWARM}" -f -b 4 -o /dev/null -i - 2> /dev/null | \
+    awk 'NR == 3 {exit $1 == "c" && $2 == "d" ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 ## -i -f number of steps between grafted amplicon and its new seed is
 ## not updated (3rd line, col. 5 is set to 1)
 ##
@@ -961,7 +997,6 @@ printf ">a_3\nAAAA\n>b_1\nAAAT\n>c_2\nTTTT\n>d_1\nATTT\n" | \
     awk 'NR == 3 {exit $5 == 1 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-
 
 ## -i print semicolon if the abundance is not at either end (gcov)
 ##
