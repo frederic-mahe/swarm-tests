@@ -1058,6 +1058,32 @@ printf ">s_1\nA\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+## Swarm -l clobbers when using /dev/stdout
+DESCRIPTION="swarm -l clobbers when using /dev/stdout"
+LOG=$(mktemp)
+echo "pass 1" > ${LOG}
+printf ">s_1\nA\n" | \
+    "${SWARM}" -o /dev/null -l /dev/stdout >> ${LOG}
+head -n 1 ${LOG} | \
+    grep -q "^pass 1$" && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+rm -f ${LOG}
+unset LOG
+
+## Swarm -l does no clobber when using "-"
+DESCRIPTION="swarm -l does no clobber when using '-'"
+LOG=$(mktemp)
+echo "pass 1" > ${LOG}
+printf ">s_1\nA\n" | \
+    "${SWARM}" -o /dev/null -l - >> ${LOG}
+head -n 1 ${LOG} | \
+    grep -q "^pass 1$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm -f ${LOG}
+unset LOG
+
 
 ## ---------------------------------------------------------------- output-file
 
