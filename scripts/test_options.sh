@@ -1058,18 +1058,18 @@ printf ">s_1\nA\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## Swarm -l clobbers when using /dev/stdout
-DESCRIPTION="swarm -l clobbers when using /dev/stdout"
-LOG=$(mktemp)
-echo "pass 1" > ${LOG}
-printf ">s_1\nA\n" | \
-    "${SWARM}" -o /dev/null -l /dev/stdout >> ${LOG}
-head -n 1 ${LOG} | \
-    grep -q "^pass 1$" && \
-    failure "${DESCRIPTION}" || \
-        success "${DESCRIPTION}"
-rm -f ${LOG}
-unset LOG
+## Swarm -l clobbers when using /dev/stdout (linux only, no clobbering on MacOS)
+# DESCRIPTION="swarm -l clobbers when using /dev/stdout"
+# LOG=$(mktemp)
+# echo "pass 1" > ${LOG}
+# printf ">s_1\nA\n" | \
+#     "${SWARM}" -o /dev/null -l /dev/stdout >> ${LOG}
+# head -n 1 ${LOG} | \
+#     grep -q "^pass 1$" && \
+#     failure "${DESCRIPTION}" || \
+#         success "${DESCRIPTION}"
+# rm -f ${LOG}
+# unset LOG
 
 ## Swarm -l does no clobber when using "-"
 DESCRIPTION="swarm -l does no clobber when using '-'"
