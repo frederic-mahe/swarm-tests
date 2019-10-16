@@ -3116,4 +3116,53 @@ if which valgrind > /dev/null 2>&1 ; then
 fi
 
 
+## valgrind thread issues
+if which valgrind > /dev/null 2>&1 ; then
+
+    DESCRIPTION="valgrind check for thread issues (-d 0)"
+    valgrind \
+        --log-fd=3 \
+        --tool=helgrind \
+        "${SWARM}" -d 0 -t 2 \
+        <(printf ">s1_1\nA\n>s2_1\nA\n>s3_1\nA\n>s4_1\nA\n") \
+        3>&1 1> /dev/null 2> /dev/null | \
+        grep -q "ERROR SUMMARY: 0 errors" && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
+    DESCRIPTION="valgrind check for thread issues (-d 1)"
+    valgrind \
+        --log-fd=3 \
+        --tool=helgrind \
+        "${SWARM}" -d 1 -t 2 \
+        <(printf ">s1_1\nA\n>s2_1\nC\n>s3_1\nG\n>s4_1\nT\n") \
+        3>&1 1> /dev/null 2> /dev/null | \
+        grep -q "ERROR SUMMARY: 0 errors" && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
+    DESCRIPTION="valgrind check for thread issues (-d 1 -f)"
+    valgrind \
+        --log-fd=3 \
+        --tool=helgrind \
+        "${SWARM}" -d 1 -f -t 2 \
+        <(printf ">s1_3\nAA\n>s2_1\nAC\n>s3_1\nAG\n>s4_1\nTT\n") \
+        3>&1 1> /dev/null 2> /dev/null | \
+        grep -q "ERROR SUMMARY: 0 errors" && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
+    DESCRIPTION="valgrind check for thread issues (-d 2)"
+    valgrind \
+        --log-fd=3 \
+        --tool=helgrind \
+        "${SWARM}" -d 2 -t 2 \
+        <(printf ">s1_3\nAAA\n>s2_1\nACC\n>s3_1\nAGG\n>s4_1\nATT\n") \
+        3>&1 1> /dev/null 2> /dev/null | \
+        grep -q "ERROR SUMMARY: 0 errors" && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
+fi
+
 exit 0
