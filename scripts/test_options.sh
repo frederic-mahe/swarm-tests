@@ -353,6 +353,18 @@ printf ">s1_3\nAAA\n>s2_2\nGGG\n>s3_1\nAAG\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+## trigger 16-bit computation for second-generation hits (algo.cc:377)
+# With default alignment score parameters, d needs to be at least 7 to
+# use 16-bit computations. We also need to use three sequences that
+# have 1-7 differences between A and B, and 1-7 differences between B
+# and C, and >7 differences between A and C to trigger the scan for
+# second-generation hits.
+DESCRIPTION="trigger 16-bit computation for second-generation hits"
+printf ">a_3\nAAAACCCC\n>b_2\nAAAAGGGG\n>c_1\nTTTTGGGG\n" | \
+    "${SWARM}" -d 7 > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 
 #*****************************************************************************#
 #                                                                             #
