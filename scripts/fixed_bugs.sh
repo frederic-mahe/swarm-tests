@@ -2445,7 +2445,7 @@ printf ">a_1\nA\n>b_1\nA\n>c_2\nC\n>d_2\nT\n" | \
 ## https://github.com/torognes/swarm/issues/140
 
 ## swarm aborts if abundance value is zero (-z)
-DESCRIPTION="swarm aborts if abundance value is zero (-z)"
+DESCRIPTION="issue 140 --- swarm aborts if abundance value is zero (-z)"
 printf ">s;size=0\nA\n" | \
     "${SWARM}" -z 2> /dev/null && \
     failure "${DESCRIPTION}" || \
@@ -2472,6 +2472,50 @@ printf ">s;size=0\nA\n" | \
 ## https://github.com/torognes/swarm/issues/142
 
 ## not testable
+
+
+#*****************************************************************************#
+#                                                                             #
+#                code coverage for algod1.cc (issue 143)                      #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/143
+
+## not testable
+
+
+#*****************************************************************************#
+#                                                                             #
+#     code modernization (long-term task, very low priority) (issue 144)      #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/144
+
+## not testable
+
+
+#*****************************************************************************#
+#                                                                             #
+#       Does swarm work with nanopore short amplicons? (issue 145)            #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/145
+
+## not testable
+
+
+#*****************************************************************************#
+#                                                                             #
+#       code coverage 2: the gnarly cases enhancement (issue 146)             #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/146
+
+## (see option and input tests)
 
 
 exit 0
