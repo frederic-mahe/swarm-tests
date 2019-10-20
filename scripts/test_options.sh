@@ -151,29 +151,36 @@ unset FASTA
 #                                                                             #
 #*****************************************************************************#
 
-## SSE2 instructions (first introduced in GGC 3.1)
-SSE2=""
-# on a linux system
-SSE2=$(grep -io -m 1 "sse2" /proc/cpuinfo 2> /dev/null)
-# or on a MacOS system
-[[ -z "${SSE2}" ]] && \
-    SSE2=$(sysctl -n machdep.cpu.features 2> /dev/null | grep -io "SSE2")
-# if sse2 is present, check if swarm runs normally
-if [[ -n "${SSE2}" ]] ; then
-    DESCRIPTION="swarm runs normally when SSE2 instructions are available"
-    printf ">s_1\nA\n" | \
-        "${SWARM}" > /dev/null 2>&1 && \
-        success "${DESCRIPTION}" || \
-            failure "${DESCRIPTION}"
-else
-    # swarm aborts with a non-zero status if SSE2 is missing (hardcoded)
-    DESCRIPTION="swarm aborts when SSE2 instructions are not available"
-    printf ">s_1\nA\n" | \
-        "${SWARM}" > /dev/null 2>&1 && \
-        failure "${DESCRIPTION}" || \
-            success "${DESCRIPTION}"
+## Check for SSE2 instructions (x86-64 only)
+# works on both Linux and MacOS? alternative is lscpu 2> /dev/null |
+# awk '$0 ~ "Architecture" {print $NF}'
+ARCHITECTURE=$(uname -a | awk '{print $(NF-1)}')
+
+if [[ "${ARCHITECTURE}" == "x86_64" ]] ; then
+    ## SSE2 instructions (first introduced in GGC 3.1)
+    SSE2=""
+    # on a x86-64 linux system
+    SSE2=$(grep -io -m 1 "sse2" /proc/cpuinfo 2> /dev/null)
+    # or on a x86-64 MacOS system
+    [[ -z "${SSE2}" ]] && \
+        SSE2=$(sysctl -n machdep.cpu.features 2> /dev/null | grep -io "SSE2")
+    # if sse2 is present, check if swarm runs normally
+    if [[ -n "${SSE2}" ]] ; then
+        DESCRIPTION="swarm runs normally when SSE2 instructions are available"
+        printf ">s_1\nA\n" | \
+            "${SWARM}" > /dev/null 2>&1 && \
+            success "${DESCRIPTION}" || \
+                failure "${DESCRIPTION}"
+    else
+        # swarm aborts with a non-zero status if SSE2 is missing (hardcoded)
+        DESCRIPTION="swarm aborts when SSE2 instructions are not available"
+        printf ">s_1\nA\n" | \
+            "${SWARM}" > /dev/null 2>&1 && \
+            failure "${DESCRIPTION}" || \
+                success "${DESCRIPTION}"
+    fi
 fi
-unset SSE2
+unset ARCHITECTURE SSE2
 
 
 #*****************************************************************************#
