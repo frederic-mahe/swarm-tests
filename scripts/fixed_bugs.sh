@@ -2518,5 +2518,16 @@ printf ">s;size=0\nA\n" | \
 ## (see option and input tests)
 
 
+#*****************************************************************************#
+#                                                                             #
+#        amplicon sequence reconstruction with swarm? (issue 147)             #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/147
+
+## not testable
+
+
 exit 0
 
