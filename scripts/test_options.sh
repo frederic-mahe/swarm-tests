@@ -2008,8 +2008,8 @@ printf ">s1_2\nAA\n>s2_1\nAC\n>s3_1\nGG\n" | \
         failure "${DESCRIPTION}"
 
 ## Check the output order (it should be sorted by abundance, then by
-## order of sequences (A, C, G and T). Sorting by alphabetical order
-## of headers is never necessary since sequences are always different
+## alphabetical order of headers). Ordering by sequences (A, C, G and
+## T) is never necessary since sequence labels are always different
 ## (even when d = 0).
 
 ## -w expected output order (2 clusters, ordered by abundance)
