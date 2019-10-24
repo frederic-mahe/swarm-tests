@@ -103,7 +103,7 @@ DESCRIPTION="non-github issue 2 --- file capturing /dev/stdout contains no null 
 TMP=$(mktemp)
 (echo "1" ; "${SWARM}" -v 2> /dev/null ; echo "2") > "${TMP}"
 # grep -E to work on OSX and -P on GNU/Linux
-(grep -Eqa '\x00' "${TMP}" || grep -Pqa '\x00' "${TMP}") && \
+(grep -Eqa '\x00' "${TMP}" || grep -Pqa '\x00' "${TMP}" 2> /dev/null) && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 rm "${TMP}"
@@ -422,9 +422,9 @@ printf ">a_3\nAAA\n>b_2\nACC\n>c_1\nCCC\n" | \
 DESCRIPTION="issue 21 --- report first illegal fasta character and line number"
 printf ">s_1\nB\n" | \
     "${SWARM}" 2>&1 | \
-    grep -qE "Error: Illegal character \'.\' in sequence on line [0-9]+" && \
-    failure "${DESCRIPTION}" || \
-        success "${DESCRIPTION}"
+    grep -qE "Error: Illegal character '.' in sequence on line [0-9]+" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 
 #*****************************************************************************#
@@ -700,7 +700,7 @@ DESCRIPTION="issue 40 --- swarm performs OTU breaking by default"
 printf ">s1_3\nAA\n>s2_3\nCC\n>s3_1\nAC\n" | \
 	"${SWARM}" 2> /dev/null | \
     wc -l | \
-    grep -q "^2$" && \
+    grep -q "\b2$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
