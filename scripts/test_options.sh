@@ -95,7 +95,7 @@ DESCRIPTION="number of OTUs is correct"
 printf ">s1_2\nAA\n>s2_1\nAT\n>s3_1\nCC\n" | \
     "${SWARM}" 2> /dev/null | \
     wc -l | \
-    grep -q "\b2$" && \
+    grep -q "^ *2$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -393,7 +393,7 @@ DESCRIPTION="deactivate OTU breaking"
 printf ">s1_9\nAA\n>s2_8\nCC\n>s3_1\nAC\n" | \
     "${SWARM}" -n 2> /dev/null | \
     wc -l | \
-    grep -q "\b1$" && \
+    grep -q "^ *1$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -425,7 +425,7 @@ DESCRIPTION="swarm groups small OTUs with large OTUs (boundary = 3)"
 printf ">s1_3\nAA\n>s2_1\nCC\n" | \
     "${SWARM}" -f 2> /dev/null | \
     wc -l | \
-    grep -q "\b1$" && \
+    grep -q "^ *1$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -510,7 +510,7 @@ DESCRIPTION="boundary value taken into account by fastidious option (-b 2)"
 printf ">s1_3\nAA\n>s2_2\nCC\n" | \
     "${SWARM}" -f -b 2 2> /dev/null | \
     wc -l | \
-    grep -q "\b2$" && \
+    grep -q "^ *2$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -893,7 +893,7 @@ DESCRIPTION="-i outputs one line per OTU"
 printf ">s1_1\nAA\n>s2_1\nAC\n>s3_1\nGG\n>s4_1\nGT\n" | \
     "${SWARM}" -o /dev/null -i - 2> /dev/null | \
     wc -l | \
-    grep -q "\b2$" && \
+    grep -q "^ *2$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -1182,7 +1182,7 @@ DESCRIPTION="-r number of OTUs is correct (1 line expected)"
 printf ">s_1\nA\n" | \
     "${SWARM}" -r 2> /dev/null | \
     wc -l | \
-    grep -q "\b1$" && \
+    grep -q "^ *1$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -2178,7 +2178,7 @@ DESCRIPTION="swarm does not merge different sequences (-d 0)"
 printf ">s1_1\nA\n>s2_5\nT\n" | \
     "${SWARM}" -d 0 2> /dev/null | \
     wc -l | \
-    grep -q "\b2$" && \
+    grep -q "^ *2$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 

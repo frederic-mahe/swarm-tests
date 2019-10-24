@@ -700,7 +700,7 @@ DESCRIPTION="issue 40 --- swarm performs OTU breaking by default"
 printf ">s1_3\nAA\n>s2_3\nCC\n>s3_1\nAC\n" | \
 	"${SWARM}" 2> /dev/null | \
     wc -l | \
-    grep -q "\b2$" && \
+    grep -q "^ *2$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
