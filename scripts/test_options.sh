@@ -373,6 +373,59 @@ printf ">a_3\nAAAACCCC\n>b_2\nAAAAGGGG\n>c_1\nTTTTGGGG\n" | \
         failure "${DESCRIPTION}"
 
 
+## disable SSE3 instructions (x86-64 only)
+ARCHITECTURE=$(uname -a | awk '{print $(NF-1)}')
+if [[ "${ARCHITECTURE}" == "x86_64" ]] ; then
+    ## trigger pairwise alignment using 16 bits on 8 channels (-d >= 16)
+    # pairwise alignment scores can be stored either on 8 or 16 bits. The
+    # number of bits is chosen as such:
+    # if d <= min(255 / mismatch penalty , 255 / gap open + extend) then 8 else 16
+    # with default pairwise alignment parameters, 255 / 16 is the minimum
+    # (almost 16), so -d 16 will force pairwise alignments using 16 bits.
+    DESCRIPTION="trigger pairwise alignment using 16 bits on 8 channels (-d >= 16) (no SSE3)"
+    printf ">s1_1\nAAAAA\n>s2_1\nAAGGA\n" | \
+        "${SWARM}" -d 16 --disable-sse3 > /dev/null 2>&1 && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
+    ## trigger pairwise alignment backtracking (d > 1, length > 8,
+    ## insertion) (nw.cc:213)
+    DESCRIPTION="trigger pairwise alignment backtracking (length > 8, insertion) (no SSE3)"
+    printf ">s1_1\nAAAAAAAAAA\n>s2_1\nAAAAAAAAAAGG\n" | \
+        "${SWARM}" -d 2 -u - --disable-sse3 > /dev/null 2>&1 && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
+    ## once down with a cluster, swarm goes back to the first unclustered
+    ## amplicon in the pool (d > 1, algo.cc:266)
+    DESCRIPTION="swarm goes back to the 1st unclustered amplicon in the pool (d>1) (no SSE3)"
+    printf ">s1_3\nAAA\n>s2_2\nGGG\n>s3_1\nAAG\n" | \
+        "${SWARM}" -d 2 --disable-sse3 > /dev/null 2>&1 && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
+    ## swarm -d 2 -w ouputs cluster seeds (algo.cc:591)
+    DESCRIPTION="swarm -w ouputs cluster seeds (d > 1)"
+    printf ">s1_3\nAAA\n>s2_2\nGGG\n>s3_1\nAAG\n" | \
+        "${SWARM}" -d 2 -w - --disable-sse3 > /dev/null 2>&1 && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
+    ## trigger 16-bit computation for second-generation hits (algo.cc:377)
+    # With default alignment score parameters, d needs to be at least 7 to
+    # use 16-bit computations. We also need to use three sequences that
+    # have 1-7 differences between A and B, and 1-7 differences between B
+    # and C, and >7 differences between A and C to trigger the scan for
+    # second-generation hits.
+    DESCRIPTION="trigger 16-bit computation for second-generation hits (no SSE3)"
+    printf ">a_3\nAAAACCCC\n>b_2\nAAAAGGGG\n>c_1\nTTTTGGGG\n" | \
+        "${SWARM}" -d 7 --disable-sse3 > /dev/null 2>&1 && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+fi
+unset ARCHITECTURE
+
+
 #*****************************************************************************#
 #                                                                             #
 #                             --no-otu-breaking                               #
