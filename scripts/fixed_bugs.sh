@@ -2562,5 +2562,16 @@ printf ">s;size=0\nA\n" | \
 ## not testable
 
 
+#*****************************************************************************#
+#                                                                             #
+# helgrind tests fail when swarm is compiled for coverage testing (issue 151) #
+#                                                                             #
+#*****************************************************************************#
+
+## https://github.com/torognes/swarm/issues/151
+
+## not testable
+
+
 exit 0
 
