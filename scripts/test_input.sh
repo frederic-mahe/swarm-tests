@@ -181,16 +181,16 @@ printf ">;size=1\nA\n" | \
         success "${DESCRIPTION}"
 
 ## Test very long header
-DESCRIPTION="swarm accepts headers as long as LINE_MAX - 3 (2,045)"
-MAX=2044  # ">" + MAX + "_1\0" = 2044 + 4 = 2048 = OK
+DESCRIPTION="swarm accepts headers as long as LINE_MAX - 5 (2,043)"
+MAX=2043  # ">" + MAX + "_1\n\0" = 2043 + 5 = 2048 = OK
 printf ">%s_1\nA\n" $(head -c ${MAX} < /dev/zero | tr '\0' 's') | \
     "${SWARM}" > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 unset MAX
 
-DESCRIPTION="swarm aborts on headers longer than LINE_MAX - 2 (2,046)"
-MAX=2045 # ">" + MAX + "_1\0" = 2045 + 4 = 2049 = ERROR
+DESCRIPTION="swarm aborts on headers longer than LINE_MAX - 5 (2,044)"
+MAX=2044 # ">" + MAX + "_1\n\0" = 2044 + 5 = 2049 = ERROR
 printf ">%s_1\nA\n" $(head -c ${MAX} < /dev/zero | tr '\0' 's') | \
     "${SWARM}" > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
