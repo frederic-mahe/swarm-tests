@@ -396,21 +396,6 @@ if [[ "${ARCHITECTURE}" == "x86_64" ]] ; then
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 
-    ## once down with a cluster, swarm goes back to the first unclustered
-    ## amplicon in the pool (d > 1, algo.cc:266)
-    DESCRIPTION="swarm goes back to the 1st unclustered amplicon in the pool (d>1) (no SSE3)"
-    printf ">s1_3\nAAA\n>s2_2\nGGG\n>s3_1\nAAG\n" | \
-        "${SWARM}" -d 2 --disable-sse3 > /dev/null 2>&1 && \
-        success "${DESCRIPTION}" || \
-            failure "${DESCRIPTION}"
-
-    ## swarm -d 2 -w ouputs cluster seeds (algo.cc:591)
-    DESCRIPTION="swarm -w ouputs cluster seeds (d > 1)"
-    printf ">s1_3\nAAA\n>s2_2\nGGG\n>s3_1\nAAG\n" | \
-        "${SWARM}" -d 2 -w - --disable-sse3 > /dev/null 2>&1 && \
-        success "${DESCRIPTION}" || \
-            failure "${DESCRIPTION}"
-
     ## trigger 16-bit computation for second-generation hits (algo.cc:377)
     # With default alignment score parameters, d needs to be at least 7 to
     # use 16-bit computations. We also need to use three sequences that
