@@ -506,6 +506,34 @@ printf ">s_1\n%s\n" $(head -c ${MAX} < /dev/zero | tr '\0' 'A') | \
         failure "${DESCRIPTION}"
 unset MAX
 
+## swarm d = 1 can process sequences with more than 5000 nucleotides
+# test can fail if there are less than 10 A, G and Ts in the sequence
+DESCRIPTION="swarm d = 1 accepts sequences with 5000 nucleotides or more"
+MAX=5000
+SEED=$(env LC_CTYPE=C tr -dc 'acgtACGT' < /dev/urandom | \
+           tr "[:lower:]" "[:upper:]" | head -c ${MAX})
+SUBSEED=$(sed 's/[AGT]/C/10' <<< $SEED)  # replace the 10th A, G or T with a C
+printf ">s1_3\n%s\n>s2_1\n%s\n" $SEED $SUBSEED | \
+    "${SWARM}" -l /dev/null | \
+    grep -q "^s1_3 s2_1$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+unset SEED SUBSEED
+
+## swarm d = 2 can process sequences with more than 5000 nucleotides
+# test can fail if there are less than 10 A, G and Ts in the sequence
+DESCRIPTION="swarm d = 2 accepts sequences with 5000 nucleotides or more"
+MAX=5000
+SEED=$(env LC_CTYPE=C tr -dc 'acgtACGT' < /dev/urandom | \
+           tr "[:lower:]" "[:upper:]" | head -c ${MAX})
+SUBSEED=$(sed 's/[AGT]/C/10' <<< $SEED)  # replace the 10th A, G or T with a C
+printf ">s1_3\n%s\n>s2_1\n%s\n" $SEED $SUBSEED | \
+    "${SWARM}" -d 2 -l /dev/null | \
+    grep -q "^s1_3 s2_1$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+unset SEED SUBSEED
+
 ## swarm can printout sequences with more than 1025 nucleotides
 ## (db.cc coverage: default buffer can contain 1024 nucleotides)
 DESCRIPTION="swarm can output sequences with more than 1025 nucleotides (-w)"
@@ -515,5 +543,33 @@ printf ">s_1\n%s\n" $(head -c ${MAX} < /dev/zero | tr '\0' 'A') | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 unset MAX
+
+
+#*****************************************************************************#
+#                                                                             #
+#                           Realistic input file                              #
+#                                                                             #
+#*****************************************************************************#
+
+# I think it would be a good idea to add some tests using a somewhat
+# larger database than the current tests. A fixed database of some
+# 1000-10000 sequences, perhaps subsampled from small real dataset. It
+# could be run with -d 0, -d 1, -d 1 -f, and -d 2 and with both 1 and 2
+# threads. All output files could be generated and the correct contents
+# of those could be checked with a fingerprint (md5 or sha1). I think it
+# would trigger some of the code lines that are not covered as of
+# now. It could also reveal more subtle errors introduced in the code.
+
+## Work in progress!
+# THREADS=1
+# DIFFERENCES=0
+
+# ${SWARM} \
+#     -d ${DIFFERENCES} \
+#     -z \
+#     -t ${THREADS} \
+#     -o /dev/null \
+#     -l /dev/null \
+#     <(zcat ../data/T111_30k_reads.fas.gz)  # 1-thread run takes 150 ms
 
 exit 0
