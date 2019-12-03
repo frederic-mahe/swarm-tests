@@ -1069,6 +1069,171 @@ printf ">s1;size=1;length=1\nA\n>s2;size=1;length=1\nT\n" | \
         failure "${DESCRIPTION}"
 
 
+## --------------------------------------------------------------- network-file
+
+# when d = 1, dumps the network of single-difference amplicons to a
+# specified file in a sorted and tab-separated format (seed amplicon,
+# neighbour amplicon). Use -n to get the full network, otherwise only
+# links between amplicons where the abundance of the seed is higher or
+# equal to the abundance of the neighbour is included.
+
+## Swarm accepts the options -j and --network-file
+for OPTION in "-j" "--network-file" ; do
+    DESCRIPTION="swarms accepts the option ${OPTION}"
+    printf ">s1_1\nA\n>s2_1\nT\n" | \
+        "${SWARM}" "${OPTION}" /dev/null > /dev/null 2>&1 && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+done
+
+
+## tests written with Milena Königshofen:
+# https://github.com/milenazilena/Internship_2019/blob/master/Tests/test_network_option.sh
+
+# test sequences with one difference (different abundances): we expect
+# one link
+DESCRIPTION="-j one difference, different abundances: one link"
+printf ">s1_3\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -l /dev/null -o /dev/null -j - | \
+    awk '{exit NR == 1 ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+# test sequences with two differences (different abundances): we
+# expect no link
+DESCRIPTION="-j two differences, different abundances: no link"
+printf ">s1_3\nA\n>s2_1\nCC\n" | \
+    "${SWARM}" -l /dev/null -o /dev/null -j - | \
+    awk '{exit NR == 0 ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+# test sequences with one difference (same abundances): we expect two
+# links
+DESCRIPTION="-j one difference, same abundance: two links"
+printf ">s1_1\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -l /dev/null -o /dev/null -j - | \
+    awk 'END {exit NR == 2 ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+# test sequences with two differences (same abundances): we expect no
+# link
+DESCRIPTION="-j two differences, same abundance: no link"
+printf ">s1_1\nA\n>s2_1\nCC\n" | \
+    "${SWARM}" -l /dev/null -o /dev/null -j - | \
+    awk '{exit NR == 0 ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+# tab-separated format
+DESCRIPTION="-j tab-separated format"
+printf ">s1_3\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -l /dev/null -o /dev/null -j - | \
+    grep -q $'\t' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+# sorted by decreasing abundances within link (most abundant amplicon
+# first)
+DESCRIPTION="-j link members are sorted by decreasing abundance"
+printf ">s1_1\nA\n>s2_3\nC\n" | \
+    "${SWARM}" -l /dev/null -o /dev/null -j - | \
+    awk '{exit $1 == "s2_3" ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+# sorted by decreasing abundances between lines (most abundant
+# amplicon first)
+DESCRIPTION="-j links are sorted by decreasing abundance"
+printf ">s1_2\nA\n>s2_1\nC\n>s3_1\nTT\n>s4_3\nGT\n" | \
+    "${SWARM}" -l /dev/null -o /dev/null -j - | \
+    cut -f 1 | \
+    tr "\n" " " | \
+    awk -F "[_ ]" '{exit $2 > $4 ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+# binds from high to low abundances: we expect only one link if
+# sequences have different abundance values
+DESCRIPTION="-j link from high to low abundance"
+printf ">s1_3\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -l /dev/null -o /dev/null -j - | \
+    awk '{exit NR == 1 ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+# binds between equals: we expect double link if sequences have
+# different abundance values
+DESCRIPTION="-j double link when equal abundance"
+printf ">s1_1\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -l /dev/null -o /dev/null -j - | \
+    tr "\n" " " | \
+    awk '{exit $1 == $4 && $2 == $3 ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+# double links are from A to B and from B to A
+DESCRIPTION="-j double link when equal abundance (A to B and B to A)"
+printf ">s1_1\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -l /dev/null -o /dev/null -j - | \
+    awk 'END {exit NR == 2 ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+# double links also between layers: we expect double links between
+# s2_1 and s3_1
+DESCRIPTION="-j expect double link between layers too"
+printf ">s1_3\nA\n>s2_1\nC\n>s3_1\nCT\n" | \
+    "${SWARM}" -l /dev/null -o /dev/null -j - | \
+        tail -n 2 | \
+        tr "\n" " " | \
+        awk '{exit $1 == $4 && $2 == $3 ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+# only with d = 1: we expect no link
+DESCRIPTION="-j only when -d 1"
+printf ">s1_3\nA\n>s2_1\nC\n>s3_1\nG\n" | \
+    "${SWARM}" -d 2 -o /dev/null -j - 2> /dev/null && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+# using fastidious option: we expect no error
+DESCRIPTION="-j works with -f"
+printf ">s1_3\nA\n>s2_1\nCC\n" | \
+    "${SWARM}" -f -l /dev/null -o /dev/null -j - && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+# with fastidious option: we expect no link (referred to "test
+# sequences with two differences (different abundances)")
+DESCRIPTION="-j -f no link if two differences"
+printf ">s1_3\nA\n>s2_1\nCC\n" | \
+    "${SWARM}" -f -l /dev/null -o /dev/null -j - | \
+    awk '{exit NR == 0 ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+# fastidious option doesn't change behaviour of -j
+DESCRIPTION="-f does not change the behaviour of -j"
+printf ">s1_3\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -f -l /dev/null -o /dev/null -j - | \
+    awk '{exit NR == 1 ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+# -n to get full network (abundance values don't matter anymore)
+# we expect a double link
+DESCRIPTION="-n does not change the behaviour of -j"
+printf ">s1_3\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -n -l /dev/null -o /dev/null -j - | \
+    tr "\n" " " | \
+    awk '{exit $1 == $4 && $2 == $3 ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+
 ## ------------------------------------------------------------------------ log
 
 ## Swarm accepts the options -l and --log
