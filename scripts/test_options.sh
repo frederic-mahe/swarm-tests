@@ -2262,6 +2262,21 @@ printf ">s1_2\nAAA\n>s2_2\nCCC\n>s3_1\nCCCC\n" | \
         failure "${DESCRIPTION}"
 
 
+## --------------------------------------------------------------- disable-sse3
+
+# disables SSE3 and any other x86 extensions beyond SSE2 (which is
+# always present on x86_64). SSE3 is only used when d>1.
+
+## Swarm accepts the options -x and --disable-sse3
+for OPTION in "-x" "--disable-sse3" ; do
+    DESCRIPTION="swarms accepts the option ${OPTION}"
+    printf ">s1_1\nA\n>s2_1\nT\n" | \
+        "${SWARM}" -d 2 "${OPTION}" /dev/null > /dev/null 2>&1 && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+done
+
+
 ## ---------------------------------------------------------- usearch-abundance
 
 # what are the output files impacted by the -z option?
