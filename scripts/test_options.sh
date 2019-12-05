@@ -2271,10 +2271,31 @@ printf ">s1_2\nAAA\n>s2_2\nCCC\n>s3_1\nCCCC\n" | \
 for OPTION in "-x" "--disable-sse3" ; do
     DESCRIPTION="swarms accepts the option ${OPTION}"
     printf ">s1_1\nA\n>s2_1\nT\n" | \
-        "${SWARM}" -d 2 "${OPTION}" /dev/null > /dev/null 2>&1 && \
+        "${SWARM}" -d 2 "${OPTION}" > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
+
+# SSE3 instructions are only used when d > 1
+DESCRIPTION="swarms accepts -x when d > 1"
+printf ">s1_1\nAA\n>s2_1\nTT\n" | \
+    "${SWARM}" -d 2 -x > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+# -x has no effect when d = 1 or d = 0
+DESCRIPTION="swarms rejects -x when d = 1"
+printf ">s1_1\nA\n>s2_1\nT\n" | \
+    "${SWARM}" -d 1 -x > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+# -x has no effect when d = 0
+DESCRIPTION="swarms rejects -x when d = 0"
+printf ">s1_1\nA\n>s2_1\nT\n" | \
+    "${SWARM}" -d 0 -x > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
 
 
 ## ---------------------------------------------------------- usearch-abundance
