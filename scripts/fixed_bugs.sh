@@ -2584,5 +2584,34 @@ printf ">s;size=0\nA\n" | \
 ## not testable
 
 
-exit 0
+# *************************************************************************** #
+#                                                                             #
+#                 restrict -x usage to d > 1 (issue 153)                      #
+#                                                                             #
+# *************************************************************************** #
 
+## https://github.com/torognes/swarm/issues/153
+
+# SSE3 instructions are only used when d > 1
+DESCRIPTION="swarms accepts -x when d > 1"
+printf ">s_1\nA\n" | \
+    "${SWARM}" -d 2 -x > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+# -x has no effect when d = 1 or d = 0
+DESCRIPTION="swarms rejects -x when d = 1"
+printf ">s_1\nA\n" | \
+    "${SWARM}" -d 1 -x > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+# -x has no effect when d = 0
+DESCRIPTION="swarms rejects -x when d = 0"
+printf ">s_1\nA\n" | \
+    "${SWARM}" -d 0 -x > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+
+exit 0
