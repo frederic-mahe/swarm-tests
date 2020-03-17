@@ -9,7 +9,6 @@ printf "# %s %s\n" "${LINE:${#SCRIPT_NAME}}" "${SCRIPT_NAME}"
 RED="\033[1;31m"
 GREEN="\033[1;32m"
 NO_COLOR="\033[0m"
-NULL="/dev/null"
 
 failure () {
     printf "${RED}FAIL${NO_COLOR}: ${1}\n"
