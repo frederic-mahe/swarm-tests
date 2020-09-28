@@ -12,7 +12,7 @@ NO_COLOR="\033[0m"
 
 failure () {
     printf "${RED}FAIL${NO_COLOR}: ${1}\n"
-    # exit -1
+    exit -1
 }
 
 success () {
@@ -571,5 +571,18 @@ unset MAX
 #     -o /dev/null \
 #     -l /dev/null \
 #     <(zcat ../data/T111_30k_reads.fas.gz)  # 1-thread run takes 150 ms
+
+# When testing with a natural dataset, the absolute expected result is
+# not known. To solve that, an alternative would be to create a
+# perfectly controlled dataset, with a know internal
+# structure. Simulation is a possibility, but I could also produce an
+# exhaustive set (all primary and secondary microvariants for a given
+# sequence). However, it is not possible to do so for sequences longer
+# than 100 nucleotides, as the number of microvariants is rougly 50
+# times the squared length: 500k for a length of 100, more than 7
+# million for an 18S V4 sequence.
+
+# cd Swarms/tests/microvariants/
+# python2 produce_microvariants_two_layers.py > tmp.fas
 
 exit 0

@@ -12,7 +12,7 @@ NO_COLOR="\033[0m"
 
 failure () {
     printf "${RED}FAIL${NO_COLOR}: ${1}\n"
-    # exit 1
+    exit -1
 }
 
 success () {
@@ -1253,7 +1253,7 @@ printf ">s1;size=1\nAA\n>s2;size=2\nAA\n" | \
 ##
 ## Bug reported by Antti Karkman first and latter by Noah Hoffman
 for i in {1..3} ; do
-    DESCRIPTION="issue 67 --- name of the representative is tshe name of the seed (-d ${i})"
+    DESCRIPTION="issue 67 --- name of the representative is the name of the seed (-d ${i})"
     printf ">s1_3\nA\n>s2_1\nT\n" | \
         "${SWARM}" -d ${i} -o /dev/null -w - 2> /dev/null | \
         grep -q "^>s1_4$" && \
