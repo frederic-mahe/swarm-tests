@@ -2294,7 +2294,7 @@ if which vsearch > /dev/null ; then
             --quiet \
             --output - | \
         "${SWARM}" -z -l /dev/null | \
-        grep -q "^s1;size=5 s3;size=1$"  && \
+        grep -q "^s1;size=5 s3;size=1$" && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 fi
@@ -2611,6 +2611,33 @@ printf ">s_1\nA\n" | \
     "${SWARM}" -d 0 -x > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
+
+
+# *************************************************************************** #
+#                                                                             #
+#     Incorrect results on ARM64 with long sequences and d>1 (issue 160)      #
+#                                                                             #
+# *************************************************************************** #
+
+## https://github.com/torognes/swarm/issues/160
+
+# swarm 3.0.0 produces incorrect results on the ARM64 architecture
+# (both Linux and Mac) with long sequences and d>2. For example, 2
+# sequences of 2515 bp (or longer) with a single substitution forms 2
+# instead of 1 cluster when d=2 or higher. Other architectures are not
+# affected, and d=1 works well.
+
+# test long sequences with one difference when d > 2
+DESCRIPTION="swarms groups long sequences with one difference when d > 2"
+LENGTH=2515
+SEQ=$(yes A | head -n "${LENGTH}" | tr -d "\n")
+printf ">s1_1\n%s\n>s2_1\n%s\n" "${SEQ}" "$(sed 's/A/T/1' <<< ${SEQ})" | \
+    "${SWARM}" -d 2 2> /dev/null | \
+    grep -wq "s1_1 s2_1" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+unset LENGTH SEQ
 
 
 exit 0
