@@ -2592,21 +2592,21 @@ printf ">s;size=0\nA\n" | \
 ## https://github.com/torognes/swarm/issues/153
 
 # SSE3 instructions are only used when d > 1
-DESCRIPTION="swarms accepts -x when d > 1"
+DESCRIPTION="issue 153 --- swarms accepts -x when d > 1"
 printf ">s_1\nA\n" | \
     "${SWARM}" -d 2 -x > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
 # -x has no effect when d = 1 or d = 0
-DESCRIPTION="swarms rejects -x when d = 1"
+DESCRIPTION="issue 153 --- swarms rejects -x when d = 1"
 printf ">s_1\nA\n" | \
     "${SWARM}" -d 1 -x > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 # -x has no effect when d = 0
-DESCRIPTION="swarms rejects -x when d = 0"
+DESCRIPTION="issue 153 --- swarms rejects -x when d = 0"
 printf ">s_1\nA\n" | \
     "${SWARM}" -d 0 -x > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
@@ -2628,7 +2628,7 @@ printf ">s_1\nA\n" | \
 # affected, and d=1 works well.
 
 # test long sequences with one difference when d > 2
-DESCRIPTION="swarms groups long sequences with one difference when d > 2"
+DESCRIPTION="issue 160 --- swarms groups long sequences with 1 diff when d > 2"
 LENGTH=2515
 SEQ=$(yes A | head -n "${LENGTH}" | tr -d "\n")
 printf ">s1_1\n%s\n>s2_1\n%s\n" "${SEQ}" "$(sed 's/A/T/1' <<< ${SEQ})" | \
