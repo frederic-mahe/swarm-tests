@@ -2622,13 +2622,13 @@ printf ">s_1\nA\n" | \
 ## https://github.com/torognes/swarm/issues/160
 
 # swarm 3.0.0 produces incorrect results on the ARM64 architecture
-# (both Linux and Mac) with long sequences and d>2. For example, 2
+# (both Linux and Mac) with long sequences and d>1. For example, 2
 # sequences of 2515 bp (or longer) with a single substitution forms 2
 # instead of 1 cluster when d=2 or higher. Other architectures are not
 # affected, and d=1 works well.
 
-# test long sequences with one difference when d > 2
-DESCRIPTION="issue 160 --- swarms groups long sequences with 1 diff when d > 2"
+# test long sequences with one difference when d > 1
+DESCRIPTION="issue 160 --- swarms groups long sequences with 1 diff when d > 1"
 LENGTH=2515
 SEQ=$(yes A | head -n "${LENGTH}" | tr -d "\n")
 printf ">s1_1\n%s\n>s2_1\n%s\n" "${SEQ}" "$(sed 's/A/T/1' <<< ${SEQ})" | \
