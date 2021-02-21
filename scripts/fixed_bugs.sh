@@ -2628,11 +2628,21 @@ printf ">s_1\nA\n" | \
 # affected, and d=1 works well.
 
 # test long sequences with one difference when d > 1
-DESCRIPTION="issue 160 --- swarms groups long sequences with 1 diff when d > 1"
+DESCRIPTION="issue 160 --- #1 group 1-diff long sequences with d = 2"
 LENGTH=2515
 SEQ=$(yes A | head -n "${LENGTH}" | tr -d "\n")
 printf ">s1_1\n%s\n>s2_1\n%s\n" "${SEQ}" "$(sed 's/A/T/1' <<< ${SEQ})" | \
     "${SWARM}" -d 2 2> /dev/null | \
+    grep -wq "s1_1 s2_1" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+# test long sequences with one difference with d = 2 and high gap penalties
+DESCRIPTION="issue 160 --- #2 group 1-diff long sequences with d = 2 and high gap penalties"
+LENGTH=1122
+SEQ=$(yes A | head -n "${LENGTH}" | tr -d "\n")
+printf ">s1_1\n%s\n>s2_1\n%s\n" "${SEQ}" "$(sed 's/A/C/1' <<< ${SEQ})" | \
+    "${SWARM}" -d 2  -g 50 -e 20 2> /dev/null | \
     grep -wq "s1_1 s2_1" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
