@@ -2276,6 +2276,29 @@ for OPTION in "-x" "--disable-sse3" ; do
             failure "${DESCRIPTION}"
 done
 
+## disable SSE3 instructions (x86-64 only)
+ARCHITECTURE=$(uname -a | awk '{print $(NF-1)}')
+if [[ "${ARCHITECTURE}" == "x86_64" ]] ; then
+    ## CPU features (sse3 and above are correctly detected)
+    DESCRIPTION="detect cpu features (-d 2) (with SSE3)"
+    printf ">s1_1\nA\n" | \
+        "${SWARM}" -d 2 2>&1 > /dev/null | \
+        grep "^CPU features" | \
+        grep -q "sse3" && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
+    ## CPU features (sse3 and above are correctly disabled)
+    DESCRIPTION="disable sse3 and above (-d 2)"
+    printf ">s1_1\nA\n" | \
+        "${SWARM}" -d 2 --disable-sse3 2>&1 > /dev/null | \
+        grep "^CPU features" | \
+        grep -q "sse3" && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+fi
+unset ARCHITECTURE
+
 # SSE3 instructions are only used when d > 1
 DESCRIPTION="swarms accepts -x when d > 1"
 printf ">s1_1\nAA\n>s2_1\nTT\n" | \
