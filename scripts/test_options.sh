@@ -1380,6 +1380,14 @@ printf ">s_1\nA\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+## -r first row is correct
+DESCRIPTION="-r field separator is a tabulation"
+printf ">s_1\nA\n" | \
+    "${SWARM}" -r 2> /dev/null | \
+    awk 'BEGIN {FS = "[\t]"} {exit NF == 3 ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 ## -r number of OTUs is correct (1 OTU)
 DESCRIPTION="-r number of OTUs is correct (1 line expected)"
 printf ">s_1\nA\n" | \
