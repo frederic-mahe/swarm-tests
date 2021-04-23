@@ -325,6 +325,14 @@ printf ">s_1\nA\n" | \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
+## Resolution (d) too high for the given scoring system
+# use primer numbers for scoring parameters (greatest common denominator is 1)
+DESCRIPTION="swarm aborts when --difference is too high for the scoring system"
+printf ">s1_2\nAA\n>s2_1\nAC\n" | \
+    "${SWARM}" -d 255 -m 947 -p 953 -g 967 -e 971 2> /dev/null && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
 ## trigger pairwise alignment using 16 bits on 8 channels (-d >= 16)
 # pairwise alignment scores can be stored either on 8 or 16 bits. The
 # number of bits is chosen as such:
