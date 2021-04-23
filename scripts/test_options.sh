@@ -1086,6 +1086,16 @@ for OPTION in "-j" "--network-file" ; do
             failure "${DESCRIPTION}"
 done
 
+# fatal error if network output file is not writable
+DESCRIPTION="-j output file is not writable"
+TMP=$(mktemp)
+chmod ugo-w "${TMP}"
+printf ">s1_2\nAA\n>s2_1\nAC\n" | \
+    "${SWARM}" -j "${TMP}" 2> /dev/null && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+rm -f "${TMP}"
+unset TMP
 
 ## tests written with Milena Königshofen:
 # https://github.com/milenazilena/Internship_2019/blob/master/Tests/test_network_option.sh
