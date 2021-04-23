@@ -1398,6 +1398,14 @@ printf ">s_1\nA\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+## -r number of OTUs is correct with -d 2 (2 OTUs)
+DESCRIPTION="-r number of OTUs is correct (d = 2, 2 OTUs)"
+printf ">s1_2\nAAA\n>s2_1\nACC\n>s3_1\nGGG\n" | \
+    "${SWARM}" -d 2 -r 2> /dev/null | \
+    awk 'BEGIN {FS = "[\t]"} {exit $2 == 2 ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 ## -r first row is correct
 DESCRIPTION="-r field separator is a tabulation"
 printf ">s_1\nA\n" | \
