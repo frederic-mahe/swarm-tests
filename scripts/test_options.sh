@@ -368,6 +368,44 @@ printf ">s1_3\nAAA\n>s2_2\nGGG\n>s3_1\nAAG\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+## swarm - d 2; a sequence and all its L2 microvariants form only one OTU
+microvariants() {
+    local SEQ="${1}"
+    local -i LENGTH=${#SEQ}
+    for ((i=0 ; i<=LENGTH ; i++)) ; do
+        ## insertions
+        for n in A C G T ; do
+            echo ${SEQ:0:i}${n}${SEQ:i:LENGTH}
+        done
+        if (( i > 0 )) ; then
+            ## deletions
+            echo ${SEQ:0:i-1}${SEQ:i:LENGTH}
+            ## substitutions
+            for n in A C G T ; do
+                echo ${SEQ:0:i-1}${n}${SEQ:i:LENGTH}
+            done
+        fi
+    done
+}
+
+## produce a fasta set with a seed, all its unique L2 microvariants
+## but no L1 microvariants (output should contain only one cluster)
+DESCRIPTION="d = 2, group all L2 microvariants into one cluster"
+SEQUENCE="ACGT"
+MICROVARIANTS_L1=$(microvariants ${SEQUENCE} | sort -du | grep -v "^${SEQUENCE}$")
+MICROVARIANTS_L2=$(while read MICROVARIANT ; do
+                       microvariants ${MICROVARIANT}
+                   done <<< "${MICROVARIANTS_L1}" | \
+                       sort -du | grep -v "^${SEQUENCE}$")
+(printf ">seed_2\n%s\n" ${SEQUENCE}
+ comm -23 <(echo "${MICROVARIANTS_L2}") <(echo "${MICROVARIANTS_L1}") | \
+     awk '{print ">s"NR"_1\n"$1}') | \
+    "${SWARM}" -d 2 -o - 2> /dev/null | \
+    awk 'END {exit NR == 1 ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+unset SEQUENCE MICROVARIANTS_L1 MICROVARIANTS_L2
+
 ## trigger 16-bit computation for second-generation hits (algo.cc:377)
 # With default alignment score parameters, d needs to be at least 7 to
 # use 16-bit computations. We also need to use three sequences that
