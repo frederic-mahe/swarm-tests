@@ -189,12 +189,12 @@ printf ">%s_1\nA\n" $(head -c ${MAX} < /dev/zero | tr '\0' 's') | \
         failure "${DESCRIPTION}"
 unset MAX
 
-DESCRIPTION="swarm aborts on headers longer than LINE_MAX - 5 (2,044)"
-MAX=2044 # ">" + MAX + "_1\n\0" = 2044 + 5 = 2049 = ERROR
+DESCRIPTION="swarm accepts headers longer than LINE_MAX - 5 (2,044)"
+MAX=2044 # ">" + MAX + "_1\n\0" = 2044 + 5 = 2049 = OK
 printf ">%s_1\nA\n" $(head -c ${MAX} < /dev/zero | tr '\0' 's') | \
     "${SWARM}" > /dev/null 2>&1 && \
-    failure "${DESCRIPTION}" || \
-        success "${DESCRIPTION}"
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 unset MAX
 
 ## Clustering with only one sequence is accepted
