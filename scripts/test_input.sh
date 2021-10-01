@@ -180,7 +180,23 @@ printf ">;size=1\nA\n" | \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
-## Test very long header
+## Test long headers
+DESCRIPTION="swarm accepts headers as long as (127 - 5) chars"
+MAX=122  # ">" + MAX + "_1\n\0" = MAX + 5
+printf ">%s_1\nA\n" $(head -c ${MAX} < /dev/zero | tr '\0' 's') | \
+    "${SWARM}" > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+unset MAX
+
+DESCRIPTION="swarm accepts headers as long as (255 - 5) chars"
+MAX=250  # ">" + MAX + "_1\n\0" = MAX + 5
+printf ">%s_1\nA\n" $(head -c ${MAX} < /dev/zero | tr '\0' 's') | \
+    "${SWARM}" > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+unset MAX
+
 DESCRIPTION="swarm accepts headers as long as LINE_MAX - 5 (2,043)"
 MAX=2043  # ">" + MAX + "_1\n\0" = 2043 + 5 = 2048 = OK
 printf ">%s_1\nA\n" $(head -c ${MAX} < /dev/zero | tr '\0' 's') | \
@@ -189,13 +205,29 @@ printf ">%s_1\nA\n" $(head -c ${MAX} < /dev/zero | tr '\0' 's') | \
         failure "${DESCRIPTION}"
 unset MAX
 
-DESCRIPTION="swarm accepts headers longer than LINE_MAX - 5 (2,044)"
-MAX=2044 # ">" + MAX + "_1\n\0" = 2044 + 5 = 2049 = OK
+DESCRIPTION="swarm accepts headers as long as (32767 - 5) chars"
+MAX=32762  # ">" + MAX + "_1\n\0" = MAX + 5
 printf ">%s_1\nA\n" $(head -c ${MAX} < /dev/zero | tr '\0' 's') | \
     "${SWARM}" > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 unset MAX
+
+DESCRIPTION="swarm accepts headers as long as (65535 - 5) chars"
+MAX=65530  # ">" + MAX + "_1\n\0" = MAX + 5
+printf ">%s_1\nA\n" $(head -c ${MAX} < /dev/zero | tr '\0' 's') | \
+    "${SWARM}" > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+unset MAX
+
+# DESCRIPTION="swarm aborts on headers longer than LINE_MAX - 5 (2,044)"
+# MAX=2044 # ">" + MAX + "_1\n\0" = 2044 + 5 = 2049 = ERROR
+# printf ">%s_1\nA\n" $(head -c ${MAX} < /dev/zero | tr '\0' 's') | \
+#     "${SWARM}" > /dev/null 2>&1 && \
+#     failure "${DESCRIPTION}" || \
+#         success "${DESCRIPTION}"
+# unset MAX
 
 ## Clustering with only one sequence is accepted
 DESCRIPTION="clustering with only one sequence is accepted"
