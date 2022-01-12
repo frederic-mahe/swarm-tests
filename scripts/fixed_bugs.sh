@@ -2642,12 +2642,58 @@ DESCRIPTION="issue 160 --- #2 group 1-diff long sequences with d = 2 and high ga
 LENGTH=1122
 SEQ=$(yes A | head -n "${LENGTH}" | tr -d "\n")
 printf ">s1_1\n%s\n>s2_1\n%s\n" "${SEQ}" "$(sed 's/A/C/1' <<< ${SEQ})" | \
-    "${SWARM}" -d 2  -g 50 -e 20 2> /dev/null | \
+    "${SWARM}" -d 2 -g 50 -e 20 2> /dev/null | \
     grep -wq "s1_1 s2_1" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
 unset LENGTH SEQ
 
+
+# *************************************************************************** #
+#                                                                             #
+#          documentation: maximal input sequence length (issue 163)           #
+#                                                                             #
+# *************************************************************************** #
+
+## https://github.com/torognes/swarm/issues/163
+
+# current upper limit for sequence lengths:
+# 67,108,861: success
+# 67,108,862: segmentation fault
+DESCRIPTION="issue 163 --- maximal accepted input sequence length"
+LENGTH=67108861  # 67.1 Mb
+FASTA="$(mktemp)"
+(
+    printf ">s1_1\n"
+    yes A | head -n "${LENGTH}" | tr -d "\n"
+    printf "\n"
+    printf ">s2_1\n"
+    (printf "T\n" ; yes A) | head -n "${LENGTH}" | tr -d "\n"
+    printf "\n"
+) > "${FASTA}"
+"${SWARM}" --output /dev/null "${FASTA}" 2> /dev/null && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${FASTA}"
+unset LENGTH FASTA
+
+## deactivated: segmentation fault breaks the test
+# DESCRIPTION="issue 163 --- first input sequence length too big"
+# LENGTH=67108862  # 67.1 Mb
+# FASTA="$(mktemp)"
+# (
+#     printf ">s1_1\n"
+#     yes A | head -n "${LENGTH}" | tr -d "\n"
+#     printf "\n"
+#     printf ">s2_1\n"
+#     (printf "T\n" ; yes A) | head -n "${LENGTH}" | tr -d "\n"
+#     printf "\n"
+# ) > "${FASTA}"
+# "${SWARM}" --output /dev/null "${FASTA}" 2> /dev/null && \
+#     failure "${DESCRIPTION}" || \
+#         success "${DESCRIPTION}"
+# rm "${FASTA}"
+# unset LENGTH FASTA
 
 exit 0
