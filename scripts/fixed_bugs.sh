@@ -2661,22 +2661,24 @@ unset LENGTH SEQ
 # current upper limit for sequence lengths:
 # 67,108,861: success
 # 67,108,862: segmentation fault
-DESCRIPTION="issue 163 --- maximal accepted input sequence length"
-LENGTH=67108861  # 67.1 Mb
-FASTA="$(mktemp)"
-(
-    printf ">s1_1\n"
-    yes A | head -n "${LENGTH}" | tr -d "\n"
-    printf "\n"
-    printf ">s2_1\n"
-    (printf "T\n" ; yes A) | head -n "${LENGTH}" | tr -d "\n"
-    printf "\n"
-) > "${FASTA}"
-"${SWARM}" --output /dev/null "${FASTA}" 2> /dev/null && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-rm "${FASTA}"
-unset LENGTH FASTA
+
+## deactivated: requires at least 32 GB of RAM (too slow, too much RAM)
+# DESCRIPTION="issue 163 --- maximal accepted input sequence length"
+# LENGTH=67108861  # 67.1 Mb
+# FASTA="$(mktemp)"
+# (
+#     printf ">s1_1\n"
+#     yes A | head -n "${LENGTH}" | tr -d "\n"
+#     printf "\n"
+#     printf ">s2_1\n"
+#     (printf "T\n" ; yes A) | head -n "${LENGTH}" | tr -d "\n"
+#     printf "\n"
+# ) > "${FASTA}"
+# "${SWARM}" --output /dev/null "${FASTA}" 2> /dev/null && \
+#     success "${DESCRIPTION}" || \
+#         failure "${DESCRIPTION}"
+# rm "${FASTA}"
+# unset LENGTH FASTA
 
 ## deactivated: segmentation fault breaks the test
 # DESCRIPTION="issue 163 --- first input sequence length too big"
@@ -2695,5 +2697,6 @@ unset LENGTH FASTA
 #         success "${DESCRIPTION}"
 # rm "${FASTA}"
 # unset LENGTH FASTA
+
 
 exit 0
