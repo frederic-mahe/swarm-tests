@@ -2680,23 +2680,22 @@ unset LENGTH SEQ
 # rm "${FASTA}"
 # unset LENGTH FASTA
 
-## deactivated: segmentation fault breaks the test
-# DESCRIPTION="issue 163 --- first input sequence length too big"
-# LENGTH=67108862  # 67.1 Mb
-# FASTA="$(mktemp)"
-# (
-#     printf ">s1_1\n"
-#     yes A | head -n "${LENGTH}" | tr -d "\n"
-#     printf "\n"
-#     printf ">s2_1\n"
-#     (printf "T\n" ; yes A) | head -n "${LENGTH}" | tr -d "\n"
-#     printf "\n"
-# ) > "${FASTA}"
-# "${SWARM}" --output /dev/null "${FASTA}" 2> /dev/null && \
-#     failure "${DESCRIPTION}" || \
-#         success "${DESCRIPTION}"
-# rm "${FASTA}"
-# unset LENGTH FASTA
+DESCRIPTION="issue 163 --- first input sequence length too big"
+LENGTH=67108862  # 67.1 Mb
+FASTA="$(mktemp)"
+(
+    printf ">s1_1\n"
+    yes A | head -n "${LENGTH}" | tr -d "\n"
+    printf "\n"
+    printf ">s2_1\n"
+    (printf "T\n" ; yes A) | head -n "${LENGTH}" | tr -d "\n"
+    printf "\n"
+) > "${FASTA}"
+"${SWARM}" --output /dev/null "${FASTA}" 2> /dev/null && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+rm "${FASTA}"
+unset LENGTH FASTA
 
 
 exit 0
