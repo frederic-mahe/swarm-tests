@@ -197,6 +197,12 @@ for OPTION in "-h" "--help" "-v" "--version" ; do
             failure "${DESCRIPTION}"
 done
 
+## swarm checks how many times each option is present on the command line
+DESCRIPTION="return an error if an option is specified more than once"
+"${SWARM}" -h -h 2> /dev/null && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
 
 #*****************************************************************************#
 #                                                                             #
