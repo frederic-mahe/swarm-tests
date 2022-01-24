@@ -77,6 +77,24 @@ unset FASTA
 
 #*****************************************************************************#
 #                                                                             #
+#                            Unknown options                                  #
+#                                                                             #
+#*****************************************************************************#
+
+## unknown options (only two unused short options: -k and -q)
+DESCRIPTION="swarm aborts when an unknown short option is specified (-k)"
+"${SWARM}" -k > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+DESCRIPTION="swarm aborts when an unknown short option is specified (-q)"
+"${SWARM}" -q > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+
+#*****************************************************************************#
+#                                                                             #
 #                             Normal output                                   #
 #                                                                             #
 #*****************************************************************************#
