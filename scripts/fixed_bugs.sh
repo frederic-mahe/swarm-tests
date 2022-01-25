@@ -421,7 +421,7 @@ printf ">a_3\nAAA\n>b_2\nACC\n>c_1\nCCC\n" | \
 DESCRIPTION="issue 21 --- report first illegal fasta character and line number"
 printf ">s_1\nB\n" | \
     "${SWARM}" 2>&1 | \
-    grep -qE "Error: Illegal character '.' in sequence on line [0-9]+" && \
+    grep -qE "Error: Illegal character '.' in sequence on line [0-9]+." && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
