@@ -342,7 +342,6 @@ printf ">s_1\nA\n>s_1\nC\n" | \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
-
 ## Swarm aborts if fasta identifiers are not unique, and reports the
 ## first duplicated identifier (abundance annotations are removed)
 DESCRIPTION="swarm reports the first duplicated identifier"
@@ -352,7 +351,6 @@ printf ">ampliconid_10\nA\n>ampliconid_1\nC\n" | \
     grep -oq "ampliconid$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-
 
 ## Fasta headers can contain more than one underscore symbol
 DESCRIPTION="fasta headers can contain more than one underscore symbol"
