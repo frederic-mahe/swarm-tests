@@ -344,9 +344,19 @@ printf ">s_1\nA\n>s_1\nC\n" | \
 
 ## Swarm aborts if fasta identifiers are not unique, and reports the
 ## first duplicated identifier (abundance annotations are removed)
-DESCRIPTION="swarm reports the first duplicated identifier"
+DESCRIPTION="swarm reports the first duplicated identifier (default)"
 printf ">ampliconid_10\nA\n>ampliconid_1\nC\n" | \
     "${SWARM}" 2>&1 > /dev/null | \
+    grep -m 1 "^Error" | \
+    grep -oq "ampliconid$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## Swarm aborts if fasta identifiers are not unique, and reports the
+## first duplicated identifier (abundance annotations are removed)
+DESCRIPTION="swarm reports the first duplicated identifier (;size=)"
+printf ">ampliconid;size=10\nA\n>ampliconid;size=1\nC\n" | \
+    "${SWARM}" -z 2>&1 > /dev/null | \
     grep -m 1 "^Error" | \
     grep -oq "ampliconid$" && \
     success "${DESCRIPTION}" || \
