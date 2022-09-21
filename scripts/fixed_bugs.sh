@@ -2698,4 +2698,69 @@ rm "${FASTA}"
 unset LENGTH FASTA
 
 
+# *************************************************************************** #
+#                                                                             #
+#                      maximal header length (issue 171)                      #
+#                                                                             #
+# *************************************************************************** #
+
+## https://github.com/torognes/swarm/issues/171
+
+# current upper limit for header total length:
+# 16,777,216: success (2^24)
+# 16,777,217: segmentation fault (2^24 + 1)
+
+## deactivated: requires at least 35 GB of RAM (too slow, too much RAM)
+# DESCRIPTION="issue 171 --- maximal accepted header length"
+# LENGTH=$(( 16777216 - 3 ))
+# FASTA="$(mktemp)"
+# (
+#     printf ">"
+#     yes A | head -n "${LENGTH}" | tr -d "\n"
+#     printf "_1\nA\n"
+# ) > "${FASTA}"
+# "${SWARM}" --output /dev/null "${FASTA}" 2> /dev/null && \
+#     failure "${DESCRIPTION}" || \
+#         success "${DESCRIPTION}"
+# rm "${FASTA}"
+# unset LENGTH FASTA
+
+# DESCRIPTION="issue 171 --- first header length too big"
+# LENGTH=$(( 16777216 - 2 ))
+# FASTA="$(mktemp)"
+# (
+#     printf ">"
+#     yes A | head -n "${LENGTH}" | tr -d "\n"
+#     printf "_1\nA\n"
+# ) > "${FASTA}"
+# "${SWARM}" --output /dev/null "${FASTA}" 2> /dev/null && \
+#     failure "${DESCRIPTION}" || \
+#         success "${DESCRIPTION}"
+# rm "${FASTA}"
+# unset LENGTH FASTA
+
+
+# *************************************************************************** #
+#                                                                             #
+#       Invalid numeric argument for option -t or --threads (issue 173)       #
+#                                                                             #
+# *************************************************************************** #
+
+## https://github.com/torognes/swarm/issues/173
+
+## error message with hints (so, more than 2 lines): case of a missing space
+DESCRIPTION="issue 173 --- Invalid numeric argument (missing space)"
+"${SWARM}" --threads 1-f 2>&1 > /dev/null | \
+    awk 'END {exit NR > 2 ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## error message with hints (so, more than 2 lines): case of a missing dash
+DESCRIPTION="issue 173 --- Invalid numeric argument (missing dash)"
+"${SWARM}" -threads 1 2>&1 > /dev/null | \
+    awk 'END {exit NR > 2 ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+
 exit 0
