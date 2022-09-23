@@ -2706,7 +2706,7 @@ unset LENGTH FASTA
 
 ## https://github.com/torognes/swarm/issues/171
 
-# current upper limit for header total length:
+# current upper limit for header total length (including '>' and '_1'):
 # 16,777,216: success (2^24)
 # 16,777,217: segmentation fault (2^24 + 1)
 
@@ -2720,24 +2720,24 @@ unset LENGTH FASTA
 #     printf "_1\nA\n"
 # ) > "${FASTA}"
 # "${SWARM}" --output /dev/null "${FASTA}" 2> /dev/null && \
-#     failure "${DESCRIPTION}" || \
-#         success "${DESCRIPTION}"
+#     success "${DESCRIPTION}" || \
+#         failure "${DESCRIPTION}"
 # rm "${FASTA}"
 # unset LENGTH FASTA
 
-# DESCRIPTION="issue 171 --- first header length too big"
-# LENGTH=$(( 16777216 - 2 ))
-# FASTA="$(mktemp)"
-# (
-#     printf ">"
-#     yes A | head -n "${LENGTH}" | tr -d "\n"
-#     printf "_1\nA\n"
-# ) > "${FASTA}"
-# "${SWARM}" --output /dev/null "${FASTA}" 2> /dev/null && \
-#     failure "${DESCRIPTION}" || \
-#         success "${DESCRIPTION}"
-# rm "${FASTA}"
-# unset LENGTH FASTA
+DESCRIPTION="issue 171 --- header is too long"
+LENGTH=$(( 16777216 - 2 ))
+FASTA="$(mktemp)"
+(
+    printf ">"
+    yes A | head -n "${LENGTH}" | tr -d "\n"
+    printf "_1\nA\n"
+) > "${FASTA}"
+"${SWARM}" --output /dev/null "${FASTA}" 2> /dev/null && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+rm "${FASTA}"
+unset LENGTH FASTA
 
 
 # *************************************************************************** #
