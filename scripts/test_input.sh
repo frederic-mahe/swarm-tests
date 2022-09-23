@@ -597,6 +597,40 @@ printf ">s_1\n%s\n" $(head -c ${MAX} < /dev/zero | tr '\0' 'A') | \
 unset MAX
 
 
+## swarm does not accept compressed input on stdin
+DESCRIPTION="swarm does not accept compressed input (gz)"
+printf ">s1_2\nAA\n>s2_1\nAT\n" | \
+    gzip --stdout | \
+    "${SWARM}" -d 2 -x > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+DESCRIPTION="swarm does not accept compressed input (bz2)"
+printf ">s1_2\nAA\n>s2_1\nAT\n" | \
+    bzip2 --stdout | \
+    "${SWARM}" -d 2 -x > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+
+## swarm accepts decompressed input on stdin
+DESCRIPTION="swarm accepts decompressed input (gz)"
+printf ">s1_2\nAA\n>s2_1\nAT\n" | \
+    gzip --stdout | \
+    zcat | \
+    "${SWARM}" -d 2 -x > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="swarm accept decompressed input (bz2)"
+printf ">s1_2\nAA\n>s2_1\nAT\n" | \
+    bzip2 --stdout | \
+    bzcat | \
+    "${SWARM}" -d 2 -x > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+
 #*****************************************************************************#
 #                                                                             #
 #                           Realistic input file                              #
