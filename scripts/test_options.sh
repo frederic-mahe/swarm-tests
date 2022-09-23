@@ -2402,7 +2402,7 @@ printf ">s1_1\nAA\n>s2_1\nTT\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-# -x has no effect when d = 1 or d = 0
+# -x has no effect when d = 1
 DESCRIPTION="swarms rejects -x when d = 1"
 printf ">s1_1\nA\n>s2_1\nT\n" | \
     "${SWARM}" -d 1 -x > /dev/null 2>&1 && \
