@@ -377,6 +377,36 @@ printf ">s1_1\nAAAAAAAAAA\n>s2_1\nAAAAAAAAAAGG\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+## trigger search16 pairwise alignment score overflow (d > 1) (search16.cc:736)
+## with a match reward of 100,000:
+## - converted costs:   mismatch: 25001, gap opening: 3, gap extension: 12501
+## - score is the sum of mismatches and gaps,
+## - score is capped to 65,536 (16-bit value),
+## - here, score will be 3 times 25,001, which is greater than 65,536.
+## - alignment should be? ---ACGT or ACGT---
+##                        TGCA---    ---TGCA
+##
+DESCRIPTION="trigger search16 pairwise alignment score overflow (score >= 2^16 - 1)"
+printf ">s1_1\nACGT\n>s2_1\nTGCA\n" | \
+    "${SWARM}" -d 2 --match-reward 100000 > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## trigger search8 pairwise alignment score overflow (d > 1) (search8.cc:1017)
+## with a match reward of 110:
+## - converted costs:   mismatch: 114, gap opening: 12, gap extension: 59
+## - score is the sum of mismatches and gaps,
+## - score is capped to 255 (8-bit value),
+## - here, score will be 3 times 114, which is greater than 255.
+## - alignment should be? --ACG or ACG--
+##                        GCA--    --GCA
+##
+DESCRIPTION="trigger search8 pairwise alignment score overflow (score >= 2^8 - 1)"
+printf ">s1_1\nACG\n>s2_1\nTGC\n" | \
+    "${SWARM}" -d 2 --match-reward 110 > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 ## once down with a cluster, swarm goes back to the first unclustered
 ## amplicon in the pool (d > 1, algo.cc:266)
 DESCRIPTION="swarm goes back to the 1st unclustered amplicon in the pool (d>1)"
