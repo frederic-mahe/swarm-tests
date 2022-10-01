@@ -291,8 +291,8 @@ printf ">s_1\nA\n" | \
 ## multithreaded d = 2 clustering (improve code coverage)
 # This sequence length will yield 34 unique sequences
 # (we need at least 30 sequences to remain on two threads)
-DESCRIPTION="triger multithreaded d = 2 clustering (cover line scan.cc:239)"
-SEQUENCE="AGCTACGTACG"
+DESCRIPTION="triger multithreaded d = 2 clustering (cover line scan.cc:211)"
+SEQUENCE="AGCTACGTA"
 
 microvariant_substitutions() {
     ## produce a fasta set with a seed and all its unique L1
@@ -313,7 +313,7 @@ microvariant_substitutions() {
       awk '{print ">s" NR "_1\n" $1}'
  )
 ) | \
-    "${SWARM}" -d 2 -t 2 2> /dev/null | \
+    "${SWARM}" -d 2 -t 3 2> /dev/null | \
     awk 'END {exit NR == 1 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
