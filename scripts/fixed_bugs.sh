@@ -2129,7 +2129,7 @@ printf ">s1_1\nA\n>s2_1\nT\n" | \
 ## https://github.com/torognes/swarm/issues/123
 
 ## memory was not allocated correctly for sequences shorter than 6 nt
-if which valgrind > /dev/null ; then
+if which valgrind > /dev/null 2>&1 ; then
     DESCRIPTION="issue 123 --- no memory allocation error for short sequences"
     valgrind \
         "${SWARM}" -f -o /dev/null <(printf ">s1_10\nAA\n>s2_1\nCC\n") 2>&1 | \
@@ -2148,7 +2148,7 @@ fi
 ## https://github.com/torognes/swarm/issues/124
 
 ## the log file was not closed properly
-if which valgrind > /dev/null ; then
+if which valgrind > /dev/null 2>&1  ; then
     DESCRIPTION="issue 124 --- no memory leak when --log is not use"
     valgrind \
         "${SWARM}" -o /dev/null <(printf ">s1_10\nAA\n>s2_1\nCC\n") 2>&1 | \
@@ -2200,7 +2200,7 @@ printf ">s1_2\nA\n>s2_1\nA\n" | \
 ## triggers one memory allocation (heap). That memory allocation is
 ## not freed by swarm before exiting (it is freed by the operating
 ## system though).
-if which valgrind > /dev/null ; then
+if which valgrind > /dev/null 2>&1  ; then
     DESCRIPTION="issue 126 --- all memory allocations are freed"
     valgrind \
         "${SWARM}" \
@@ -2283,7 +2283,7 @@ unset c
 ## https://github.com/torognes/swarm/issues/131
 
 ## swarm can read vsearch's abundance annotations (with option -z)
-if which vsearch > /dev/null ; then
+if which vsearch > /dev/null 2>&1 ; then
     DESCRIPTION="issue 131 --- swarm can read vsearch's abundance annotations"
     printf ">s1;size=3\nA\n>s2;size=2\nA\n>s3;size=1\nT\n" | \
         vsearch \
