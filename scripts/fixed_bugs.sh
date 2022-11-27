@@ -125,7 +125,7 @@ rm "${TMP}"
 ## https://github.com/torognes/swarm/issues/1
 ##
 ## Swarm radius values are available in the statistics file (-s), 7th column.
-DESCRIPTION="issue 1 --- theoretical radii of OTUs is available with -s"
+DESCRIPTION="issue 1 --- theoretical radii of clusters is available with -s"
 printf ">s1_3\nA\n>s2_1\nT\n" | \
     "${SWARM}" -d 1 -o /dev/null -s - 2> /dev/null | \
     awk '{exit $7 == 1 ? 0 : 1}' && \
@@ -694,8 +694,8 @@ printf ">s_2_2_3\nA\n" | \
 
 ## https://github.com/torognes/swarm/issues/40
 ##
-## issue 40 --- swarm performs OTU breaking by default (AA-AC CC)
-DESCRIPTION="issue 40 --- swarm performs OTU breaking by default"
+## issue 40 --- swarm performs cluster breaking by default (AA-AC CC)
+DESCRIPTION="issue 40 --- swarm performs cluster breaking by default"
 printf ">s1_3\nAA\n>s2_3\nCC\n>s3_1\nAC\n" | \
 	"${SWARM}" 2> /dev/null | \
     wc -l | \
@@ -712,16 +712,16 @@ printf ">s1_3\nAA\n>s2_3\nCC\n>s3_1\nAC\n" | \
 
 ## https://github.com/torognes/swarm/issues/41
 ##
-## issue 41 --- -i number of the OTU is correct #1
-DESCRIPTION="issue 41 --- -i number of the OTU is correct #1"
+## issue 41 --- -i number of the cluster is correct #1
+DESCRIPTION="issue 41 --- -i number of the cluster is correct #1"
 printf ">s1_1\nA\n>s2_1\nC\n" | \
     "${SWARM}" -i - -o /dev/null 2> /dev/null | \
     awk -F "\t" '{exit $4 == 1 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## issue 41 --- -i number of the OTU is correct #2
-DESCRIPTION="issue 41 --- -i number of the OTU is correct #2"
+## issue 41 --- -i number of the cluster is correct #2
+DESCRIPTION="issue 41 --- -i number of the cluster is correct #2"
 printf ">s1_1\nAA\n>s2_1\nAC\n>s3_1\nGG\n>s4_1\nGT\n" | \
     "${SWARM}" -i - -o /dev/null 2> /dev/null | \
     awk 'NR == 2 {exit $4 == 2 ? 0 : 1}' && \
@@ -731,7 +731,7 @@ printf ">s1_1\nAA\n>s2_1\nAC\n>s3_1\nGG\n>s4_1\nGT\n" | \
 
 # *************************************************************************** #
 #                                                                             #
-#        Add the OTU number to the output of the -b option (issue 42)         #
+#      Add the cluster number to the output of the -b option (issue 42)       #
 #                                                                             #
 # *************************************************************************** #
 
@@ -891,7 +891,7 @@ printf ">s;size=1\nA\n" | \
 
 ## https://github.com/torognes/swarm/issues/53
 ##
-## a sequence and all its microvariants should form only one OTU
+## a sequence and all its microvariants should form only one cluster
 
 microvariants() {
     local SEQ="${1}"
@@ -985,8 +985,8 @@ unset SEQUENCE MICROVARIANTS_L1 MICROVARIANTS_L2
 ##
 ## Updating the file --statistics-file seems difficult: the 6th and
 ## 7th columns report the number of growth iterations and the length
-## of the longest, continuous, down-hill abundance path in the
-## OTU. Updating these columns would break that idea of continuity.
+## of the longest, continuous, down-hill abundance path inside the
+## cluster. Updating these columns would break that idea of continuity.
 ##
 ## So the output of the --internal-structure (-i) is the only thing
 ## that would make sense updating.
@@ -1000,13 +1000,13 @@ printf ">a_3\nAAAA\n>b_1\nAATT\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## Grafted amplicons receive the OTU number of the main OTU (in this
+## Grafted amplicons receive the cluster number of the main cluster (in this
 ## toy example, the 4th column should be always equal to 1)
 ##
 ## a	b	1	1	1
 ## b	c	2	1	2
 ## c	d	1	1	1
-DESCRIPTION="issue 55 --- grafted amplicons receive the OTU number of the main OTU"
+DESCRIPTION="issue 55 --- grafted amplicons receive the cluster number of the main cluster"
 printf ">a_3\nAAAA\n>b_1\nAAAT\n>c_1\nATTT\n>d_1\nTTTT\n" | \
     "${SWARM}" -f -o /dev/null -i - 2> /dev/null | \
     awk '$4 != 1 {exit 1}' && \

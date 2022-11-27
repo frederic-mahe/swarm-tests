@@ -99,8 +99,8 @@ DESCRIPTION="swarm aborts when an unknown short option is specified (-q)"
 #                                                                             #
 #*****************************************************************************#
 
-## OTUs are correct
-DESCRIPTION="OTUs are correct"
+## clusters are correct
+DESCRIPTION="clusters are correct"
 printf ">s1_2\nAA\n>s2_1\nAT\n>s3_1\nCC\n" | \
     "${SWARM}" 2> /dev/null | \
     tr "\n" "@" | \
@@ -108,8 +108,8 @@ printf ">s1_2\nAA\n>s2_1\nAT\n>s3_1\nCC\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## OTUs number is correct
-DESCRIPTION="number of OTUs is correct"
+## clusters number is correct
+DESCRIPTION="number of clusters is correct"
 printf ">s1_2\nAA\n>s2_1\nAT\n>s3_1\nCC\n" | \
     "${SWARM}" 2> /dev/null | \
     wc -l | \
@@ -117,15 +117,15 @@ printf ">s1_2\nAA\n>s2_1\nAT\n>s3_1\nCC\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## OTU seed is the most abundant amplicon
-DESCRIPTION="OTU seed is the most abundant amplicon"
+## cluster seed is the most abundant amplicon
+DESCRIPTION="cluster seed is the most abundant amplicon"
 printf ">s1_1\nA\n>s2_2\nT\n" | \
     "${SWARM}" 2> /dev/null | \
     grep -q "^s2_2" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## OTU amplicons are sorted alphabetically
+## cluster amplicons are sorted alphabetically
 DESCRIPTION="amplicons with the same abundance are sorted alphabetically"
 printf ">b_1\nA\n>a_1\nT\n" | \
     "${SWARM}" 2> /dev/null | \
@@ -455,7 +455,7 @@ printf ">s1_3\nAAA\n>s2_2\nGGG\n>s3_1\nAAG\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## swarm - d 2; a sequence and all its L2 microvariants form only one OTU
+## swarm - d 2; a sequence and all its L2 microvariants form only one cluster
 microvariants() {
     local SEQ="${1}"
     local -i LENGTH=${#SEQ}
@@ -559,8 +559,8 @@ for OPTION in "-n" "--no-otu-breaking" ; do
             failure "${DESCRIPTION}"
 done
 
-## Deactivate the built-in OTU refinement
-DESCRIPTION="deactivate OTU breaking"
+## Deactivate the built-in cluster refinement
+DESCRIPTION="deactivate cluster breaking"
 printf ">s1_9\nAA\n>s2_8\nCC\n>s3_1\nAC\n" | \
     "${SWARM}" -n 2> /dev/null | \
     wc -l | \
@@ -592,7 +592,7 @@ printf ">s1_3\nAA\n>s2_1\nCC\n" | \
         success "${DESCRIPTION}"
 
 ## Swarm performs a second clustering (aka fastidious)
-DESCRIPTION="swarm groups small OTUs with large OTUs (boundary = 3)"
+DESCRIPTION="swarm groups small clusters with large clusters (boundary = 3)"
 printf ">s1_3\nAA\n>s2_1\nCC\n" | \
     "${SWARM}" -f 2> /dev/null | \
     wc -l | \
@@ -869,16 +869,16 @@ printf ">s\nA\n" | \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
-## Swarm -a appends an abundance value to OTU members
-DESCRIPTION="-a appends an abundance number to OTU members (-o output)"
+## Swarm -a appends an abundance value to cluster members
+DESCRIPTION="-a appends an abundance number to cluster members (-o output)"
 printf ">s\nA\n" | \
     "${SWARM}" -a 2 -o - 2> /dev/null | \
     grep -q "^s_2$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## Swarm -a appends an abundance value to OTU members (-z)
-DESCRIPTION="-a appends an abundance number to OTU members (-o output, -z)"
+## Swarm -a appends an abundance value to cluster members (-z)
+DESCRIPTION="-a appends an abundance number to cluster members (-o output, -z)"
 printf ">s\nA\n" | \
     "${SWARM}" -z -a 2 -o - 2> /dev/null | \
     grep -qE "^s;size=2;?$" && \
@@ -1051,16 +1051,16 @@ printf ">s1_1\nA\n>s2_1\nC\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## -i number of the OTU is correct #1
-DESCRIPTION="-i number of the OTU is correct #1"
+## -i number of the cluster is correct #1
+DESCRIPTION="-i number of the cluster is correct #1"
 printf ">s1_1\nA\n>s2_1\nC\n" | \
     "${SWARM}" -d 2 -o /dev/null -i - 2> /dev/null | \
     awk '{exit ($4 == 1) ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## -i outputs one line per OTU
-DESCRIPTION="-i outputs one line per OTU"
+## -i outputs one line per cluster
+DESCRIPTION="-i outputs one line per cluster"
 printf ">s1_1\nAA\n>s2_1\nAC\n>s3_1\nGG\n>s4_1\nGT\n" | \
     "${SWARM}" -o /dev/null -i - 2> /dev/null | \
     wc -l | \
@@ -1068,8 +1068,8 @@ printf ">s1_1\nAA\n>s2_1\nAC\n>s3_1\nGG\n>s4_1\nGT\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## -i number of the OTU is correct #2
-DESCRIPTION="-i number of the OTU is correct #2"
+## -i number of the cluster is correct #2
+DESCRIPTION="-i number of the cluster is correct #2"
 printf ">s1_1\nAA\n>s2_1\nAC\n>s3_1\nGG\n>s4_1\nGT\n" | \
     "${SWARM}" -o /dev/null -i - 2> /dev/null | \
     awk 'NR == 2 {exit ($4 == 2) ? 0 : 1}' && \
@@ -1108,23 +1108,23 @@ printf ">s1_1\nAAAA\n>s2_1\nAACC\n>s3_1\nCCCC\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## -i -f OTU numbering is updated (2nd line, col. 4 should be 1)
+## -i -f cluster numbering is updated (2nd line, col. 4 should be 1)
 # a	b	1	1	1
 # b	c	2	1	2
 # c	d	1	1	1
-DESCRIPTION="-i -f OTU numbering is updated"
+DESCRIPTION="-i -f cluster numbering is updated"
 printf ">a_3\nAAAA\n>b_1\nAAAT\n>c_1\nATTT\n>d_1\nTTTT\n" | \
     "${SWARM}" -f -o /dev/null -i - 2> /dev/null | \
     awk 'NR == 2 {exit $4 == 1 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## -i -f OTU numbering is contiguous (no gap) (4th line, col. 4 should be 2)
+## -i -f cluster numbering is contiguous (no gap) (4th line, col. 4 should be 2)
 # a	b	1	1	1
 # b	c	2	1	2
 # c	d	1	1	1
 # e	f	1	2	1
-DESCRIPTION="-i -f OTU numbering is contiguous (no gap)"
+DESCRIPTION="-i -f cluster numbering is contiguous (no gap)"
 (printf ">a_3\nAAAA\n>b_1\nAAAT\n>c_1\nATTT\n"
  printf ">d_1\nTTTT\n>e_1\nGGGG\n>f_1\nGGGA\n") | \
     "${SWARM}" -f -o /dev/null -i - 2> /dev/null | \
@@ -1523,8 +1523,8 @@ printf ">s_1\nA\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## -r number of OTUs is correct with -d 2 (2 OTUs)
-DESCRIPTION="-r number of OTUs is correct (d = 2, 2 OTUs)"
+## -r number of clusters is correct with -d 2 (2 clusters)
+DESCRIPTION="-r number of clusters is correct (d = 2, 2 clusters)"
 printf ">s1_2\nAAA\n>s2_1\nACC\n>s3_1\nGGG\n" | \
     "${SWARM}" -d 2 -r 2> /dev/null | \
     awk 'BEGIN {FS = "[\t]"} {exit $2 == 2 ? 0 : 1}' && \
@@ -1539,8 +1539,8 @@ printf ">s_1\nA\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## -r number of OTUs is correct (1 OTU)
-DESCRIPTION="-r number of OTUs is correct (1 line expected)"
+## -r number of clusters is correct (1 cluster)
+DESCRIPTION="-r number of clusters is correct (1 line expected)"
 printf ">s_1\nA\n" | \
     "${SWARM}" -r 2> /dev/null | \
     wc -l | \
@@ -1548,29 +1548,29 @@ printf ">s_1\nA\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-DESCRIPTION="-r number of OTUs is correct (2nd field is 1)"
+DESCRIPTION="-r number of clusters is correct (2nd field is 1)"
 printf ">s_1\nA\n" | \
     "${SWARM}" -r 2> /dev/null | \
     awk '{exit $2 == 1 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-DESCRIPTION="-r number of OTUs is correct (last field is s_1)"
+DESCRIPTION="-r number of clusters is correct (last field is s_1)"
 printf ">s_1\nA\n" | \
     "${SWARM}" -r 2> /dev/null | \
     awk '{exit $NF == "s_1" ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## -r number of OTUs is correct (2 OTUs)
-DESCRIPTION="-r number of OTUs is correct (2nd field is 2)"
+## -r number of clusters is correct (2 clusters)
+DESCRIPTION="-r number of clusters is correct (2nd field is 2)"
 printf ">s1_1\nAA\n>s2_1\nTT\n" | \
     "${SWARM}" -r 2> /dev/null | \
     awk '{exit $2 == 2 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-DESCRIPTION="-r number of OTUs is correct (last field is s2_1)"
+DESCRIPTION="-r number of clusters is correct (last field is s2_1)"
 printf ">s1_1\nAA\n>s2_1\nTT\n" | \
     "${SWARM}" -r 2> /dev/null | \
     awk '{exit $NF == "s2_1" ? 0 : 1}' && \
@@ -1585,24 +1585,24 @@ printf ">s1_1\nAA\n>s2_1\nAT\n>s3_1\nGG\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## -r composition of OTUs is correct #1
-DESCRIPTION="-r composition of OTUs is correct (1 OTU)"
+## -r composition of clusters is correct #1
+DESCRIPTION="-r composition of clusters is correct (1 cluster)"
 printf ">s1_1\nAA\n>s2_1\nAT\n" | \
     "${SWARM}" -r 2> /dev/null | \
     awk '{exit $NF == "s1_1,s2_1" ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## -r composition of OTUs is correct #2
-DESCRIPTION="-r composition of OTUs is correct (2 OTUs #1)"
+## -r composition of clusters is correct #2
+DESCRIPTION="-r composition of clusters is correct (2 clusters #1)"
 printf ">s1_1\nAA\n>s2_1\nAT\n>s3_1\nGG\n" | \
     "${SWARM}" -r 2> /dev/null | \
     awk '{exit $NF == "s3_1" ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## -r composition of OTUs is correct #3
-DESCRIPTION="-r composition of OTUs is correct (2 OTUs #2)"
+## -r composition of clusters is correct #3
+DESCRIPTION="-r composition of clusters is correct (2 clusters #2)"
 printf ">s1_1\nAA\n>s2_1\nGG\n>s3_1\nGC\n" | \
     "${SWARM}" -r 2> /dev/null | \
     awk '{exit $NF == "s2_1,s3_1" ? 0 : 1}' && \
@@ -1617,33 +1617,33 @@ printf ">s\nA\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## -r composition of OTUs is correct with -a
-DESCRIPTION="-r composition of OTUs is correct with -a"
+## -r composition of clusters is correct with -a
+DESCRIPTION="-r composition of clusters is correct with -a"
 printf ">s1_1\nA\n>s2\nT\n" | \
     "${SWARM}" -a 2 -r 2> /dev/null | \
     awk '{exit $NF == "s2_2,s1_1" ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## -r composition of OTUs is correct with -z
-DESCRIPTION="-r OTUs is correct with -z"
+## -r composition of clusters is correct with -z
+DESCRIPTION="-r clusters is correct with -z"
 printf ">s;size=1\nA\n" | \
     "${SWARM}" -z -r 2> /dev/null | \
     awk '{exit $NF == "s;size=1" ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## -r OTU is correct with -z -a (adds ;size=INT;, with a terminal ";")
-DESCRIPTION="-r OTU is correct with -z -a"
+## -r cluster is correct with -z -a (adds ;size=INT;, with a terminal ";")
+DESCRIPTION="-r cluster is correct with -z -a"
 printf ">s\nA\n" | \
     "${SWARM}" -z -a 1 -r 2> /dev/null | \
     awk '{exit $NF == "s;size=1;" ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## -r composition of OTUs is correct with -z -a (2 sequences)
+## -r composition of clusters is correct with -z -a (2 sequences)
 ## note the mix of ;size=INT and ;size=INT;
-DESCRIPTION="-r OTUs is correct with -z -a (2 sequences)"
+DESCRIPTION="-r clusters is correct with -z -a (2 sequences)"
 printf ">s1\nA\n>s2;size=2\nT\n" | \
     "${SWARM}" -z -a 1 -r 2> /dev/null | \
     awk '{exit $NF == "s2;size=2,s1;size=1;" ? 0 : 1}' && \
@@ -2037,7 +2037,7 @@ printf ">s1_2\nA\n>s2_1\nAA\n" | \
         failure "${DESCRIPTION}"
 
 ## -u similarity percentage is zero in 4th column
-## Sequences s1 and s2 should be grouped inside the same OTU, with a
+## Sequences s1 and s2 should be grouped inside the same cluster, with a
 ## similarity of 0.0.
 DESCRIPTION="-u similarity percentage is 0.0"
 printf ">s1_2\nA\n>s2_1\nC\n" | \
@@ -2274,9 +2274,9 @@ printf ">s1_2\nA\n>s2_1\nC\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## -u -f OTU numbering is contiguous (no gap)
-## s3-s4 is grafted onto s1-s2, so s5 becomes the second OTU
-DESCRIPTION="-u -f OTU numbering is contiguous (no gap)"
+## -u -f cluster numbering is contiguous (no gap)
+## s3-s4 is grafted onto s1-s2, so s5 becomes the second cluster
+DESCRIPTION="-u -f cluster numbering is contiguous (no gap)"
 printf ">s1_3\nAAAA\n>s2_1\nAAAT\n>s3_1\nATTT\n>s4_1\nTTTT\n>s5_1\nGGGG\n" | \
     "${SWARM}" -f -o /dev/null -u - 2> /dev/null | \
     awk 'BEGIN {FS = "\t"}
@@ -2733,8 +2733,8 @@ printf ">s1\nA\n>s2_5\nA\n" | \
 #                                                                             #
 #*****************************************************************************#
 
-## Swarm sorts amplicons in an OTU by decreasing abundance
-DESCRIPTION="swarm sorts amplicons in an OTU by decreasing abundance"
+## Swarm sorts amplicons in an cluster by decreasing abundance
+DESCRIPTION="swarm sorts amplicons in an cluster by decreasing abundance"
 printf ">s3_1\nA\n>s1_3\nC\n>s2_2\nG\n" | \
     "${SWARM}" 2> /dev/null | \
     grep -q "^s1_3 s2_2 s3_1$" && \
