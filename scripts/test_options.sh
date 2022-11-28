@@ -774,31 +774,31 @@ printf ">s1_3\nAA\n>s2_1\nCC\n" | \
         success "${DESCRIPTION}"
 
 
-## Trigger "Reducing memory used for Bloom filter due to --ceiling option"
+# ## Trigger "Reducing memory used for Bloom filter due to --ceiling option"
 
-## produce a set of n dissimilar sequences (no d = 1 clustering)
-dissimilar_sequences() {
-    local SEQ="AAAA"
-    local -i n=275  # output 275 sequences
-    for ((i=0 ; i<=n ; i++)) ; do
-        SEQ=${SEQ}"AA"
-        echo ${SEQ}
-    done
-}
+# ## produce a set of n dissimilar sequences (no d = 1 clustering)
+# dissimilar_sequences() {
+#     local SEQ="AAAA"
+#     local -i n=275  # output 275 sequences
+#     for ((i=0 ; i<=n ; i++)) ; do
+#         SEQ=${SEQ}"AA"
+#         echo ${SEQ}
+#     done
+# }
 
-## set max possible bit value (64) and put a memory ceiling at 8 MB
-## (lowest possible value)
-DESCRIPTION="d = 1 -f trigger reducing memory used for Bloom filter"
-(printf ">s0_3\nAAAA\n"
- dissimilar_sequences | \
-     awk '{print ">s"NR"_1\n"$1}'
-) | \
-    "${SWARM}" -d 1 -f --ceiling 8 --bloom-bits 64 -o /dev/null 2>&1 | \
-    grep -q "^Reducing memory" && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
+# ## set max possible bit value (64) and put a memory ceiling at 8 MB
+# ## (lowest possible value)
+# DESCRIPTION="d = 1 -f trigger reducing memory used for Bloom filter"
+# (printf ">s0_3\nAAAA\n"
+#  dissimilar_sequences | \
+#      awk '{print ">s"NR"_1\n"$1}'
+# ) | \
+#     "${SWARM}" -d 1 -f --ceiling 8 --bloom-bits 64 -o /dev/null 2>&1 | \
+#     grep -q "^Reducing memory" && \
+#     success "${DESCRIPTION}" || \
+#         failure "${DESCRIPTION}"
 
-unset dissimilar_sequences
+# unset dissimilar_sequences
 
 
 ## Bloom bits -----------------------------------------------------------------
