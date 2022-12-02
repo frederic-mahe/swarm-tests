@@ -611,6 +611,16 @@ printf ">s1_3\nAAA\n>s2_1\nACC\n>s3_1\nCCC\n>s4_3\nCGG\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+## trigger x->parent > y->parent when comparing graft candidates
+# except s1_3 s3_1 s5_1
+#        s2_3 s4_1
+DESCRIPTION="trigger x->parent > y->parent when comparing graft candidates"
+printf ">s1_3\nGG\n>s2_3\nAA\n>s3_1\nGGGG\n>s4_1\nAAAA\n>s5_1\nGGCC\n" | \
+    "${SWARM}" -d 1 -f 2> /dev/null | \
+    tr "\n" "@" | \
+    grep -q "^s1_3 s3_1 s5_1@s2_3 s4_1@$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 ## attach small clusters to a larger cluster
 # what controls the attachment order? level-2 microvariant generation order?
