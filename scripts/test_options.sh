@@ -612,6 +612,33 @@ printf ">s1_3\nAAA\n>s2_1\nACC\n>s3_1\nCCC\n>s4_3\nCGG\n" | \
         failure "${DESCRIPTION}"
 
 
+## attach small clusters to a larger cluster
+# what controls the attachment order? level-2 microvariant generation order?
+# expect: s1_3 s2_1 s3_1 (s2 and s3 grafted onto s1)
+DESCRIPTION="swarm outputs grafts in input order? #1"
+printf ">s1_3\nGG\n>s2_1\nGGCC\n>s3_1\nGGGG\n" | \
+    "${SWARM}" -d 1 -f 2> /dev/null | \
+    grep -q "^s1_3 s2_1 s3_1$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+# expect: s1_3 s2_1 s3_1 (s2 and s3 grafted onto s1)
+DESCRIPTION="swarm outputs grafts in input order? not lexicographic order"
+printf ">s1_3\nGG\n>s2_1\nGGGG\n>s3_1\nGGCC\n" | \
+    "${SWARM}" -d 1 -f 2> /dev/null | \
+    grep -q "^s1_3 s2_1 s3_1$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+# expect: s1_3 s3_2 s2_1 (s2 and s3 grafted onto s1)
+DESCRIPTION="swarm outputs grafts in input order? by decreasing abundance"
+printf ">s1_3\nGG\n>s2_1\nGGGG\n>s3_2\nGGCC\n" | \
+    "${SWARM}" -d 1 -f 2> /dev/null | \
+    grep -q "^s1_3 s3_2 s2_1$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+
 ## Boundary -------------------------------------------------------------------
 
 ## Swarm accepts the options -b and --boundary
