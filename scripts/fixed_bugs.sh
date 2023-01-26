@@ -2356,6 +2356,23 @@ printf ">s2_4\nAAA\n>s1_3\nCCC\n>s3_1\nCGG\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+# with d > 1
+DESCRIPTION="issue 133 --- seeds are sorted by decreasing cluster abundance (-d 2)"
+printf ">s1_4\nAAA\n>s2_3\nCCC\n>s3_2\nCGG\n" | \
+    "${SWARM}" -d 2 -o /dev/null -w - 2> /dev/null | \
+    tr -d "\n" | \
+    grep -qw ">s2_5CCC>s1_4AAA" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="issue 133 --- seeds are sorted by decreasing cluster abundance and label (-d 2)"
+printf ">s2_4\nAAA\n>s1_3\nCCC\n>s3_1\nCGG\n" | \
+    "${SWARM}" -d 2 -o /dev/null -w - 2> /dev/null | \
+    tr -d "\n" | \
+    grep -qw ">s1_4CCC>s2_4AAA" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 
 # *************************************************************************** #
 #                                                                             #
