@@ -262,10 +262,10 @@ printf ">s_1\nA\n" | \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
-## Number of threads (--threads is 257)
-DESCRIPTION="swarm aborts when --threads is 257"
+## Number of threads (--threads is 512 or higher)
+DESCRIPTION="swarm aborts when --threads is more than 512"
 printf ">s_1\nA\n" | \
-    "${SWARM}" -t 257 2> /dev/null && \
+    "${SWARM}" -t 513 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
