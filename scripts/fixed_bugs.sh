@@ -2780,4 +2780,50 @@ DESCRIPTION="issue 173 --- Invalid numeric argument (missing dash)"
         failure "${DESCRIPTION}"
 
 
+# *************************************************************************** #
+#                                                                             #
+#  risk of silent 8-bit unsigned integer overflow in score matrix (issue 177) #
+#                                                                             #
+# *************************************************************************** #
+
+## https://github.com/torognes/swarm/issues/177
+
+# While looking at the code in score_matrix_read(), I've noticed that
+# there is no check that the penalty_mismatch value actually fits in
+# 16-bit and 8-bit unsigned integer types.
+
+# The way penalty_mismatch is computed is a bit complicated, but when
+# all other pairwise alignment options are left untouched (default
+# values), predictable penalty_mismatch values can be obtained by
+# setting the option --mismatch-penalty to 7 + 12a, where a is a
+# positive integer.
+
+# For instance:
+
+# with a = 0, --mismatch-penalty = 7, penalty_mismatch = 10 + 2 * 7 = 24
+# with a = 1, --mismatch-penalty = 19, penalty_mismatch = 10 + 2 * 19 = 48
+# with a = 2, --mismatch-penalty = 31, penalty_mismatch = 10 + 2 * 31 = 72
+# ...
+# with a = 10, --mismatch-penalty = 127, penalty_mismatch = 10 + 2 * 127 = 264
+
+# That last value is bigger than 255 and will overflow a 8-bit
+# unsigned integer.
+
+DESCRIPTION="issue 177 --- avoid score matrix uint8_t silent overflow (below limit)"
+printf ">s1_10\nAAA\n>s2_1\nAAT\n" | \
+    "${SWARM}" \
+        --differences 2 \
+        --mismatch-penalty 115 > /dev/null 2> /dev/null && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="issue 177 --- avoid score matrix uint8_t silent overflow (beyond limit)"
+printf ">s1_10\nAAA\n>s2_1\nAAT\n" | \
+    "${SWARM}" \
+        --differences 2 \
+        --mismatch-penalty 127 > /dev/null 2> /dev/null && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+
 exit 0
