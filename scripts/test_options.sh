@@ -419,11 +419,12 @@ printf ">s1_1\nAAAAAAAAAA\n>s2_1\nAAAAAAAAAAGG\n" | \
 ## - alignment should be? ---ACGT or ACGT---
 ##                        TGCA---    ---TGCA
 ##
+## Update (2023-09-18): issue 177 a penalty mismatch value > 255 is an error
 DESCRIPTION="trigger search16 pairwise alignment score overflow (score >= 2^16 - 1)"
 printf ">s1_1\nACGT\n>s2_1\nTGCA\n" | \
     "${SWARM}" -d 2 --match-reward 100000 > /dev/null 2>&1 && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
 
 ## trigger search8 pairwise alignment score overflow (d > 1) (search8.cc:1017)
 ## with a match reward of 110:
@@ -2867,9 +2868,10 @@ while read LONG SHORT ; do
         failure "${DESCRIPTION}"
     fi
 
-    ## Accepted values for the option goes from 1 to 255
+    ## Accepted values for the option goes from 1 to 122 (higher
+    ## values trigger error: penalty value > 255)
     MIN=1
-    MAX=255
+    MAX=122
     DESCRIPTION="swarm runs normally when --${LONG} goes from ${MIN} to ${MAX}"
     for ((i=$MIN ; i<=$MAX ; i++)) ; do
         printf ">s_1\nA\n" | \
