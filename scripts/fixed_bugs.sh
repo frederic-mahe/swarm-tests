@@ -2826,4 +2826,92 @@ printf ">s1_10\nAAA\n>s2_1\nAAT\n" | \
         success "${DESCRIPTION}"
 
 
+# *************************************************************************** #
+#                                                                             #
+#   fastidious boundary applies to the consolidated cluster mass (issue 178)  #
+#                                                                             #
+# *************************************************************************** #
+
+## https://github.com/torognes/swarm/issues/178
+
+# when using the fastidious option, the boundary threshold separates
+# clusters into two groups: large and small. Small clusters can be
+# grafted unto large clusters.
+
+# The default boundary value is 3. So, a cluster is small if it has a
+# total abundance of 2 or less, meaning that it is composed of either
+# one amplicon of abundance 2, or two amplicons of abundance 1, or one
+# amplicon of abundance 1.
+
+# The boundary threshold applies to the consolidated cluster mass (sum
+# of all abundances), not seed mass.
+
+# When default boundary is three:
+
+# fastidious graft if cluster size is:
+# - 1 + 1 + 1
+# - 2 + 1
+# - 3
+
+DESCRIPTION="issue 178 --- fastidious boundary: graft if total abundance = 3 (singleton)"
+printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" \
+        --differences 1 \
+        --fastidious 2> /dev/null | \
+    grep -qw "s1_3 s2_1" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="issue 178 --- fastidious boundary: graft if total abundance = 3 (doubleton)"
+printf ">s1_2\nAA\n>s2_1\nAT\n>s3_1\nCC\n" | \
+    "${SWARM}" \
+        --differences 1 \
+        --fastidious 2> /dev/null | \
+    grep -qw "s1_2 s2_1 s3_1" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="issue 178 --- fastidious boundary: graft if total abundance = 3 (tripleton)"
+printf ">s1_1\nAA\n>s2_1\nAG\n>s3_1\nAT\n>s4_1\nCC\n" | \
+    "${SWARM}" \
+        --differences 1 \
+        --fastidious 2> /dev/null | \
+    grep -qw "s1_1 s2_1 s3_1 s4_1" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+
+# no fastidious graft if cluster size is:
+# - 1,
+# - 1 + 1,
+# - 2
+
+DESCRIPTION="issue 178 --- fastidious boundary: no graft if total abundance = 1 (single-singleton)"
+printf ">s1_1\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" \
+        --differences 1 \
+        --fastidious 2> /dev/null | \
+    grep -qw "s2_1" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="issue 178 --- fastidious boundary: no graft if total abundance = 2 (single-singletons)"
+printf ">s1_1\nAA\n>s2_1\nAT\n>s3_1\nCC\n" | \
+    "${SWARM}" \
+        --differences 1 \
+        --fastidious 2> /dev/null | \
+    grep -qw "s3_1" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="issue 178 --- fastidious boundary: no graft if total abundance = 2 (singleton)"
+printf ">s1_2\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" \
+        --differences 1 \
+        --fastidious 2> /dev/null | \
+    grep -qw "s2_1" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+
 exit 0
