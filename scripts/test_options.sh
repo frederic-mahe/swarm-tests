@@ -649,6 +649,70 @@ printf ">s1_3\nGG\n>s2_1\nGGGG\n>s3_2\nGGCC\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+## grafting order
+
+# - same number of differences (not possible)
+# - same name (not possible)
+# - same length (NO)
+# - alpha order sequences (NO)
+# - same abundance,
+# - alpha order sequence names
+
+DESCRIPTION="swarm grafting rules for ties: all things equal except sequence names"
+printf ">s1_3\nAA\n>s2_3\nCC\n>s3_1\nGG\n" | \
+    "${SWARM}" \
+        --difference 1 \
+        --fastidious 2> /dev/null | \
+    grep -wq "s1_3 s3_1" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="swarm grafting rules for ties: most abundant wins"
+printf ">s1_3\nAA\n>s2_7\nCC\n>s3_1\nGG\n" | \
+    "${SWARM}" \
+        --difference 1 \
+        --fastidious 2> /dev/null | \
+    grep -wq "s2_7 s3_1" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="swarm grafting rules for ties: sequence alpha order does not matter"
+printf ">s1_3\nCC\n>s2_3\nAA\n>s3_1\nGG\n" | \
+    "${SWARM}" \
+        --difference 1 \
+        --fastidious 2> /dev/null | \
+    grep -wq "s1_3 s3_1" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+# hypothesis: graft to shortest
+DESCRIPTION="swarm grafting rules for ties: sequence length does not matter (#1)"
+printf ">s1_3\nCCG\n>s2_3\nAAGG\n>s3_1\nGG\n" | \
+    "${SWARM}" \
+        --difference 1 \
+        --fastidious 2> /dev/null | \
+    grep -wq "s1_3 s3_1" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="swarm grafting rules for ties: sequence length does not matter (#2)"
+printf ">s2_3\nCCG\n>s1_3\nAAGG\n>s3_1\nGG\n" | \
+    "${SWARM}" \
+        --difference 1 \
+        --fastidious 2> /dev/null | \
+    grep -wq "s2_3 s3_1" && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+DESCRIPTION="swarm grafting rules for ties: sorted sequence names are the tie-breaker"
+printf ">s2_3\nAA\n>s1_3\nCC\n>s3_1\nGG\n" | \
+    "${SWARM}" \
+        --difference 1 \
+        --fastidious 2> /dev/null | \
+    grep -wq "s1_3 s3_1" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 
 ## Boundary -------------------------------------------------------------------
 
