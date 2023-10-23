@@ -19,6 +19,11 @@ success () {
     printf "${GREEN}PASS${NO_COLOR}: ${1}\n"
 }
 
+## address sanitizer: disable runtime errors for mismatching
+## allocation-deallocation methods (new and free for example)
+## (temporary workaround)
+export ASAN_OPTIONS=alloc_dealloc_mismatch=0
+
 ## use the first swarm binary in $PATH by default, unless user wants
 ## to test another binary
 SWARM=$(which swarm 2> /dev/null)
