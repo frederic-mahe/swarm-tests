@@ -1380,6 +1380,14 @@ printf ">s1_3\nA\n>s2_1\nCC\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+# two clusters: we expect two lines
+DESCRIPTION="-j two clusters: two lines"
+printf ">s1_3\nAA\n>s2_1\nAC\n>s3_2\nGG\n>s4_1\nGGG\n" | \
+    "${SWARM}" -l /dev/null -o /dev/null -j - | \
+    awk 'END {exit NR == 2 ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 # test sequences with one difference (same abundances): we expect two
 # links
 DESCRIPTION="-j one difference, same abundance: two links"
