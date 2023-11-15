@@ -2919,4 +2919,33 @@ printf ">s1_2\nAA\n>s2_1\nCC\n" | \
         failure "${DESCRIPTION}"
 
 
+# *************************************************************************** #
+#                                                                             #
+#         Option to output cluster member ids/sequence id? (issue 179)        #
+#                                                                             #
+# *************************************************************************** #
+
+## https://github.com/torognes/swarm/issues/179
+
+DESCRIPTION="issue 179 --- output cluster member sequence id (default)"
+printf ">s1_2\nA\n>s2_1\nC\n" | \
+    "${SWARM}" 2> /dev/null | \
+    grep -qw "s1_2 s2_1" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="issue 179 --- output cluster member sequence id (-o)"
+printf ">s1_2\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -o /dev/stdout 2> /dev/null | \
+    grep -qw "s1_2 s2_1" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="issue 179 --- output cluster member sequence id (--output-file)"
+printf ">s1_2\nA\n>s2_1\nC\n" | \
+    "${SWARM}" --output-file /dev/stdout 2> /dev/null | \
+    grep -qw "s1_2 s2_1" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 exit 0
