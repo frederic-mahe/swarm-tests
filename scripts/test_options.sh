@@ -390,6 +390,62 @@ printf ">s1_2\nAA\n>s2_1\nAC\n" | \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
+## test pairwise alignment vectorized functions (SSSE3 and SSE41
+## functions) using long sequences (1,024 is a multiple of 64) and
+## only level-1 microvariants, to prevent k-mer prefiltering
+E_coli_1024bp="AAATTGAAGAGTTTGATCATGGCTCAGATTGAACGCTGGCGGCAGGCCTAACACATGCAAGTCGAACGGTAACAGGAAGAAGCTTGCTTCTTTGCTGACGAGTGGCGGACGGGTGAGTAATGTCTGGGAAACTGCCTGATGGAGGGGGATAACTACTGGAAACGGTAGCTAATACCGCATAACGTCGCAAGACCAAAAAGGGGGACCTTCGGGCCTCTTGCCATCGGATGTGCCCAGATGGGATTAGCTAGTAGGTGGGGTAACGGCTCACCTAGGCGACGATCCCTAGCTGGTCTGAGAGGATGACCAGCCACACTGGAACTGAGACACGGTCCAGACTCCTACGGGAGGCAGCAGTGGGGAATATTGCACAATGGGCGCAAGCCTGATGCAGCCATGCCGCGTGTATGAAGAAGGCCTTCGGGTTGTAAAGTACTTTCAGCGGGGAGGAAGGGAGTAAAGTTAATACCTTTGCTCATTGACGTTACCCGCAGAAGAAGCACCGGCTAACTCCGTGCCAGCAGCCGCGGTAATACGGAGGGTGCAAGCGTTAATCGGAATTACTGGGCGTAAAGCGCACGCAGGCGGTTTGTTAAGTCAGATGTGAAATCCCCGGGCTCAACCTGGGAACTGCATCTGATACTGGCAAGCTTGAGTCTCGTAGAGGGGGGTAGAATTCCAGGTGTAGCGGTGAAATGCGTAGAGATCTGGAGGAATACCGGTGGCGAAGGCGGCCCCCTGGACGAAGACTGACGCTCAGGTGCGAAAGCGTGGGGAGCAAACAGGATTAGATACCCTGGTAGTCCACGCCGTAAACGATGTCGACTTGGAGGTTGTGCCCTTGAGGCGTGGCTTCCGGAGCTAACGCGTTAAGTCGACCGCCTGGGGAGTACGGCCGCAAGGTTAAAACTCAAATGAATTGACGGGGGCCCGCACAAGCGGTGGAGCATGTGGTTTAATTCGATGCAACGCGAAGAACCTTACCTGGTCTTGACATCCACGGAAGTTTTCAGAGATGAGAATG"
+FASTA_FILE=$(mktemp)
+
+microvariants() {
+    # only substitutions
+    local SEQ="${1}"
+    local -i LENGTH=${#SEQ}
+    for ((i=1 ; i<=LENGTH ; i++)) ; do
+        ## substitutions
+        for n in A C G T ; do
+            echo ${SEQ:0:i-1}${n}${SEQ:i:LENGTH}
+        done
+    done
+}
+
+MICROVARIANTS_L1=$(microvariants ${E_coli_1024bp} | sort -du | grep -vw "${E_coli_1024bp}")
+
+(
+    printf ">seed_1000\n%s\n" "${E_coli_1024bp}"
+    awk '{print ">variant"NR"_1\n"$1}' <<< "${MICROVARIANTS_L1}"
+) > "${FASTA_FILE}"
+
+
+## 8-bit version (16 channels)
+# expect a single cluster with 1 + 3 * 1,024 = 3,073 sequences
+DESCRIPTION="swarm pairwise alignment functions work (8 bits on 16 channels)"
+"${SWARM}" \
+    -d 2 \
+    -o /dev/null \
+    --log /dev/null \
+    --statistics-file - \
+    "${FASTA_FILE}" | \
+    grep -q "^3073" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## 16-bit version (8 channels)
+# expect a single cluster with 1 + 3 * 1,024 = 3,073 sequences
+DESCRIPTION="swarm pairwise alignment functions work (16 bits on 8 channels)"
+"${SWARM}" \
+    -d 16 \
+    -o /dev/null \
+    --log /dev/null \
+    --statistics-file - \
+    "${FASTA_FILE}" | \
+    grep -q "^3073" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+rm -rf "${FASTA_FILE}"
+unset E_coli_1024bp microvariants MICROVARIANTS_L1 FASTA_FILE
+
+
 ## trigger pairwise alignment using 16 bits on 8 channels (-d >= 16)
 # pairwise alignment scores can be stored either on 8 or 16 bits. The
 # number of bits is chosen as such:
