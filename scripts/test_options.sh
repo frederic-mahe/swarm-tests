@@ -2919,6 +2919,36 @@ printf ">s1\nA\n>s2_5\nA\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+# tests inspired by a regression introduced with commit
+# 9a2558ff9bd1521d5aff7c3ed50f1bd667c2cbc6 [2024-01-01] (wrong usage
+# of C++ references)
+
+## d = 0 (output order)
+DESCRIPTION="swarm outputs expected order (-d 0)"
+printf ">s1_1\nA\n>s2_1\nAA\n" | \
+    "${SWARM}" -d 0 2> /dev/null | \
+    awk 'NR == 1 && $1 == ">s1_1"' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## d = 0 (no duplicates)
+DESCRIPTION="swarm outputs seed only once (-d 0)"
+printf ">seed_10\nCC\n>s1_1\nA\n>s2_1\nAA\n" | \
+    "${SWARM}" -d 0 2> /dev/null | \
+    grep -w "seed_10" |
+    awk 'END {exit (NR == 1) ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## d = 0 (lossless)
+DESCRIPTION="swarm outputs each unique sequence (-d 0)"
+paste <(printf "seed_10\ns1_1\ns2_1" | sort) \
+      <(printf ">seed_10\nCC\n>s1_1\nA\n>s2_1\nAA\n" | \
+            "${SWARM}" -d 0 2> /dev/null | sort) | \
+    awk '{exit $1 == $2 ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 
 #*****************************************************************************#
 #                                                                             #
