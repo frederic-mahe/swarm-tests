@@ -2360,9 +2360,49 @@ printf ">s1_2\nA\n>s2_1\nC\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+## -u column 8 (CIGAR) is M for hit
+## (1 match/mismatch)
+DESCRIPTION="-u column 8 (CIGAR) is M for hit (single nucleotide)"
+printf ">s1_1\nA\n>s2_1\nA\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "H" {exit $8 == "M" ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -u column 8 (CIGAR) is 10M for hit
+## (10 matches/mismatches)
+DESCRIPTION="-u column 8 (CIGAR) is 10M for hit (double-digit)"
+printf ">s1_1\nAAAAAAAAAA\n>s2_1\nAAAAAAAAAA\n" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "H" {exit $8 == "10M" ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -u column 8 (CIGAR) is 100M for hit
+## (100 matches/mismatches)
+DESCRIPTION="-u column 8 (CIGAR) is 100M for hit (triple-digit)"
+SEQ="$(for i in {1..10} ; do printf "AAAAAAAAAA" ; done)"
+printf ">s1_1\n%s\n>s2_1\n%s\n" "${SEQ}" "${SEQ}" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "H" {exit $8 == "100M" ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+unset SEQ
+
+## -u column 8 (CIGAR) is 1000M for hit
+## (1000 matches/mismatches)
+DESCRIPTION="-u column 8 (CIGAR) is 1000M for hit (quadruple-digit)"
+SEQ="$(for i in {1..100} ; do printf "AAAAAAAAAA" ; done)"
+printf ">s1_1\n%s\n>s2_1\n%s\n" "${SEQ}" "${SEQ}" | \
+    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "H" {exit $8 == "1000M" ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+unset SEQ
+
 ## -u column 8 (CIGAR) is 4M for hit
 ## (4 matches/mismatches)
-DESCRIPTION="-u column 8 (CIGAR) is 4M for hit"
+DESCRIPTION="-u column 8 (CIGAR) is 4M for hit (monotonous)"
 printf ">s1_1\nAAAA\n>s2_1\nAAAC\n" | \
     "${SWARM}" -o /dev/null -u - 2> /dev/null | \
     awk 'BEGIN {FS = "\t"} $1 == "H" {exit $8 == "4M" ? 0 : 1}' && \
@@ -2371,7 +2411,7 @@ printf ">s1_1\nAAAA\n>s2_1\nAAAC\n" | \
 
 ## -u column 8 (CIGAR) is D3M for hit
 ## (a deletion, 3 matches/mismatches)
-DESCRIPTION="-u column 8 (CIGAR) is D3M for hit"
+DESCRIPTION="-u column 8 (CIGAR) is D3M for hit (initial singleton)"
 printf ">s1_1\nAAAA\n>s2_1\nAAA\n" | \
     "${SWARM}" -o /dev/null -u - 2> /dev/null | \
     awk 'BEGIN {FS = "\t"} $1 == "H" {exit $8 == "D3M" ? 0 : 1}' && \
@@ -2380,7 +2420,7 @@ printf ">s1_1\nAAAA\n>s2_1\nAAA\n" | \
 
 ## -u column 8 (CIGAR) is 4MI for hit
 ## (4 matches/mismatches, with a terminal insertion)
-DESCRIPTION="-u column 8 (CIGAR) is D3M for hit"
+DESCRIPTION="-u column 8 (CIGAR) is 4MI for hit (terminal singleton)"
 printf ">s1_1\nAAAA\n>s2_1\nAAAAA\n" | \
     "${SWARM}" -o /dev/null -u - 2> /dev/null | \
     awk 'BEGIN {FS = "\t"} $1 == "H" {exit $8 == "4MI" ? 0 : 1}' && \
