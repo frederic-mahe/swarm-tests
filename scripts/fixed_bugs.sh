@@ -2948,4 +2948,27 @@ printf ">s1_2\nA\n>s2_1\nC\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+
+# *************************************************************************** #
+#                                                                             #
+#     swarm terminates if any sequence in the input fasta file has an N       #
+#                                 (issue 180)                                 #
+#                                                                             #
+# *************************************************************************** #
+
+## https://github.com/torognes/swarm/issues/180
+
+DESCRIPTION="issue 180 --- swarm terminates if any input sequence has an N"
+printf ">s_1\nN\n" | \
+    "${SWARM}" > /dev/null 2> /dev/null && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+DESCRIPTION="issue 180 --- swarm reads streams, so Ns can be replaced on-the-fly"
+printf ">s_1\nN\n" | \
+    sed '/^>/ ! s/[Nn]/A/g' | \
+    "${SWARM}" > /dev/null 2> /dev/null && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 exit 0
