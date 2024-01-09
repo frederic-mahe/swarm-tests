@@ -148,6 +148,16 @@ done | \
         failure "${DESCRIPTION}"
 unset N_SWARMS SEQ
 
+## getline reallocates line with alloc, so it is not possible to reserve line with new
+DESCRIPTION="non-github issue 4 --- alloc-dealloc-mismatch (lines > 2,048 chars)"
+LENGTH=2049
+SEQ=$(yes A | head -n ${LENGTH} | tr -d "\n")
+echo -e ">s_10\n${SEQ}" | \
+    "${SWARM}" -o /dev/null && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+unset LENGTH SEQ
+
 
 # *************************************************************************** #
 #                                                                             #
