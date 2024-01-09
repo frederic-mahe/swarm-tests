@@ -153,7 +153,7 @@ DESCRIPTION="non-github issue 4 --- alloc-dealloc-mismatch (lines > 2,048 chars)
 LENGTH=2049
 SEQ=$(yes A | head -n ${LENGTH} | tr -d "\n")
 echo -e ">s_10\n${SEQ}" | \
-    "${SWARM}" -o /dev/null && \
+    "${SWARM}" -o /dev/null 2> /dev/null && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 unset LENGTH SEQ
