@@ -120,6 +120,34 @@ grep -q "^1" "${TMP}" && \
         failure "${DESCRIPTION}"
 rm "${TMP}"
 
+## bug (late 2023/early 2024)
+# - each cluster is referenced in a vector of struct
+# - that vector grows by increment of 1,024 structs,
+# - this is done with the member function resize(new_size),
+# - newsize was triggered by n_cluster >= capacity, which lead to a bug
+# - initial capacity = size = 1,024
+# - when the number of cluster is 1,024, resize increases size by
+#   1024, capacity doubles
+# - new capacity = new size = 2,048
+# - when the number of cluster is 2,048, resize increases size by
+#   1024, capacity doubles
+# - new capacity = 4,096, new size = 3,072
+# - when the number of cluster is 3,072, no resize since n_cluster < capacity,
+# - program starts to write struct in reserved but uninitialized memory
+# - undefined behaviour
+# - fix: n_cluster >= capacity -> n_cluster >= size
+DESCRIPTION="non-github issue 3 --- bug in clustering record: storage in uninitialized memory"
+N_SWARMS=3073
+SEQ=$(yes A | head -n $(( ${N_SWARMS} * 2 )) | tr -d "\n")
+for ((i = 1; i <= N_SWARMS; i++)) ; do
+    echo -e ">s${i}_10\n${SEQ:0:i * 2}"
+    echo -e ">s${i}bis_1\n${SEQ:0:i * 2}G"
+done | \
+    "${SWARM}" -o /dev/null 2> /dev/null && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+unset N_SWARMS SEQ
+
 
 # *************************************************************************** #
 #                                                                             #
@@ -1714,6 +1742,11 @@ printf ">s1_1\nCTATTGTTGTC\n>s2_1\nTCTATGTGTCT\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+# I4M2D5MI expected
+# I4M D5MI observed
+# {73 'I', 77 'M', 77 'M', 77 'M', 77 'M', 68 'D', 68 'D', 77 'M', 77 'M', 77 'M', 77 'M', 77 'M', 73 'I'}
+# I4M2D5MI after nw()
+# I4M2D5MI
 
 # *************************************************************************** #
 #                                                                             #
