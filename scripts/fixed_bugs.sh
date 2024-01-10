@@ -136,6 +136,7 @@ rm "${TMP}"
 # - program starts to write struct in reserved but uninitialized memory
 # - undefined behaviour
 # - fix: n_cluster >= capacity -> n_cluster >= size
+# (bug detectable when compiling with address sanitizer)
 DESCRIPTION="non-github issue 3 --- bug in clustering record: storage in uninitialized memory"
 N_SWARMS=3073
 SEQ=$(yes A | head -n $(( ${N_SWARMS} * 2 )) | tr -d "\n")
@@ -148,7 +149,9 @@ done | \
         failure "${DESCRIPTION}"
 unset N_SWARMS SEQ
 
-## getline reallocates line with alloc, so it is not possible to reserve line with new
+## getline reallocates line with alloc, so it is not possible to
+## reserve line with new (bug detectable when compiling with address
+## sanitizer)
 DESCRIPTION="non-github issue 4 --- alloc-dealloc-mismatch (lines > 2,048 chars)"
 LENGTH=2049
 SEQ=$(yes A | head -n ${LENGTH} | tr -d "\n")
