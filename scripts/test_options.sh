@@ -442,6 +442,35 @@ DESCRIPTION="swarm pairwise alignment functions work (16 bits on 8 channels)"
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+## --------------------------------------------------- test pure SSE2 functions
+## 8-bit version (16 channels)
+# expect a single cluster with 1 + 3 * 1,024 = 3,073 sequences
+DESCRIPTION="swarm pairwise alignment functions work (8 bits on 16 channels, SSE2)"
+"${SWARM}" \
+    -d 2 \
+    --disable-sse3 \
+    -o /dev/null \
+    --log /dev/null \
+    --statistics-file - \
+    "${FASTA_FILE}" | \
+    grep -q "^3073" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## 16-bit version (8 channels)
+# expect a single cluster with 1 + 3 * 1,024 = 3,073 sequences
+DESCRIPTION="swarm pairwise alignment functions work (16 bits on 8 channels, SSE2)"
+"${SWARM}" \
+    -d 16 \
+    --disable-sse3 \
+    -o /dev/null \
+    --log /dev/null \
+    --statistics-file - \
+    "${FASTA_FILE}" | \
+    grep -q "^3073" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 rm -rf "${FASTA_FILE}"
 unset E_coli_1024bp microvariants MICROVARIANTS_L1 FASTA_FILE
 
