@@ -161,6 +161,19 @@ echo -e ">s_10\n${SEQ}" | \
         failure "${DESCRIPTION}"
 unset LENGTH SEQ
 
+## casting bug in search8 and search16 functions
+DESCRIPTION="non-github issue 5 --- heap-buffer-overflow (search8, no SSE3)"
+printf ">s1_2\nAA\n>s2_1\nAT\n" | \
+    "${SWARM}" -d 2 -x > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="non-github issue 5 --- heap-buffer-overflow (search16, no SSE3)"
+printf ">s1_2\nAA\n>s2_1\nAT\n" | \
+    "${SWARM}" -d 2 -x -p 59 > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 
 # *************************************************************************** #
 #                                                                             #
