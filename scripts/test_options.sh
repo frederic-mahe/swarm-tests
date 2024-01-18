@@ -2744,6 +2744,24 @@ printf ">s1_1\nA\n>s2_1\nT\n" | \
 
 ## ---------------------------------------------------------- usearch-abundance
 
+DESCRIPTION="swarm rejects header with size=INT (without -z)"
+printf ">s1;size=1;\nA\n" | \
+    "${SWARM}" -o /dev/null 2> /dev/null && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+DESCRIPTION="swarm accepts header with size=INT (with -z)"
+printf ">s1;size=1;\nA\n" | \
+    "${SWARM}" -z -o /dev/null 2> /dev/null && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="swarm rejects header without size=INT (with -z)"
+printf ">s1\nA\n" | \
+    "${SWARM}" -z -o /dev/null 2> /dev/null && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
 # what are the output files impacted by the -z option?
 ## reminder: >header[[:blank:]]   and   header = label_[1-9][0-9]*$
 
