@@ -244,7 +244,7 @@ unset MAX
 
 DESCRIPTION="swarm: trigger reallocation (add sequence number)"
 MAX=$(( 1024 * 1024 - 20 ))  # ">" + MAX + "_1\n\0" = MAX + 5
-printf ">%s_1\nA\n>r_1\nA\n" $(head -c ${MAX} < /dev/zero | tr '\0' 's') | \
+printf ">%s_1\nA\n>r_1\nC\n" $(head -c ${MAX} < /dev/zero | tr '\0' 's') | \
     "${SWARM}" > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
