@@ -3138,6 +3138,18 @@ printf ">s_1\nA\n" | \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
+## trigger case score = uint16_max in search16.cc
+DESCRIPTION="swarm: trigger saturation of diff (diff = uint16_max, search16)"
+# penalty value: 122 (highest possible?)
+# align two completely mismatching sequences (all gap extensions)
+# 'score' saturates at uint16_max
+LENGTH=2519
+printf ">s1_1\n%s\n>s2_1\n%s\n" $(head -c ${LENGTH} < /dev/zero | tr '\0' 'A') $(head -c ${LENGTH} < /dev/zero | tr '\0' 'G') | \
+    "${SWARM}" -d 2 -p 122 > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+unset LENGTH
+
 
 #*****************************************************************************#
 #                                                                             #
