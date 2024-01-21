@@ -1444,6 +1444,23 @@ printf ">s1_2\nAA\n>s2_1\nAC\n" | \
 rm -f "${TMP}"
 unset TMP
 
+# network elements are sorted by capture order (? not sure)
+DESCRIPTION="-j orders amplicons by capture order (case 1)"
+printf ">s1_3\nA\n>s2_2\nC\n>s3_1\nG\n" | \
+    "${SWARM}" -o /dev/null -j - 2> /dev/null | \
+    head -n 1 | \
+    grep -wEq "s1_3[[:blank:]]s2_2" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="-j orders amplicons by capture order (case 2)"
+printf ">s1_3\nA\n>s2_1\nC\n>s3_2\nG\n" | \
+    "${SWARM}" -o /dev/null -j - 2> /dev/null | \
+    head -n 1 | \
+    grep -wEq "s1_3[[:blank:]]s3_2" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 ## tests written with Milena Königshofen:
 # https://github.com/milenazilena/Internship_2019/blob/master/Tests/test_network_option.sh
 
