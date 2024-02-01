@@ -159,11 +159,102 @@ printf "" | \
 rm -f ${TMP}
 
 ## Test empty sequence
-DESCRIPTION="swarm handles empty sequences"
+DESCRIPTION="swarm handles empty sequences (single \\\n)"
+printf ">s_1\n" | \
+    "${SWARM}" > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+DESCRIPTION="swarm handles empty sequences (double \\\n)"
 printf ">s_1\n\n" | \
     "${SWARM}" > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
+
+## ---------------------------- set of early-detection tests for db_read issues
+
+## std::cin
+
+DESCRIPTION="accepts empty sequence line (first line)"
+printf ">s1_1\n\nA\n" | \
+    "${SWARM}" > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="accepts empty sequence line (last line)"
+printf ">s1_1\nA\n\n" | \
+    "${SWARM}" > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="accepts empty sequence line (middle line)"
+printf ">s1_1\nA\n\nA\n" | \
+    "${SWARM}" > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="accepts missing final new line"
+printf ">s1_1\nA" | \
+    "${SWARM}" > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="rejects empty last sequence"
+printf ">s1_1\nA\n>s2_1\n" | \
+    "${SWARM}" > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+DESCRIPTION="rejects empty first sequence"
+printf ">s1_1\n>s2_1\nC\n" | \
+    "${SWARM}" > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+DESCRIPTION="rejects empty middle sequence"
+printf ">s1_1\nA\n>s2_1\n>s3_1\nG\n" | \
+    "${SWARM}" > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+## file descriptor input
+
+DESCRIPTION="accepts empty sequence line (first line)"
+"${SWARM}" <(printf ">s1_1\n\nA\n") > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="accepts empty sequence line (last line)"
+"${SWARM}" <(printf ">s1_1\nA\n\n") > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="accepts empty sequence line (middle line)"
+"${SWARM}" <(printf ">s1_1\nA\n\nA\n") > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="accepts missing final new line"
+"${SWARM}" <(printf ">s1_1\nA") > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="rejects empty last sequence"
+"${SWARM}" <(printf ">s1_1\nA\n>s2_1\n") > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+DESCRIPTION="rejects empty first sequence"
+"${SWARM}" <(printf ">s1_1\n>s2_1\nC\n") > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+DESCRIPTION="rejects empty middle sequence"
+"${SWARM}" <(printf ">s1_1\nA\n>s2_1\n>s3_1\nG\n") > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+## ------------------------------------------------------------------------ end
 
 ## Test completely empty header
 DESCRIPTION="swarm aborts on empty fasta headers"
