@@ -98,6 +98,7 @@ mkfifo fifo_test
 	    failure "${DESCRIPTION}" &
 printf ">s_1\nA\n" > fifo_test
 rm fifo_test
+kill $(ps -C $(basename "${SWARM}") -o pid=) 2> /dev/null
 
 ## swarm reads from a process substitution (anonymous pipe)
 DESCRIPTION="swarm reads from a process substitution (unseekable)"
