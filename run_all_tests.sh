@@ -4,7 +4,7 @@
 ## point to another binary
 
 ## Launch all tests
-for s in ./scripts/*.sh ; do
+for s in ./scripts/{test_input,test_options,fixed_bugs}.sh ; do
     bash "${s}" "${1}" || exit 1
     echo
 done
