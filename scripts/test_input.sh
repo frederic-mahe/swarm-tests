@@ -90,7 +90,7 @@ DESCRIPTION="swarm reads from a symbolic link"
 rm -f "${FASTA}" "${FASTA_LINK}"
 unset FASTA FASTA_LINK
 
-# ## swarm accepts inputs from named pipes
+## swarm accepts inputs from named pipes
 # DESCRIPTION="swarm accepts inputs from named pipes"
 # mkfifo fifo_test
 # "${SWARM}" fifo_test > /dev/null 2>&1 && \
