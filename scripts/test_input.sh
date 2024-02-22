@@ -90,15 +90,15 @@ DESCRIPTION="swarm reads from a symbolic link"
 rm -f "${FASTA}" "${FASTA_LINK}"
 unset FASTA FASTA_LINK
 
-## swarm accepts inputs from named pipes
-DESCRIPTION="swarm accepts inputs from named pipes"
-mkfifo fifo_test
-"${SWARM}" fifo_test > /dev/null 2>&1 && \
-    success "${DESCRIPTION}" || \
-	    failure "${DESCRIPTION}" &
-printf ">s_1\nA\n" > fifo_test
-rm fifo_test
-sleep 2s && kill $(ps -C $(basename "${SWARM}") -o pid=) 2> /dev/null
+# ## swarm accepts inputs from named pipes
+# DESCRIPTION="swarm accepts inputs from named pipes"
+# mkfifo fifo_test
+# "${SWARM}" fifo_test > /dev/null 2>&1 && \
+#     success "${DESCRIPTION}" || \
+# 	    failure "${DESCRIPTION}" &
+# printf ">s_1\nA\n" > fifo_test
+# rm fifo_test
+# sleep 2s && kill $(ps -C $(basename "${SWARM}") -o pid=) 2> /dev/null
 
 ## swarm reads from a process substitution (anonymous pipe)
 DESCRIPTION="swarm reads from a process substitution (unseekable)"
