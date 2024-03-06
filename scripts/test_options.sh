@@ -1563,6 +1563,22 @@ printf ">s1_1\nA\n>s2_1\nC\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+# double links are from s1 to s2 and from s2 to s1 (header sorting)
+DESCRIPTION="-j links with equal abundances are sorted by header (sorted input)"
+printf ">s1_1\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -l /dev/null -o /dev/null -j - | \
+    awk '{exit (NR == 1 && $1 == "s1_1") ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+# double links are from s1 to s2 and from s2 to s1 (header sorting)
+DESCRIPTION="-j links with equal abundances are sorted by header (reversed input)"
+printf ">s2_1\nA\n>s1_1\nC\n" | \
+    "${SWARM}" -l /dev/null -o /dev/null -j - | \
+    awk '{exit (NR == 1 && $1 == "s1_1") ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 # double links also between layers: we expect double links between
 # s2_1 and s3_1
 DESCRIPTION="-j expect double link between layers too"
