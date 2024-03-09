@@ -886,7 +886,7 @@ printf ">s1_3\nAA\n>s2_1\nCC\n" | \
 for OPTION in "-c" "--ceiling" ; do
     DESCRIPTION="swarms accepts the option ${OPTION}"
     printf ">s1_3\nAA\n>s2_1\nCC\n" | \
-        "${SWARM}" -f "${OPTION}" 10 > /dev/null 2>&1 && \
+        "${SWARM}" -f "${OPTION}" 40 > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
@@ -912,8 +912,8 @@ printf ">s1_3\nAA\n>s2_1\nCC\n" | \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
-## Ceiling should fail when 0 <= c < 8
-for ((c=0 ; c<8; c++)) ; do
+## Ceiling should fail when 0 <= c < 20
+for ((c=0 ; c<20; c++)) ; do
     DESCRIPTION="swarm aborts when --ceiling is ${c}"
     printf ">s1_3\nAA\n>s2_1\nCC\n" | \
         "${SWARM}" -f -c ${c} > /dev/null 2>&1 && \
@@ -922,16 +922,16 @@ for ((c=0 ; c<8; c++)) ; do
 done
 
 ## Bloom filter needs at least 8 MB, even for a minimal example
-DESCRIPTION="swarm fastidious needs at least 8 MB for the Bloom filter"
+DESCRIPTION="swarm fastidious needs at least 21 MB for the Bloom filter"
 printf ">s1_3\nAA\n>s2_1\nCC\n" | \
-    "${SWARM}" -f -c 8 > /dev/null 2>&1 && \
+    "${SWARM}" -f -c 21 > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
 ## ceiling option accepts positive integers
-MIN=8
+MIN=21
 MAX=255
-DESCRIPTION="swarm runs normally when --ceiling goes from 8 to ${MAX}"
+DESCRIPTION="swarm runs normally when --ceiling goes from 21 to ${MAX}"
 for ((c=$MIN ; c<=$MAX ; c++)) ; do
     printf ">s1_3\nAA\n>s2_1\nCC\n" | \
         "${SWARM}" -f -c ${c} > /dev/null 2>&1 || \
@@ -956,7 +956,7 @@ printf ">s1_3\nAA\n>s2_1\nCC\n" | \
 ## Passing the --ceiling option without the fastidious option should fail
 DESCRIPTION="swarm fails when the ceiling option is specified without -f"
 printf ">s1_3\nAA\n>s2_1\nCC\n" | \
-    "${SWARM}" -c 10 > /dev/null 2>&1 && \
+    "${SWARM}" -c 40 > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -973,14 +973,14 @@ printf ">s1_3\nAA\n>s2_1\nCC\n" | \
 #     done
 # }
 
-# ## set max possible bit value (64) and put a memory ceiling at 8 MB
+# ## set max possible bit value (64) and put a memory ceiling at 20 MB
 # ## (lowest possible value)
 # DESCRIPTION="d = 1 -f trigger reducing memory used for Bloom filter"
 # (printf ">s0_3\nAAAA\n"
 #  dissimilar_sequences | \
 #      awk '{print ">s"NR"_1\n"$1}'
 # ) | \
-#     "${SWARM}" -d 1 -f --ceiling 8 --bloom-bits 64 -o /dev/null 2>&1 | \
+#     "${SWARM}" -d 1 -f --ceiling 20 --bloom-bits 64 -o /dev/null 2>&1 | \
 #     grep -q "^Reducing memory" && \
 #     success "${DESCRIPTION}" || \
 #         failure "${DESCRIPTION}"
