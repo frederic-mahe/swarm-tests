@@ -912,8 +912,8 @@ printf ">s1_3\nAA\n>s2_1\nCC\n" | \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
-## Ceiling should fail when 0 <= c < 20
-for ((c=0 ; c<20; c++)) ; do
+## Ceiling should fail when 0 <= c < 29
+for ((c=0 ; c<29; c++)) ; do
     DESCRIPTION="swarm aborts when --ceiling is ${c}"
     printf ">s1_3\nAA\n>s2_1\nCC\n" | \
         "${SWARM}" -f -c ${c} > /dev/null 2>&1 && \
@@ -921,17 +921,17 @@ for ((c=0 ; c<20; c++)) ; do
             success "${DESCRIPTION}"
 done
 
-## Bloom filter needs at least 8 MB, even for a minimal example
-DESCRIPTION="swarm fastidious needs at least 21 MB for the Bloom filter"
+## Bloom filter needs at least 30 MB, even for a minimal example
+DESCRIPTION="swarm fastidious needs at least 30 MB for the Bloom filter"
 printf ">s1_3\nAA\n>s2_1\nCC\n" | \
-    "${SWARM}" -f -c 21 > /dev/null 2>&1 && \
+    "${SWARM}" -f -c 30 > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
 ## ceiling option accepts positive integers
-MIN=21
+MIN=30
 MAX=255
-DESCRIPTION="swarm runs normally when --ceiling goes from 21 to ${MAX}"
+DESCRIPTION="swarm runs normally when --ceiling goes from 30 to ${MAX}"
 for ((c=$MIN ; c<=$MAX ; c++)) ; do
     printf ">s1_3\nAA\n>s2_1\nCC\n" | \
         "${SWARM}" -f -c ${c} > /dev/null 2>&1 || \
