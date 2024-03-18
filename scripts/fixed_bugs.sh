@@ -2286,16 +2286,16 @@ fi
 
 ## https://github.com/torognes/swarm/issues/127
 
-## Bloom filter needs at least 21 MB, even for a minimal example
-## (manpage used to indicate 3 MB)
-DESCRIPTION="issue 127 --- (fastidious) Bloom filter needs at least 30 MB (can fail)"
+## in debug mode, Bloom filter needs at least 40 MB, even for a
+## minimal example (manpage used to indicate 3 MB)
+DESCRIPTION="issue 127 --- (fastidious) Bloom filter needs at least 40 MB (in debug mode)"
 printf ">s1_3\nAA\n>s2_1\nCC\n" | \
-    "${SWARM}" -f -c 30 > /dev/null 2>&1 && \
+    "${SWARM}" -f -c 40 > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
-## Ceiling should fail when 0 <= c < 29
-for ((c=0 ; c<29; c++)) ; do
+## Ceiling should fail when 0 <= c < 39
+for ((c=0 ; c<39; c++)) ; do
     DESCRIPTION="issue 127 --- aborts when --ceiling is ${c}"
     printf ">s1_3\nAA\n>s2_1\nCC\n" | \
         "${SWARM}" -f -c ${c} > /dev/null 2>&1 && \
