@@ -3030,4 +3030,27 @@ printf ">s_1\nN\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+
+# *************************************************************************** #
+#                                                                             #
+#                   Refactor Bloom filter code (issue 182)                    #
+#                                                                             #
+# *************************************************************************** #
+
+## https://github.com/torognes/swarm/issues/182
+
+## not testable
+
+
+# *************************************************************************** #
+#                                                                             #
+#     Using SWARM on zOTUs instead of dereplicated sequences? (issue 183)     #
+#                                                                             #
+# *************************************************************************** #
+
+## https://github.com/torognes/swarm/issues/183
+
+## not testable
+
+
 exit 0
