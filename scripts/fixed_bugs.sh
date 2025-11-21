@@ -3053,4 +3053,15 @@ printf ">s_1\nN\n" | \
 ## not testable
 
 
+# *************************************************************************** #
+#                                                                             #
+#        Dealing with the new Illumina Binned Quality scores (issue 185)      #
+#                                                                             #
+# *************************************************************************** #
+
+## https://github.com/torognes/swarm/issues/185
+
+## not testable
+
+
 exit 0
