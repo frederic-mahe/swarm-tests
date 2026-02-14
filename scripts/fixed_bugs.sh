@@ -1,4 +1,5 @@
 #!/bin/bash -
+# shellcheck disable=SC2015
 
 ## Print a header
 SCRIPT_NAME="Fixed bugs"
