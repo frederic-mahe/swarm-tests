@@ -959,14 +959,14 @@ microvariants() {
     for ((i=0 ; i<=LENGTH ; i++)) ; do
         ## insertions
         for n in A C G T ; do 
-            echo ${SEQ:0:i}${n}${SEQ:i:LENGTH}
+            echo "${SEQ:0:i}${n}${SEQ:i:LENGTH}"
         done
         if (( i > 0 )) ; then 
             ## deletions
-            echo ${SEQ:0:i-1}${SEQ:i:LENGTH}
+            echo "${SEQ:0:i-1}${SEQ:i:LENGTH}"
             ## substitutions
             for n in A C G T ; do
-                echo ${SEQ:0:i-1}${n}${SEQ:i:LENGTH}
+                echo "${SEQ:0:i-1}${n}${SEQ:i:LENGTH}"
             done
         fi
     done    
@@ -989,7 +989,7 @@ DESCRIPTION="issue 53 --- fastidious links L2 microvariants and the seed"
 SEQUENCE="ACGT"
 MICROVARIANTS_L1=$(microvariants ${SEQUENCE} | sort -du | grep -v "^${SEQUENCE}$")
 MICROVARIANTS_L2=$(while read -r MICROVARIANT ; do
-                       microvariants ${MICROVARIANT}
+                       microvariants "${MICROVARIANT}"
                    done <<< "${MICROVARIANTS_L1}" | \
                        sort -du | grep -v "^${SEQUENCE}$")
 (printf ">seed_1\n%s\n" ${SEQUENCE}
@@ -1007,13 +1007,13 @@ SEQUENCE="ACGT"
 ## produce L1 and L2 microvariants
 MICROVARIANTS_L1=$(microvariants ${SEQUENCE} | sort -du | grep -v "^${SEQUENCE}$")
 MICROVARIANTS_L2=$(while read -r MICROVARIANT ; do
-                       microvariants ${MICROVARIANT}
+                       microvariants "${MICROVARIANT}"
                    done <<< "${MICROVARIANTS_L1}" | \
                        sort -du | grep -v "^${SEQUENCE}$")
 ## produce a fasta set with the seed, L2 microvariants and no L1 microvariants
 comm -23 <(echo "${MICROVARIANTS_L2}") <(echo "${MICROVARIANTS_L1}") | \
     while read -r MICROVARIANT_L2 ; do
-        printf ">seed_10\n%s\n>m_1\n%s\n" ${SEQUENCE} ${MICROVARIANT_L2} | \
+        printf ">seed_10\n%s\n>m_1\n%s\n" ${SEQUENCE} "${MICROVARIANT_L2}" | \
             "${SWARM}" -d 1 -f -o - 2> /dev/null | \
             awk 'END {exit NR == 1 ? 0 : 1}' || \
             failure "${DESCRIPTION}"
