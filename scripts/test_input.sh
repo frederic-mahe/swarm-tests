@@ -698,11 +698,12 @@ printf ">s1_1\nA\n" | \
 ## (zobrist.cc coverage)
 DESCRIPTION="swarm d = 1 accepts sequences with 32 nucleotides or more"
 MAX=40
-printf ">s_1\n%s\n" $(head -c ${MAX} < /dev/zero | tr '\0' 'A') | \
+SEQUENCE="$(head -c ${MAX} < /dev/zero | tr '\0' 'A')"
+printf ">s_1\n%s\n" "${SEQUENCE}" | \
     "${SWARM}" > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-unset MAX
+unset MAX SEQUENCE
 
 ## swarm d = 1 can process sequences with more than 5000 nucleotides
 # test can fail if there are less than 10 A, G and Ts in the sequence
