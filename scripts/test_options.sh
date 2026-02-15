@@ -1695,14 +1695,14 @@ printf ">s_1\nA\n" | \
 ## Swarm -l does no clobber when using "-"
 DESCRIPTION="swarm -l does no clobber when using '-'"
 LOG=$(mktemp)
-echo "pass 1" > ${LOG}
+echo "pass 1" > "${LOG}"
 printf ">s_1\nA\n" | \
-    "${SWARM}" -o /dev/null -l - >> ${LOG}
-head -n 1 ${LOG} | \
+    "${SWARM}" -o /dev/null -l - >> "${LOG}"
+head -n 1 "${LOG}" | \
     grep -q "^pass 1$" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm -f ${LOG}
+rm -f "${LOG}"
 unset LOG
 
 
