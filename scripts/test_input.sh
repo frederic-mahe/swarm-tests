@@ -281,43 +281,48 @@ printf ">;size=1\nA\n" | \
 ## Test long headers
 DESCRIPTION="swarm accepts headers as long as (127 - 5) chars"
 MAX=122  # ">" + MAX + "_1\n\0" = MAX + 5
-printf ">%s_1\nA\n" $(head -c ${MAX} < /dev/zero | tr '\0' 's') | \
+HEADER="$(head -c ${MAX} < /dev/zero | tr '\0' 's')"
+printf ">%s_1\nA\n" "${HEADER}" | \
     "${SWARM}" > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-unset MAX
+unset MAX HEADER
 
 DESCRIPTION="swarm accepts headers as long as (255 - 5) chars"
 MAX=250  # ">" + MAX + "_1\n\0" = MAX + 5
-printf ">%s_1\nA\n" $(head -c ${MAX} < /dev/zero | tr '\0' 's') | \
+HEADER="$(head -c ${MAX} < /dev/zero | tr '\0' 's')"
+printf ">%s_1\nA\n" "${HEADER}" | \
     "${SWARM}" > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-unset MAX
+unset MAX HEADER
 
 DESCRIPTION="swarm accepts headers as long as LINE_MAX - 5 (2,043)"
 MAX=2043  # ">" + MAX + "_1\n\0" = 2043 + 5 = 2048 = OK
-printf ">%s_1\nA\n" $(head -c ${MAX} < /dev/zero | tr '\0' 's') | \
+HEADER="$(head -c ${MAX} < /dev/zero | tr '\0' 's')"
+printf ">%s_1\nA\n" "${HEADER}" | \
     "${SWARM}" > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-unset MAX
+unset MAX HEADER
 
 DESCRIPTION="swarm accepts headers as long as (32767 - 5) chars"
 MAX=32762  # ">" + MAX + "_1\n\0" = MAX + 5
-printf ">%s_1\nA\n" $(head -c ${MAX} < /dev/zero | tr '\0' 's') | \
+HEADER="$(head -c ${MAX} < /dev/zero | tr '\0' 's')"
+printf ">%s_1\nA\n" "${HEADER}" | \
     "${SWARM}" > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-unset MAX
+unset MAX HEADER
 
 DESCRIPTION="swarm accepts headers as long as (65535 - 5) chars"
 MAX=65530  # ">" + MAX + "_1\n\0" = MAX + 5
-printf ">%s_1\nA\n" $(head -c ${MAX} < /dev/zero | tr '\0' 's') | \
+HEADER="$(head -c ${MAX} < /dev/zero | tr '\0' 's')"
+printf ">%s_1\nA\n" "${HEADER}" | \
     "${SWARM}" > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-unset MAX
+unset MAX HEADER
 
 # tests requiring at least a gigabyte of available RAM
 if which free > /dev/null 2>&1 ; then
@@ -325,39 +330,39 @@ if which free > /dev/null 2>&1 ; then
     if [[ ${AVAILABLE_RAM} -ge 1048576 ]] ; then
         DESCRIPTION="swarm: trigger reallocation (2^20 chars header, size of memchunk)"
         MAX=$(( 1024 * 1024 ))  # ">" + MAX + "_1\n\0" = MAX + 5
-        printf ">%s_1\nA\n" \
-               $(head -c ${MAX} < /dev/zero | tr '\0' 's') | \
+        HEADER="$(head -c ${MAX} < /dev/zero | tr '\0' 's')"
+        printf ">%s_1\nA\n" "${HEADER}" | \
             "${SWARM}" > /dev/null 2>&1 && \
             success "${DESCRIPTION}" || \
                 failure "${DESCRIPTION}"
-        unset MAX
+        unset MAX HEADER
 
         DESCRIPTION="swarm: trigger reallocation (add sequence length)"
         MAX=$(( 1024 * 1024 - 8 ))  # ">" + MAX + "_1\n\0" = MAX + 5
-        printf ">%s_1\nA\n" \
-               $(head -c ${MAX} < /dev/zero | tr '\0' 's') | \
+        HEADER="$(head -c ${MAX} < /dev/zero | tr '\0' 's')"
+        printf ">%s_1\nA\n" "${HEADER}" | \
             "${SWARM}" > /dev/null 2>&1 && \
             success "${DESCRIPTION}" || \
                 failure "${DESCRIPTION}"
-        unset MAX
+        unset MAX HEADER
 
         DESCRIPTION="swarm: trigger reallocation (add sequence number)"
         MAX=$(( 1024 * 1024 - 20 ))  # ">" + MAX + "_1\n\0" = MAX + 5
-        printf ">%s_1\nA\n>r_1\nC\n" \
-               $(head -c ${MAX} < /dev/zero | tr '\0' 's') | \
+        HEADER="$(head -c ${MAX} < /dev/zero | tr '\0' 's')"
+        printf ">%s_1\nA\n>r_1\nC\n" "${HEADER}" | \
             "${SWARM}" > /dev/null 2>&1 && \
             success "${DESCRIPTION}" || \
                 failure "${DESCRIPTION}"
-        unset MAX
+        unset MAX HEADER
 
         DESCRIPTION="swarm: trigger reallocation (add remaining nt_buffer)"
         MAX=$(( 1024 * 1024 - 20 ))  # ">" + MAX + "_1\n\0" = MAX + 5
-        printf ">%s_1\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC\n" \
-               $(head -c ${MAX} < /dev/zero | tr '\0' 's') | \
+        HEADER="$(head -c ${MAX} < /dev/zero | tr '\0' 's')"
+        printf ">%s_1\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC\n" "${HEADER}" | \
             "${SWARM}" > /dev/null 2>&1 && \
             success "${DESCRIPTION}" || \
                 failure "${DESCRIPTION}"
-        unset MAX
+        unset MAX HEADER
     fi
 fi
 
