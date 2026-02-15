@@ -358,7 +358,7 @@ printf ">s_1\nA\n" | \
 ## Number of differences (--differences is negative)
 DESCRIPTION="swarm aborts when --difference is -1"
 printf ">s_1\nA\n" | \
-    "${SWARM}" -d \-1 2> /dev/null && \
+    "${SWARM}" -d -1 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
