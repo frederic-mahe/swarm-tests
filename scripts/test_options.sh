@@ -1654,12 +1654,12 @@ printf ">s_1\nA\n" | \
 
 ## Swarm -l fails if unable to open output file for writing
 DESCRIPTION="-l fails if unable to open output file for writing"
-TMP=$(mktemp) && chmod u-w ${TMP}  # remove write permission
+TMP=$(mktemp) && chmod u-w "${TMP}"  # remove write permission
 printf ">s_1\nA\n" | \
-    "${SWARM}" -l ${TMP} > /dev/null 2>&1 && \
+    "${SWARM}" -l "${TMP}" > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
-chmod u+w ${TMP} && rm -f ${TMP}
+chmod u+w "${TMP}" && rm -f "${TMP}"
 unset TMP
 
 ## Swarm does not write on standard error when using -l
