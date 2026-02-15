@@ -1010,7 +1010,7 @@ printf ">s1_3\nAA\n>s2_1\nCC\n" | \
 ## Bloom bits (-y is negative)
 DESCRIPTION="swarm aborts when --bloom-bits is -1"
 printf ">s1_3\nAA\n>s2_1\nCC\n" | \
-    "${SWARM}" -f -y \-1 > /dev/null 2>&1 && \
+    "${SWARM}" -f -y -1 > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
