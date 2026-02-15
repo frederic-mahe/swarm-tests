@@ -712,7 +712,7 @@ MAX=5000
 SEED=$(env LC_CTYPE=C tr -dc 'acgtACGT' < /dev/urandom | \
            tr "[:lower:]" "[:upper:]" | head -c ${MAX})
 SUBSEED=$(sed 's/[AGT]/C/10' <<< $SEED)  # replace the 10th A, G or T with a C
-printf ">s1_3\n%s\n>s2_1\n%s\n" $SEED $SUBSEED | \
+printf ">s1_3\n%s\n>s2_1\n%s\n" "${SEED}" "${SUBSEED}" | \
     "${SWARM}" -l /dev/null | \
     grep -q "^s1_3 s2_1$" && \
     success "${DESCRIPTION}" || \
@@ -726,7 +726,7 @@ MAX=5000
 SEED=$(env LC_CTYPE=C tr -dc 'acgtACGT' < /dev/urandom | \
            tr "[:lower:]" "[:upper:]" | head -c ${MAX})
 SUBSEED=$(sed 's/[AGT]/C/10' <<< $SEED)  # replace the 10th A, G or T with a C
-printf ">s1_3\n%s\n>s2_1\n%s\n" $SEED $SUBSEED | \
+printf ">s1_3\n%s\n>s2_1\n%s\n" "${SEED}" "${SUBSEED}" | \
     "${SWARM}" -d 2 -l /dev/null | \
     grep -q "^s1_3 s2_1$" && \
     success "${DESCRIPTION}" || \
