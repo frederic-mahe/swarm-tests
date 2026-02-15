@@ -1025,7 +1025,7 @@ printf ">s1_3\nAA\n>s2_1\nCC\n" | \
 MIN=2
 MAX=64
 DESCRIPTION="swarm runs normally when --bloom-bits goes from ${MIN} to ${MAX}"
-for ((y=$MIN ; y<=$MAX ; y++)) ; do
+for ((y=MIN ; y<=MAX ; y++)) ; do
     printf ">s1_3\nAA\n>s2_1\nCC\n" | \
         "${SWARM}" -f -y ${y} > /dev/null 2>&1 || \
         failure "swarm aborts when --bloom-bits equals ${y}"
