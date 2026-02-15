@@ -2481,12 +2481,12 @@ printf ">s2_4\nAAA\n>s1_3\nCCC\n>s3_1\nCGG\n" | \
 ## https://github.com/torognes/swarm/issues/137
 
 ## swarm accepts --bloom-bits values of 2, 3 and 4
-DESCRIPTION="issue 137 --- swarm runs normally when --bloom-bits equals ${y}"
+DESCRIPTION="issue 137 --- swarm runs normally when --bloom-bits equals"
 for i in 2 3 4 ; do
     printf ">s1_3\nAA\n>s2_1\nCC\n" | \
         "${SWARM}" -f -y ${i} > /dev/null 2>&1 && \
-        success "${DESCRIPTION}" || \
-            failure "${DESCRIPTION}"
+        success "${DESCRIPTION} ${i}" || \
+            failure "${DESCRIPTION} ${i}"
 done
 
 
