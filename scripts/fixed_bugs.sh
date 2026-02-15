@@ -140,7 +140,7 @@ rm "${TMP}"
 # (bug detectable when compiling with address sanitizer)
 DESCRIPTION="non-github issue 3 --- bug in clustering record: storage in uninitialized memory"
 N_SWARMS=3073
-SEQ=$(yes A | head -n $(( ${N_SWARMS} * 2 )) | tr -d "\n")
+SEQ=$(yes A | head -n $(( N_SWARMS * 2 )) | tr -d "\n")
 for ((i = 1; i <= N_SWARMS; i++)) ; do
     echo -e ">s${i}_10\n${SEQ:0:i * 2}"
     echo -e ">s${i}bis_1\n${SEQ:0:i * 2}G"
