@@ -737,11 +737,12 @@ unset SEED SUBSEED
 ## (db.cc coverage: default buffer can contain 1024 nucleotides)
 DESCRIPTION="swarm can output sequences with more than 1025 nucleotides (-w)"
 MAX=1025
-printf ">s_1\n%s\n" $(head -c ${MAX} < /dev/zero | tr '\0' 'A') | \
+SEQUENCE="$(head -c ${MAX} < /dev/zero | tr '\0' 'A')"
+printf ">s_1\n%s\n" "${SEQUENCE}" | \
     "${SWARM}" -w - > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-unset MAX
+unset MAX SEQUENCE
 
 ## swarm does not accept compressed input on stdin
 DESCRIPTION="swarm does not accept compressed input (gz)"
