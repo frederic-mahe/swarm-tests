@@ -567,7 +567,7 @@ microvariants() {
 DESCRIPTION="d = 2, group all L2 microvariants into one cluster"
 SEQUENCE="ACGT"
 MICROVARIANTS_L1=$(microvariants ${SEQUENCE} | sort -du | grep -v "^${SEQUENCE}$")
-MICROVARIANTS_L2=$(while read MICROVARIANT ; do
+MICROVARIANTS_L2=$(while read -r MICROVARIANT ; do
                        microvariants "${MICROVARIANT}"
                    done <<< "${MICROVARIANTS_L1}" | \
                        sort -du | grep -v "^${SEQUENCE}$")
