@@ -3152,7 +3152,7 @@ while read LONG SHORT ; do
     MIN=1
     MAX=122
     DESCRIPTION="swarm runs normally when --${LONG} goes from ${MIN} to ${MAX}"
-    for ((i=$MIN ; i<=$MAX ; i++)) ; do
+    for ((i=MIN ; i<=MAX ; i++)) ; do
         printf ">s_1\nA\n" | \
             "${SWARM}" -d 2 "${SHORT}" ${i} > /dev/null 2>&1 || \
             failure "swarm aborts when --${LONG} equals ${i}"
