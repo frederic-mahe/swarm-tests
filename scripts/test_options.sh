@@ -933,7 +933,7 @@ printf ">s1_3\nAA\n>s2_1\nCC\n" | \
 MIN=40
 MAX=255
 DESCRIPTION="swarm runs normally when --ceiling goes from 40 to ${MAX}"
-for ((c=$MIN ; c<=$MAX ; c++)) ; do
+for ((c=MIN ; c<=MAX ; c++)) ; do
     printf ">s1_3\nAA\n>s2_1\nCC\n" | \
         "${SWARM}" -f -c ${c} > /dev/null 2>&1 || \
         failure "swarm aborts when --ceiling equals ${c}"
