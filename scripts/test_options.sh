@@ -843,7 +843,7 @@ printf ">s1_3\nAA\n>s2_1\nCC\n" | \
 MIN=2
 MAX=255
 DESCRIPTION="swarm runs normally when --boundary goes from ${MIN} to ${MAX}"
-for ((b=$MIN ; b<=$MAX ; b++)) ; do
+for ((b=MIN ; b<=MAX ; b++)) ; do
     printf ">s1_3\nAA\n>s2_1\nCC\n" | \
         "${SWARM}" -f -b ${b} > /dev/null 2>&1 || \
         failure "swarm aborts when --boundary equals ${b}"
