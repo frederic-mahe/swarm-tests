@@ -302,7 +302,7 @@ microvariant_substitutions() {
     local -i LENGTH=${#SEQ}
     for ((i=1 ; i<=LENGTH ; i++)) ; do
         for n in A C G T ; do
-            echo ${SEQ:0:i-1}${n}${SEQ:i:LENGTH}
+            echo "${SEQ:0:i-1}${n}${SEQ:i:LENGTH}"
         done
     done
 }
