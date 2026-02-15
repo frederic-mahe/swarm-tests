@@ -341,7 +341,7 @@ done
 MIN=0
 MAX=255
 DESCRIPTION="swarm runs normally when --differences goes from ${MIN} to ${MAX}"
-for ((d=$MIN ; d<=$MAX ; d++)) ; do
+for ((d=MIN ; d<=MAX ; d++)) ; do
     printf ">s_1\nA\n" | \
         "${SWARM}" -d ${d} > /dev/null 2>&1 || \
         failure "swarm aborts when --differences equals ${d}"
