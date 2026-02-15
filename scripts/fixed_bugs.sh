@@ -1391,7 +1391,7 @@ done
 # 32 : SPACE : 20
 for i in 00 0A 0D 20 ; do
     DESCRIPTION="issue 72 --- ascii character x${i} is not allowed in fasta headers"
-    printf ">s\x${i}_1\nA\n" | \
+    printf ">s%b_1\nA\n" "\x${i}" | \
         "${SWARM}"  > /dev/null 2>&1 && \
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
@@ -1404,7 +1404,7 @@ done
 # 32 : SPACE : 20
 for i in 00 0A 0D 20 ; do
     DESCRIPTION="issue 72 --- ascii character x${i} is accepted if present at the end of the header"
-    printf ">s_1\x${i}\nA\n" | \
+    printf ">s_1%b\nA\n" "\x${i}" | \
         "${SWARM}"  > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
