@@ -144,20 +144,20 @@ unset TMP
 DESCRIPTION="empty input yields empty output (-o)"
 TMP=$(mktemp -u)
 printf "" | \
-    "${SWARM}" -o ${TMP} 2> /dev/null
-[[ -e ${TMP} ]] && \
+    "${SWARM}" -o "${TMP}" 2> /dev/null
+[[ -e "${TMP}" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm -f ${TMP}
+rm -f "${TMP}"
 
 DESCRIPTION="empty input yields empty output (-w)"
 TMP=$(mktemp -u)
 printf "" | \
-    "${SWARM}" -w ${TMP} 2> /dev/null
-[[ -e ${TMP} ]] && \
+    "${SWARM}" -w "${TMP}" 2> /dev/null
+[[ -e "${TMP}" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-rm -f ${TMP}
+rm -f "${TMP}"
 
 ## Test empty sequence
 DESCRIPTION="swarm handles empty sequences (single \\\n)"
