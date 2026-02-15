@@ -3104,28 +3104,28 @@ while read LONG SHORT ; do
     ## Using option when d = 1 should fail (or warning?)
     DESCRIPTION="swarm aborts when --${LONG} is specified and d = 1"
     printf ">s_1\nA\n" | \
-        "${SWARM}" -d 1 ${SHORT} 1 > /dev/null 2>&1 && \
+        "${SWARM}" -d 1 "${SHORT}" 1 > /dev/null 2>&1 && \
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
 
     ## option is empty
     DESCRIPTION="swarm aborts when --${LONG} is empty"
     printf ">s_1\nA\n" | \
-        "${SWARM}" -d 2 ${SHORT} > /dev/null 2>&1 && \
+        "${SWARM}" -d 2 "${SHORT}" > /dev/null 2>&1 && \
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
 
     ## option is negative
     DESCRIPTION="swarm aborts when --${LONG} is -1"
     printf ">s_1\nA\n" | \
-        "${SWARM}" -d 2 ${SHORT} \-1 > /dev/null 2>&1 && \
+        "${SWARM}" -d 2 "${SHORT}" \-1 > /dev/null 2>&1 && \
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
 
     ## option is non-numerical
     DESCRIPTION="swarm aborts when --${LONG} is not numerical"
     printf ">s_1\nA\n" | \
-        "${SWARM}" -d 2 ${SHORT} "a" > /dev/null 2>&1 && \
+        "${SWARM}" -d 2 "${SHORT}" "a" > /dev/null 2>&1 && \
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
 
@@ -3133,13 +3133,13 @@ while read LONG SHORT ; do
     if [[ "${SHORT}" == "-m" || "${SHORT}" == "-p" ]] ; then
         DESCRIPTION="swarm aborts when --${LONG} is null"
         printf ">s_1\nA\n" | \
-            "${SWARM}" -d 2 ${SHORT} 0 > /dev/null 2>&1 && \
+            "${SWARM}" -d 2 "${SHORT}" 0 > /dev/null 2>&1 && \
             failure "${DESCRIPTION}" || \
                 success "${DESCRIPTION}"
     elif [[ "${SHORT}" == "-g" || "${SHORT}" == "-e" ]] ; then
         DESCRIPTION="swarm runs normally when --${LONG} is null"
         printf ">s_1\nA\n" | \
-            "${SWARM}" -d 2 ${SHORT} 0 > /dev/null 2>&1 && \
+            "${SWARM}" -d 2 "${SHORT}" 0 > /dev/null 2>&1 && \
             success "${DESCRIPTION}" || \
                 failure "${DESCRIPTION}"
     else
