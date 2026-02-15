@@ -549,14 +549,14 @@ microvariants() {
     for ((i=0 ; i<=LENGTH ; i++)) ; do
         ## insertions
         for n in A C G T ; do
-            echo ${SEQ:0:i}${n}${SEQ:i:LENGTH}
+            echo "${SEQ:0:i}${n}${SEQ:i:LENGTH}"
         done
         if (( i > 0 )) ; then
             ## deletions
-            echo ${SEQ:0:i-1}${SEQ:i:LENGTH}
+            echo "${SEQ:0:i-1}${SEQ:i:LENGTH}"
             ## substitutions
             for n in A C G T ; do
-                echo ${SEQ:0:i-1}${n}${SEQ:i:LENGTH}
+                echo "${SEQ:0:i-1}${n}${SEQ:i:LENGTH}"
             done
         fi
     done
