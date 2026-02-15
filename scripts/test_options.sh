@@ -1735,12 +1735,12 @@ printf ">s_1\nA\n" | \
 
 ## Swarm -o fails if unable to open output file for writing
 DESCRIPTION="-o fails if unable to open output file for writing"
-TMP=$(mktemp) && chmod u-w ${TMP}  # remove write permission
+TMP=$(mktemp) && chmod u-w "${TMP}"  # remove write permission
 printf ">s_1\nA\n" | \
-    "${SWARM}" -o ${TMP} > /dev/null 2>&1 && \
+    "${SWARM}" -o "${TMP}" > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
-chmod u+w ${TMP} && rm -f ${TMP}
+chmod u+w "${TMP}" && rm -f "${TMP}"
 unset TMP
 
 ## Swarm fills correctly output file with -o option
