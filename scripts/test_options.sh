@@ -3100,7 +3100,7 @@ printf ">s1_1\nAA\n>s2_3\nCC\n" | \
 #                                                                             #
 #*****************************************************************************#
 
-while read LONG SHORT ; do
+while read -r LONG SHORT ; do
     ## Using option when d = 1 should fail (or warning?)
     DESCRIPTION="swarm aborts when --${LONG} is specified and d = 1"
     printf ">s_1\nA\n" | \
