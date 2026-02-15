@@ -392,7 +392,7 @@ printf ">s_1\nA\n" | \
 ## Define ASCII characters accepted in fasta identifiers
 DESCRIPTION="ascii characters 1-9, 11-12, 14-31, 33-127 allowed in fasta identifiers"
 for i in {1..9} 11 12 {14..31} {33..127} ; do
-    OCTAL=$(printf "\%04o" ${i})
+    OCTAL=$(printf "\%04o" "${i}")
     echo -e ">s${OCTAL}_1\nA\n" | \
         "${SWARM}" > /dev/null 2>&1 || \
         failure "ascii character ${i} allowed in fasta identifiers"
@@ -406,7 +406,7 @@ unset OCTAL
 # 32: SPACE
 for i in 0 10 13 32 ; do
     DESCRIPTION="ascii character ${i} is not allowed in fasta identifiers"
-    OCTAL=$(printf "\%04o" ${i})
+    OCTAL=$(printf "\%04o" "${i}")
     echo -e ">s${OCTAL}_1\nA\n" | \
         "${SWARM}" > /dev/null 2>&1 && \
         failure "${DESCRIPTION}" || \
@@ -420,7 +420,7 @@ unset OCTAL
 # 32: SPACE
 for i in 0 13 32 ; do
     DESCRIPTION="ascii character ${i} is allowed in fasta header (outside identifier)"
-    OCTAL=$(printf "\%04o" ${i})
+    OCTAL=$(printf "\%04o" "${i}")
     echo -e ">s_1 ${OCTAL}\nA\n" | \
         "${SWARM}" > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
