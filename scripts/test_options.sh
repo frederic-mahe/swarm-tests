@@ -3118,7 +3118,7 @@ while read -r LONG SHORT ; do
     ## option is negative
     DESCRIPTION="swarm aborts when --${LONG} is -1"
     printf ">s_1\nA\n" | \
-        "${SWARM}" -d 2 "${SHORT}" \-1 > /dev/null 2>&1 && \
+        "${SWARM}" -d 2 "${SHORT}" -1 > /dev/null 2>&1 && \
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
 
