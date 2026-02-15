@@ -242,7 +242,7 @@ done
 MIN=1
 MAX=256
 DESCRIPTION="swarm runs normally when --threads goes from ${MIN} to ${MAX}"
-for ((t=$MIN ; t<=$MAX ; t++)) ; do
+for ((t=MIN ; t<=MAX ; t++)) ; do
     printf ">s_1\nA\n" | \
         "${SWARM}" -t ${t} > /dev/null 2>&1 || \
         failure "swarm aborts when --threads equals ${t}"
