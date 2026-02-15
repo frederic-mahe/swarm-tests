@@ -1045,7 +1045,7 @@ unset y
 MIN=65
 MAX=255
 DESCRIPTION="swarm aborts when --bloom-bits is higher than 64"
-for ((y=$MIN ; y<=$MAX ; y++)) ; do
+for ((y=MIN ; y<=MAX ; y++)) ; do
     printf ">s1_3\nAA\n>s2_1\nCC\n" | \
         "${SWARM}" -f -y ${y} > /dev/null 2>&1 && \
         failure "swarm runs normally when --bloom-bits equals ${y}"
