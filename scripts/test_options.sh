@@ -3178,11 +3178,13 @@ DESCRIPTION="swarm: trigger saturation of diff (diff = uint16_max, search16)"
 # align two completely mismatching sequences (all gap extensions)
 # 'score' saturates at uint16_max
 LENGTH=2519
-printf ">s1_1\n%s\n>s2_1\n%s\n" "$(head -c ${LENGTH} < /dev/zero | tr '\0' 'A')" "$(head -c ${LENGTH} < /dev/zero | tr '\0' 'G')" | \
+SEQUENCE_1="$(head -c ${LENGTH} < /dev/zero | tr '\0' 'A')"
+SEQUENCE_2="$(head -c ${LENGTH} < /dev/zero | tr '\0' 'G')"
+printf ">s1_1\n%s\n>s2_1\n%s\n" "${SEQUENCE_1}" "${SEQUENCE_2}" | \
     "${SWARM}" -d 2 -p 122 > /dev/null 2>&1 && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
-unset LENGTH
+unset LENGTH SEQUENCE_1 SEQUENCE_2
 
 
 #*****************************************************************************#
