@@ -2392,7 +2392,7 @@ DESCRIPTION="issue 133 --- seeds are sorted by decreasing cluster abundance"
 printf ">s1_4\nAA\n>s2_3\nCC\n>s3_2\nCG\n" | \
     "${SWARM}" -o /dev/null -w - 2> /dev/null | \
     tr -d "\n" | \
-    grep -qw ">s2_5CC>s1_4AA" && \
+    grep -qx ">s2_5CC>s1_4AA" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -2400,7 +2400,7 @@ DESCRIPTION="issue 133 --- seeds are sorted by decreasing cluster abundance and 
 printf ">s2_2\nAA\n>s1_1\nCC\n>s3_1\nCG\n" | \
     "${SWARM}" -o /dev/null -w - 2> /dev/null | \
     tr -d "\n" | \
-    grep -qw ">s1_2CC>s2_2AA" && \
+    grep -qx ">s1_2CC>s2_2AA" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -2409,7 +2409,7 @@ DESCRIPTION="issue 133 --- seeds are sorted by decreasing cluster abundance (-f)
 printf ">s1_4\nAAA\n>s2_3\nCCC\n>s3_2\nCGG\n" | \
     "${SWARM}" -f -o /dev/null -w - 2> /dev/null | \
     tr -d "\n" | \
-    grep -qw ">s2_5CCC>s1_4AAA" && \
+    grep -qx ">s2_5CCC>s1_4AAA" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -2417,7 +2417,7 @@ DESCRIPTION="issue 133 --- seeds are sorted by decreasing cluster abundance and 
 printf ">s2_4\nAAA\n>s1_3\nCCC\n>s3_1\nCGG\n" | \
     "${SWARM}" -f -o /dev/null -w - 2> /dev/null | \
     tr -d "\n" | \
-    grep -qw ">s1_4CCC>s2_4AAA" && \
+    grep -qx ">s1_4CCC>s2_4AAA" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -2426,7 +2426,7 @@ DESCRIPTION="issue 133 --- seeds are sorted by decreasing cluster abundance (-d 
 printf ">s1_4\nAAA\n>s2_3\nCCC\n>s3_2\nCGG\n" | \
     "${SWARM}" -d 2 -o /dev/null -w - 2> /dev/null | \
     tr -d "\n" | \
-    grep -qw ">s2_5CCC>s1_4AAA" && \
+    grep -qx ">s2_5CCC>s1_4AAA" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -2434,7 +2434,7 @@ DESCRIPTION="issue 133 --- seeds are sorted by decreasing cluster abundance and 
 printf ">s2_4\nAAA\n>s1_3\nCCC\n>s3_1\nCGG\n" | \
     "${SWARM}" -d 2 -o /dev/null -w - 2> /dev/null | \
     tr -d "\n" | \
-    grep -qw ">s1_4CCC>s2_4AAA" && \
+    grep -qx ">s1_4CCC>s2_4AAA" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -2715,7 +2715,7 @@ LENGTH=2515
 SEQ=$(yes A | head -n "${LENGTH}" | tr -d "\n")
 printf ">s1_1\n%s\n>s2_1\n%s\n" "${SEQ}" "${SEQ/A/T}" | \
     "${SWARM}" -d 2 2> /dev/null | \
-    grep -qw "s1_1 s2_1" && \
+    grep -qx "s1_1 s2_1" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -2725,7 +2725,7 @@ LENGTH=1122
 SEQ=$(yes A | head -n "${LENGTH}" | tr -d "\n")
 printf ">s1_1\n%s\n>s2_1\n%s\n" "${SEQ}" "${SEQ/A/T}" | \
     "${SWARM}" -d 2 -g 50 -e 20 2> /dev/null | \
-    grep -qw "s1_1 s2_1" && \
+    grep -qx "s1_1 s2_1" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -2923,7 +2923,7 @@ printf ">s1_3\nAA\n>s2_1\nCC\n" | \
     "${SWARM}" \
         --differences 1 \
         --fastidious 2> /dev/null | \
-    grep -qw "s1_3 s2_1" && \
+    grep -qx "s1_3 s2_1" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -2932,7 +2932,7 @@ printf ">s1_2\nAA\n>s2_1\nAT\n>s3_1\nCC\n" | \
     "${SWARM}" \
         --differences 1 \
         --fastidious 2> /dev/null | \
-    grep -qw "s1_2 s2_1 s3_1" && \
+    grep -qx "s1_2 s2_1 s3_1" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -2941,7 +2941,7 @@ printf ">s1_1\nAA\n>s2_1\nAG\n>s3_1\nAT\n>s4_1\nCC\n" | \
     "${SWARM}" \
         --differences 1 \
         --fastidious 2> /dev/null | \
-    grep -qw "s1_1 s2_1 s3_1 s4_1" && \
+    grep -qx "s1_1 s2_1 s3_1 s4_1" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -2956,7 +2956,7 @@ printf ">s1_1\nAA\n>s2_1\nCC\n" | \
     "${SWARM}" \
         --differences 1 \
         --fastidious 2> /dev/null | \
-    grep -qw "s2_1" && \
+    grep -qx "s2_1" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -2965,7 +2965,7 @@ printf ">s1_1\nAA\n>s2_1\nAT\n>s3_1\nCC\n" | \
     "${SWARM}" \
         --differences 1 \
         --fastidious 2> /dev/null | \
-    grep -qw "s3_1" && \
+    grep -qx "s3_1" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -2974,7 +2974,7 @@ printf ">s1_2\nAA\n>s2_1\nCC\n" | \
     "${SWARM}" \
         --differences 1 \
         --fastidious 2> /dev/null | \
-    grep -qw "s2_1" && \
+    grep -qx "s2_1" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -2990,21 +2990,21 @@ printf ">s1_2\nAA\n>s2_1\nCC\n" | \
 DESCRIPTION="issue 179 --- output cluster member sequence id (default)"
 printf ">s1_2\nA\n>s2_1\nC\n" | \
     "${SWARM}" 2> /dev/null | \
-    grep -qw "s1_2 s2_1" && \
+    grep -qx "s1_2 s2_1" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
 DESCRIPTION="issue 179 --- output cluster member sequence id (-o)"
 printf ">s1_2\nA\n>s2_1\nC\n" | \
     "${SWARM}" -o /dev/stdout 2> /dev/null | \
-    grep -qw "s1_2 s2_1" && \
+    grep -qx "s1_2 s2_1" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
 DESCRIPTION="issue 179 --- output cluster member sequence id (--output-file)"
 printf ">s1_2\nA\n>s2_1\nC\n" | \
     "${SWARM}" --output-file /dev/stdout 2> /dev/null | \
-    grep -qw "s1_2 s2_1" && \
+    grep -qx "s1_2 s2_1" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
