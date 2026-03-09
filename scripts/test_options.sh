@@ -409,7 +409,7 @@ microvariants() {
     done
 }
 
-MICROVARIANTS_L1=$(microvariants ${E_coli_1024bp} | sort -du | grep -vw "${E_coli_1024bp}")
+MICROVARIANTS_L1=$(microvariants ${E_coli_1024bp} | sort -du | grep -vx "${E_coli_1024bp}")
 
 (
     printf ">seed_1000\n%s\n" "${E_coli_1024bp}"
@@ -749,7 +749,7 @@ printf ">s1_3\nAA\n>s2_3\nCC\n>s3_1\nGG\n" | \
     "${SWARM}" \
         --difference 1 \
         --fastidious 2> /dev/null | \
-    grep -qw "s1_3 s3_1" && \
+    grep -qx "s1_3 s3_1" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -758,7 +758,7 @@ printf ">s1_3\nAA\n>s2_7\nCC\n>s3_1\nGG\n" | \
     "${SWARM}" \
         --difference 1 \
         --fastidious 2> /dev/null | \
-    grep -qw "s2_7 s3_1" && \
+    grep -qx "s2_7 s3_1" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -767,7 +767,7 @@ printf ">s1_3\nCC\n>s2_3\nAA\n>s3_1\nGG\n" | \
     "${SWARM}" \
         --difference 1 \
         --fastidious 2> /dev/null | \
-    grep -qw "s1_3 s3_1" && \
+    grep -qx "s1_3 s3_1" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -777,7 +777,7 @@ printf ">s1_3\nCCG\n>s2_3\nAAGG\n>s3_1\nGG\n" | \
     "${SWARM}" \
         --difference 1 \
         --fastidious 2> /dev/null | \
-    grep -qw "s1_3 s3_1" && \
+    grep -qx "s1_3 s3_1" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -786,7 +786,7 @@ printf ">s2_3\nCCG\n>s1_3\nAAGG\n>s3_1\nGG\n" | \
     "${SWARM}" \
         --difference 1 \
         --fastidious 2> /dev/null | \
-    grep -qw "s2_3 s3_1" && \
+    grep -qx "s2_3 s3_1" && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
@@ -795,7 +795,7 @@ printf ">s2_3\nAA\n>s1_3\nCC\n>s3_1\nGG\n" | \
     "${SWARM}" \
         --difference 1 \
         --fastidious 2> /dev/null | \
-    grep -qw "s1_3 s3_1" && \
+    grep -qx "s1_3 s3_1" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -1450,7 +1450,7 @@ DESCRIPTION="-j orders amplicons by capture order (case 1)"
 printf ">s1_3\nA\n>s2_2\nC\n>s3_1\nG\n" | \
     "${SWARM}" -o /dev/null -j - 2> /dev/null | \
     head -n 1 | \
-    grep -Eqw "s1_3[[:blank:]]s2_2" && \
+    grep -Eqx "s1_3[[:blank:]]s2_2" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -1458,7 +1458,7 @@ DESCRIPTION="-j orders amplicons by capture order (case 2)"
 printf ">s1_3\nA\n>s2_1\nC\n>s3_2\nG\n" | \
     "${SWARM}" -o /dev/null -j - 2> /dev/null | \
     head -n 1 | \
-    grep -Eqw "s1_3[[:blank:]]s3_2" && \
+    grep -Eqx "s1_3[[:blank:]]s3_2" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
