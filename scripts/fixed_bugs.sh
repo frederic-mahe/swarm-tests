@@ -2715,7 +2715,7 @@ LENGTH=2515
 SEQ=$(yes A | head -n "${LENGTH}" | tr -d "\n")
 printf ">s1_1\n%s\n>s2_1\n%s\n" "${SEQ}" "${SEQ/A/T}" | \
     "${SWARM}" -d 2 2> /dev/null | \
-    grep -wq "s1_1 s2_1" && \
+    grep -qw "s1_1 s2_1" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -2725,7 +2725,7 @@ LENGTH=1122
 SEQ=$(yes A | head -n "${LENGTH}" | tr -d "\n")
 printf ">s1_1\n%s\n>s2_1\n%s\n" "${SEQ}" "${SEQ/A/T}" | \
     "${SWARM}" -d 2 -g 50 -e 20 2> /dev/null | \
-    grep -wq "s1_1 s2_1" && \
+    grep -qw "s1_1 s2_1" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -3061,6 +3061,18 @@ printf ">s_1\nN\n" | \
 # *************************************************************************** #
 
 ## https://github.com/torognes/swarm/issues/185
+
+## not testable
+
+
+# *************************************************************************** #
+#                                                                             #
+#    Should low-abundance sequences be filtered before Swarm clustering?      #
+#                            (issue 189)                                      #
+#                                                                             #
+# *************************************************************************** #
+
+## https://github.com/torognes/swarm/issues/189
 
 ## not testable
 
