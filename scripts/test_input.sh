@@ -96,7 +96,7 @@ unset FASTA FASTA_LINK
 # mkfifo fifo_test
 # "${SWARM}" fifo_test > /dev/null 2>&1 && \
 #     success "${DESCRIPTION}" || \
-# 	    failure "${DESCRIPTION}" &
+#       failure "${DESCRIPTION}" &
 # printf ">s_1\nA\n" > fifo_test
 # rm fifo_test
 # sleep 2s && kill $(ps -C $(basename "${SWARM}") -o pid=) 2> /dev/null
@@ -411,7 +411,7 @@ for i in 0 10 13 32 ; do
         "${SWARM}" > /dev/null 2>&1 && \
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
-done 
+done
 unset OCTAL
 
 ## Define ASCII characters accepted in fasta headers
@@ -425,7 +425,7 @@ for i in 0 13 32 ; do
         "${SWARM}" > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
-done 
+done
 unset OCTAL
 
 ## ASCII character 10 (\n) is not allowed in fasta headers (outside identifier)
