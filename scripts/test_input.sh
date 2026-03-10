@@ -702,7 +702,7 @@ unset MAX
 # test can fail if there are less than 10 A, G and Ts in the sequence
 DESCRIPTION="swarm d = 1 accepts sequences with 5000 nucleotides or more"
 MAX=5000
-SEED=$(env LC_ALL=C head -c 1000000 | tr -dc 'ACGT' | head -c ${MAX})
+SEED=$(env LC_ALL=C dd count=1 bs=1000000 if=/dev/urandom status=none | tr -dc 'ACGT' | head -c ${MAX})
 SUBSEED=$(sed 's/[AGT]/C/10' <<< $SEED)  # replace the 10th A, G or T with a C
 printf ">s1_3\n%s\n>s2_1\n%s\n" $SEED $SUBSEED | \
     "${SWARM}" -l /dev/null | \
@@ -715,7 +715,7 @@ unset SEED SUBSEED
 # test can fail if there are less than 10 A, G and Ts in the sequence
 DESCRIPTION="swarm d = 2 accepts sequences with 5000 nucleotides or more"
 MAX=5000
-SEED=$(env LC_ALL=C head -c 1000000 | tr -dc 'ACGT' | head -c ${MAX})
+SEED=$(env LC_ALL=C dd count=1 bs=1000000 if=/dev/urandom status=none | tr -dc 'ACGT' | head -c ${MAX})
 SUBSEED=$(sed 's/[AGT]/C/10' <<< $SEED)  # replace the 10th A, G or T with a C
 printf ">s1_3\n%s\n>s2_1\n%s\n" $SEED $SUBSEED | \
     "${SWARM}" -d 2 -l /dev/null | \
