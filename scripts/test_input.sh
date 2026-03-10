@@ -95,7 +95,7 @@ unset FASTA FASTA_LINK
 # mkfifo fifo_test
 # "${SWARM}" fifo_test > /dev/null 2>&1 && \
 #     success "${DESCRIPTION}" || \
-# 	    failure "${DESCRIPTION}" &
+#       failure "${DESCRIPTION}" &
 # printf ">s_1\nA\n" > fifo_test
 # rm fifo_test
 # sleep 2s && kill $(ps -C $(basename "${SWARM}") -o pid=) 2> /dev/null
@@ -702,7 +702,7 @@ unset MAX
 # test can fail if there are less than 10 A, G and Ts in the sequence
 DESCRIPTION="swarm d = 1 accepts sequences with 5000 nucleotides or more"
 MAX=5000
-SEED=$(env LC_CTYPE=C tr -dc 'acgtACGT' < /dev/urandom | \
+SEED=$(env LC_ALL=C tr -dc 'acgtACGT' < /dev/urandom | \
            tr "[:lower:]" "[:upper:]" | head -c ${MAX})
 SUBSEED=$(sed 's/[AGT]/C/10' <<< $SEED)  # replace the 10th A, G or T with a C
 printf ">s1_3\n%s\n>s2_1\n%s\n" $SEED $SUBSEED | \
@@ -716,7 +716,7 @@ unset SEED SUBSEED
 # test can fail if there are less than 10 A, G and Ts in the sequence
 DESCRIPTION="swarm d = 2 accepts sequences with 5000 nucleotides or more"
 MAX=5000
-SEED=$(env LC_CTYPE=C tr -dc 'acgtACGT' < /dev/urandom | \
+SEED=$(env LC_ALL=C tr -dc 'acgtACGT' < /dev/urandom | \
            tr "[:lower:]" "[:upper:]" | head -c ${MAX})
 SUBSEED=$(sed 's/[AGT]/C/10' <<< $SEED)  # replace the 10th A, G or T with a C
 printf ">s1_3\n%s\n>s2_1\n%s\n" $SEED $SUBSEED | \
