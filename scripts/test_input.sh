@@ -508,6 +508,17 @@ printf ">ampliconid;size=10\nA\n>ampliconid;size=1\nC\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+## Swarm reports the duplicated identifier when the first occurrence
+## uses the 'size=N;label' style (abundance-first) and the second uses
+## the 'label;size=N' style (abundance-last)
+DESCRIPTION="swarm reports the duplicated identifier (size=N;label first, then label;size=N)"
+printf ">size=10;ampliconid\nA\n>ampliconid;size=1\nC\n" | \
+    "${SWARM}" -z 2>&1 > /dev/null | \
+    grep -m 1 "^Error" | \
+    grep -oq "ampliconid$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 ## Fasta headers can contain more than one underscore symbol
 DESCRIPTION="fasta headers can contain more than one underscore symbol"
 printf ">s_2_2_3\nA\n" | \
