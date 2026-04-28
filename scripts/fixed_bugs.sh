@@ -3079,11 +3079,23 @@ printf ">s_1\nN\n" | \
 # *************************************************************************** #
 #                                                                             #
 #    Should low-abundance sequences be filtered before Swarm clustering?      #
-#                            (issue 189)                                      #
+#                            (issue 186)                                      #
 #                                                                             #
 # *************************************************************************** #
 
-## https://github.com/torognes/swarm/issues/189
+## https://github.com/torognes/swarm/issues/186
+
+## not testable
+
+
+# *************************************************************************** #
+#                                                                             #
+#      Should amplicon length filtering be applied before or after Swarm      #
+#                         clustering? (issue 187)                             #
+#                                                                             #
+# *************************************************************************** #
+
+## https://github.com/torognes/swarm/issues/187
 
 ## not testable
 
