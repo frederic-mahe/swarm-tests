@@ -3,7 +3,7 @@
 
 ## Print a header
 SCRIPT_NAME="Test inputs"
-line=$(printf "%076s\n" " " | tr " " "-")
+line=$(printf '%.0s-' {1..76})
 printf "# %s %s\n" "${line:${#SCRIPT_NAME}}" "${SCRIPT_NAME}"
 
 ## Declare a color code for test results
