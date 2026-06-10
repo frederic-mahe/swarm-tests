@@ -688,6 +688,21 @@ printf ">s;size=1s\nA\n" | \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
+## the header ends with 'size=' but the digit run is empty: no match,
+## swarm scans to the end of the header and reports a missing abundance
+DESCRIPTION="swarm aborts if the header ends with an empty size= (-z)"
+printf ">s;size=\nA\n" | \
+    "${SWARM}" -z > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+## same as above, but the header consists solely of an empty 'size='
+DESCRIPTION="swarm aborts if the header is exactly an empty size= (-z)"
+printf ">size=\nA\n" | \
+    "${SWARM}" -z > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
 ## swarm accepts large abundance values (2^32 - 1)
 DESCRIPTION="swarm accepts large abundance values (up to 2^32 - 1)"
 for POWER in {2..32} ; do
