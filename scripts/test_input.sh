@@ -278,6 +278,27 @@ printf ">;size=1\nA\n" | \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
+## Test abundance value at the int64_t maximum (19 digits)
+DESCRIPTION="swarm accepts an abundance equal to int64_t max (9223372036854775807)"
+printf ">s_9223372036854775807\nA\n" | \
+    "${SWARM}" > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## Test abundance value overflowing int64_t (20 digits, _ format)
+DESCRIPTION="swarm aborts on an abundance value overflowing int64_t"
+printf ">s_99999999999999999999\nA\n" | \
+    "${SWARM}" > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+## Test abundance value overflowing int64_t (;size=n format)
+DESCRIPTION="swarm aborts on an abundance value overflowing int64_t (-z)"
+printf ">s;size=99999999999999999999\nA\n" | \
+    "${SWARM}" -z > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
 ## Test long headers
 DESCRIPTION="swarm accepts headers as long as (127 - 5) chars"
 MAX=122  # ">" + MAX + "_1\n\0" = MAX + 5
