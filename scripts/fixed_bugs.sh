@@ -408,7 +408,10 @@ printf ">a_3\nAAA\n>b_2\nACC\n>c_1\nCCC\n" | \
 
 ## https://github.com/torognes/swarm/issues/15
 ##
-## TODO: can that be tested?
+## internal alignment-backtracking correctness (affine gap penalties,
+## d >= 2); the issue gives no triggering example, so there is no known
+## input that exposes a sub-optimal alignment from the command line
+## (see issue 16).
 
 
 # *************************************************************************** #
@@ -1339,8 +1342,10 @@ done
 # *************************************************************************** #
 
 ## https://github.com/torognes/swarm/issues/68
-##  
-## TODO
+##
+## enhancement request closed without implementation; no command-line
+## option controls the number of generations during growth --- not
+## testable.
 
 
 # *************************************************************************** #
