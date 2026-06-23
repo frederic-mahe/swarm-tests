@@ -874,7 +874,7 @@ printf ">s1_3\nAA\n>s2_2\nCC\n" | \
         failure "${DESCRIPTION}"
 
 ## Passing the --boundary option without the fastidious option should fail
-DESCRIPTION="swarm fails when the boundary option is specified without -f"
+DESCRIPTION="swarm errors out when the boundary option is specified without -f"
 printf ">s1_3\nAA\n>s2_1\nCC\n" | \
     "${SWARM}" -b 3 > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
@@ -955,7 +955,7 @@ printf ">s1_3\nAA\n>s2_1\nCC\n" | \
         success "${DESCRIPTION}"
 
 ## Passing the --ceiling option without the fastidious option should fail
-DESCRIPTION="swarm fails when the ceiling option is specified without -f"
+DESCRIPTION="swarm errors out when the ceiling option is specified without -f"
 printf ">s1_3\nAA\n>s2_1\nCC\n" | \
     "${SWARM}" -c 40 > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
@@ -1053,7 +1053,7 @@ done || success "${DESCRIPTION}"
 unset MIN MAX y
 
 ## Passing the --bloom-bits option without the fastidious option should fail
-DESCRIPTION="swarm fails when the --bloom-bits option is specified without -f"
+DESCRIPTION="swarm errors out when the --bloom-bits option is specified without -f"
 printf ">s1_3\nAA\n>s2_1\nCC\n" | \
     "${SWARM}" -y 16 > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
@@ -1193,14 +1193,14 @@ for OPTION in "-i" "--internal-structure" ; do
 done
 
 ## Swarm -i fails if no output file given
-DESCRIPTION="-i fails if no output file given"
+DESCRIPTION="-i errors out if no output file given"
 printf ">s_1\nA\n" | \
     "${SWARM}" -i > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Swarm -i fails if unable to open output file for writing
-DESCRIPTION="-i fails if unable to open output file for writing"
+DESCRIPTION="-i errors out if unable to open output file for writing"
 TMP=$(mktemp) && chmod u-w "${TMP}"  # remove write permission
 printf ">s_1\nA\n" | \
     "${SWARM}" -i "${TMP}" > /dev/null 2>&1 && \
@@ -1653,7 +1653,7 @@ printf ">s_1\nA\n" | \
         failure "${DESCRIPTION}"
 
 ## Swarm -l fails if unable to open output file for writing
-DESCRIPTION="-l fails if unable to open output file for writing"
+DESCRIPTION="-l errors out if unable to open output file for writing"
 TMP=$(mktemp) && chmod u-w "${TMP}"  # remove write permission
 printf ">s_1\nA\n" | \
     "${SWARM}" -l "${TMP}" > /dev/null 2>&1 && \
@@ -1734,7 +1734,7 @@ printf ">s_1\nA\n" | \
         failure "${DESCRIPTION}"
 
 ## Swarm -o fails if unable to open output file for writing
-DESCRIPTION="-o fails if unable to open output file for writing"
+DESCRIPTION="-o errors out if unable to open output file for writing"
 TMP=$(mktemp) && chmod u-w "${TMP}"  # remove write permission
 printf ">s_1\nA\n" | \
     "${SWARM}" -o "${TMP}" > /dev/null 2>&1 && \
@@ -1929,14 +1929,14 @@ printf ">s1_1\nA\n>s2_1\nC\n" | \
 rm "${OUTPUT}"
 
 ## Swarm -s fails if no filename given
-DESCRIPTION="-s fails if no filename given"
+DESCRIPTION="-s errors out if no filename given"
 printf ">s_1\nA\n" | \
     "${SWARM}" -s  > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Swarm -s fails if file is not writable
-DESCRIPTION="-s fails if file is not writable"
+DESCRIPTION="-s errors out if file is not writable"
 OUTPUT=$(mktemp)
 chmod -w "${OUTPUT}"
 printf ">s_1\nA\n" | \
@@ -2124,7 +2124,7 @@ for OPTION in "-u" "--uclust-file" ; do
 done
 
 ## Swarm -u fails if no output file given
-DESCRIPTION="-u fails if no output file given"
+DESCRIPTION="-u errors out if no output file given"
 printf ">s1_1\nA\n>s2_1\nC\n" | \
     "${SWARM}" -u > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
@@ -2141,7 +2141,7 @@ printf ">s1_1\nA\n>s2_1\nC\n" | \
 rm "${OUTPUT}"
 
 ## Swarm -u fails if file is not writable
-DESCRIPTION="-u fails if file is not writable"
+DESCRIPTION="-u errors out if file is not writable"
 OUTPUT=$(mktemp)
 chmod -w "${OUTPUT}"
 printf ">s1_1\nA\n>s2_1\nC\n" | \
@@ -2622,14 +2622,14 @@ printf ">s_1\nA\n" | \
         failure "${DESCRIPTION}"
 
 ## Swarm -w fails if no output file given
-DESCRIPTION="-w fails if no output file given"
+DESCRIPTION="-w errors out if no output file given"
 printf ">s_1\nA\n" | \
     "${SWARM}" -o /dev/null -w 2> /dev/null && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## Swarm -w fails if unable to open output file for writing
-DESCRIPTION="-w fails if unable to open output file for writing"
+DESCRIPTION="-w errors out if unable to open output file for writing"
 TMP=$(mktemp) && chmod u-w "${TMP}"  # remove write permission
 printf ">s_1\nA\n" | \
     "${SWARM}" -w "${TMP}" > /dev/null 2>&1 && \

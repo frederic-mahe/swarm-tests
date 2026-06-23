@@ -1196,7 +1196,7 @@ printf ">s1_1\nA\n>s2\nT\n" | \
         failure "${DESCRIPTION}"
 
 ## issue 59 --- swarm -a fails without argument
-DESCRIPTION="issue 59 --- swarm -a fails without argument"
+DESCRIPTION="issue 59 --- swarm -a errors out without argument"
 printf ">s\nA\n" | \
     "${SWARM}" -a 2> /dev/null && \
     failure "${DESCRIPTION}" || \
@@ -1275,13 +1275,13 @@ printf ">s1_1_2\nA\n>s2_1_2\nT\n" | \
 ## https://github.com/torognes/swarm/issues/65
 ##
 ## issue 65 --- swarm complains if input sequences are not dereplicated
-DESCRIPTION="issue 65 --- swarm fails if input sequences are duplicated (d=2)"
+DESCRIPTION="issue 65 --- swarm errors out if input sequences are duplicated (d=2)"
 printf ">s1;size=1\nAA\n>s2;size=2\nAA\n" | \
     "${SWARM}" -z -d 2 > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
-DESCRIPTION="issue 65 --- swarm fails if input sequences are duplicated (d=1)"
+DESCRIPTION="issue 65 --- swarm errors out if input sequences are duplicated (d=1)"
 printf ">s1;size=1\nAA\n>s2;size=2\nAA\n" | \
     "${SWARM}" -z -d 1 > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
@@ -1856,21 +1856,21 @@ printf ">s_1\nA\n" | \
 ## https://github.com/torognes/swarm/issues/101
 ##
 ## issue 101 --- fail if an option is passed twice #1
-DESCRIPTION="issue 101 --- fail if an option is passed twice #1"
+DESCRIPTION="issue 101 --- errors out if an option is passed twice #1"
 printf ">s_1\nA\n" | \
     "${SWARM}" -d 2 -d 2 > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## issue 101 --- fail if an option is passed twice #2
-DESCRIPTION="issue 101 --- fail if an option is passed twice #2"
+DESCRIPTION="issue 101 --- errors out if an option is passed twice #2"
 printf ">s_1\nA\n" | \
     "${SWARM}" -v -v > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
 ## issue 101 --- fail if an unknown option is passed
-DESCRIPTION="issue 101 --- fail if an unknown option is passed"
+DESCRIPTION="issue 101 --- errors out if an unknown option is passed"
 printf ">s_1\nA\n" | \
     "${SWARM}" --smurf > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
