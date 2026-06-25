@@ -3147,6 +3147,16 @@ while read -r LONG SHORT ; do
         failure "${DESCRIPTION}"
     fi
 
+    ## option exceeds the maximal scoring value (INT64_MAX / 4): swarm
+    ## guards the four scoring parameters against signed-integer
+    ## overflow before they are combined into the alignment penalties
+    DESCRIPTION="swarm aborts when --${LONG} exceeds the maximal scoring value"
+    printf ">s_1\nA\n" | \
+        "${SWARM}" -d 2 "${SHORT}" 3000000000000000000 2>&1 > /dev/null | \
+        grep -q "is too large" && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
     ## Accepted values for the option goes from 1 to 122 (higher
     ## values trigger error: penalty value > 255)
     MIN=1
