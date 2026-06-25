@@ -988,6 +988,34 @@ printf ">s1_3\nAA\n>s2_1\nCC\n" | \
 
 # unset dissimilar_sequences
 
+## Trigger "Reducing memory used for Bloom filter due to --ceiling option"
+## The Bloom filter size grows with the number of nucleotides held in
+## light swarms (mass < boundary). A heavy seed (abundance >= boundary)
+## is required for the filter to be built at all. Feeding swarm a large
+## set of distinct singletons (here ~1,050,000 nucleotides across 7000
+## light amplicons, pairwise distance >= 2 so none cluster at d = 1)
+## inflates the requested size beyond the lowest possible --ceiling (40
+## MB) when --bloom-bits is at its maximum (64). swarm must then shrink
+## the number of bits to honor the ceiling. The amount of data exceeds
+## the worst-case threshold (~749,000 nucleotides, reached when no
+## memory is yet in use), so the reduction is triggered on any machine.
+DESCRIPTION="d = 1 -f reduces the Bloom filter size to honor the --ceiling option"
+{ printf ">heavy_5\n%s\n" "$(printf 'G%.0s' $(seq 1 150))"
+  awk 'BEGIN{
+         split("ACGT", b, "")
+         for (i = 0 ; i < 7000 ; i++) {
+           s = "" ; x = i
+           for (d = 0 ; d < 8 ; d++) { c = b[(x % 4) + 1] ; s = s c c ; x = int(x / 4) }
+           while (length(s) < 150) s = s "A"
+           printf ">s%d_1\n%s\n", i + 1, substr(s, 1, 150)
+         }
+       }'
+} | \
+    "${SWARM}" -d 1 -f --ceiling 40 --bloom-bits 64 -o /dev/null 2>&1 | \
+    grep -q "^Reducing memory used for Bloom filter" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 
 ## Bloom bits -----------------------------------------------------------------
 
