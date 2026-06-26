@@ -391,6 +391,17 @@ printf ">s1_2\nAA\n>s2_1\nAC\n" | \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
+## Scoring parameters that drive all penalties to zero must be rejected
+## with a normal error, not crash with an integer divide-by-zero
+## (SIGFPE): the gcd-based penalty reduction used to run before the
+## scoring validation.
+DESCRIPTION="swarm rejects all-zero scoring instead of a divide-by-zero crash"
+printf ">s_1\nACGT\n" | \
+    "${SWARM}" -d 2 -m 0 -p 0 -e 0 -g 0 -o /dev/null 2>&1 | \
+    grep -q "Error:" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 ## test pairwise alignment vectorized functions (SSSE3 and SSE41
 ## functions) using long sequences (1,024 is a multiple of 64) and
 ## only level-1 microvariants, to prevent k-mer prefiltering
@@ -627,6 +638,19 @@ if [[ "${ARCHITECTURE}" == "x86_64" ]] ; then
         "${SWARM}" -d 7 --disable-sse3 > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
+
+    ## the --disable-sse3 (SSE2-without-POPCNT) path must cluster exactly
+    ## like the default path: it used to extract the popcount via an MMX
+    ## intrinsic without EMMS, which could corrupt later FPU state.
+    DESCRIPTION="--disable-sse3 clustering matches the default path (d=2)"
+    DEFAULT=$(printf ">a_5\nACGTACGTAC\n>b_1\nACGTACGTTT\n" | \
+                  "${SWARM}" -d 2 -o - 2> /dev/null)
+    FALLBACK=$(printf ">a_5\nACGTACGTAC\n>b_1\nACGTACGTTT\n" | \
+                   "${SWARM}" -d 2 --disable-sse3 -o - 2> /dev/null)
+    [[ "${DEFAULT}" == "${FALLBACK}" ]] && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+    unset DEFAULT FALLBACK
 fi
 unset ARCHITECTURE
 
@@ -684,6 +708,17 @@ printf ">s1_3\nAA\n>s2_1\nCC\n" | \
     "${SWARM}" -f 2> /dev/null | \
     wc -l | \
     grep -q "^ *1$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## The reported light/heavy swarm counts must reflect the real swarms
+## only. swarminfo_v is over-allocated in fixed-size chunks and those
+## padding entries (mass 0) used to be miscounted as light swarms. Here:
+## one heavy swarm (a_5) and one light swarm (b_1), too far apart to graft.
+DESCRIPTION="fastidious reports the true number of light swarms (1, not padding)"
+printf ">a_5\nAAAAAAAAAA\n>b_1\nCCCCCCCCCC\n" | \
+    "${SWARM}" -d 1 -f -o /dev/null 2>&1 | \
+    grep -qx "Light swarms: 1, with 1 amplicons" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -960,6 +995,17 @@ printf ">s1_3\nAA\n>s2_1\nCC\n" | \
     "${SWARM}" -c 40 > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
+
+## fastidious + --ceiling on an input with no light swarms must not
+## crash: the over-allocated padding entries used to defeat the
+## no-light-swarm short-circuit, dividing by zero in the Bloom filter
+## sizing. Two heavy swarms (a_5, b_5), too far apart to graft; the high
+## ceiling keeps the run above the "ceiling too low" check.
+DESCRIPTION="fastidious + --ceiling on an all-heavy input does not crash"
+printf ">a_5\nAAAAAAAAAA\n>b_5\nCCCCCCCCCC\n" | \
+    "${SWARM}" -d 1 -f -c 30000 -o /dev/null 2> /dev/null && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 
 # ## Trigger "Reducing memory used for Bloom filter due to --ceiling option"

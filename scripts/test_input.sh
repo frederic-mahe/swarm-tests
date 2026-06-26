@@ -278,6 +278,16 @@ printf ">;size=1\nA\n" | \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
+## Test empty sequence
+# the pairwise aligner relies on this rejection (an empty alignment
+# would otherwise divide by zero when computing percent identity)
+DESCRIPTION="swarm aborts on an empty sequence with a clear error"
+printf ">s_1\n\n" | \
+    "${SWARM}" -d 1 -o /dev/null 2>&1 | \
+    grep -q "Empty sequence" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 ## Test abundance value at the int64_t maximum (19 digits)
 DESCRIPTION="swarm accepts an abundance equal to int64_t max (9223372036854775807)"
 printf ">s_9223372036854775807\nA\n" | \
@@ -298,6 +308,25 @@ printf ">s;size=99999999999999999999\nA\n" | \
     "${SWARM}" -z > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
+
+## A present-but-oversized abundance must be reported as too large, not
+## silently treated as a missing annotation (it used to be reported as
+## "Abundance annotations not found"). Strengthens the exit-code tests
+## above by checking the error message (_ format).
+DESCRIPTION="swarm reports an overflowing abundance as too large, not missing"
+printf ">s_99999999999999999999\nACGT\n" | \
+    "${SWARM}" -d 1 -o /dev/null 2>&1 | \
+    grep -q "is too large" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## same, with the usearch-style ";size=" annotation (-z)
+DESCRIPTION="swarm reports an overflowing abundance as too large, not missing (-z)"
+printf ">s;size=99999999999999999999\nACGT\n" | \
+    "${SWARM}" -d 1 -z -o /dev/null 2>&1 | \
+    grep -q "is too large" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 ## Test long headers
 DESCRIPTION="swarm accepts headers as long as (127 - 5) chars"
