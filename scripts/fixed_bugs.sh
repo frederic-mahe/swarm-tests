@@ -3105,4 +3105,40 @@ printf ">s_1\nN\n" | \
 ## not testable
 
 
+# *************************************************************************** #
+#                                                                             #
+#      d > 1 reports an error instead of aborting when the alignment          #
+#                      buffers would exceed the RAM                           #
+#                                                                             #
+# *************************************************************************** #
+
+## security review (2026, non-github): when d > 1 the per-thread
+## Needleman-Wunsch direction buffer grows as O(L^2) in the longest
+## sequence length, bounded only by max_sequence_length (~67 million
+## nucleotides). A single very long sequence therefore requested an
+## unbounded allocation; because swarm is built with -fno-exceptions the
+## resulting bad_alloc called std::terminate() and the process aborted
+## instead of reporting the problem. swarm now compares the request
+## against the total RAM and exits with an actionable message.
+##
+## A 2,000,000 nt sequence needs about 8 * L^2 = 32 TB of direction
+## buffer, which exceeds the RAM of any real machine, so the guard fires
+## regardless of the host running the test.
+DESCRIPTION="d > 1 reports a clear error (no crash) when alignment buffers exceed RAM"
+awk 'BEGIN{printf ">s_1\n" ; for (i = 0 ; i < 2000000 ; i++) printf "A" ; printf "\n"}' | \
+    "${SWARM}" -d 2 -o /dev/null 2>&1 | \
+    grep -q "Not enough memory for the pairwise-alignment" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## the same over-long sequence is processed normally at d = 1, where the
+## O(L^2) alignment buffers are never allocated: the memory guard must not
+## reject inputs that do not use those buffers.
+DESCRIPTION="the d > 1 memory guard does not affect d = 1"
+awk 'BEGIN{printf ">s_1\n" ; for (i = 0 ; i < 2000000 ; i++) printf "A" ; printf "\n"}' | \
+    "${SWARM}" -d 1 -o /dev/null > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+
 exit 0
