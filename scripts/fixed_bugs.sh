@@ -3107,6 +3107,30 @@ printf ">s_1\nN\n" | \
 
 # *************************************************************************** #
 #                                                                             #
+#     floating point exception with --ceiling and --fastidious (issue 190)    #
+#                                                                             #
+# *************************************************************************** #
+
+## https://github.com/torognes/swarm/issues/190
+
+## When fastidious clustering produced only heavy swarms (no light
+## swarm), the swarminfo vector still held default-constructed padding
+## entries (mass 0, length 0), grown in chunks of 1,024. These padding
+## entries were miscounted as light swarms, so the light-swarm count was
+## non-zero while the total light-swarm length stayed zero. With
+## --ceiling set, compute_bloom_geometry() then divided by that zero
+## length, raising a floating point exception (SIGFPE). A single heavy
+## swarm (abundance >= boundary, default 3) with no light swarm is enough
+## to reproduce the crash; swarm must now complete normally.
+DESCRIPTION="issue 190 --- --ceiling with --fastidious does not crash when there is no light swarm"
+printf ">s1_3\nAA\n" | \
+    "${SWARM}" -f -c 40 > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+
+# *************************************************************************** #
+#                                                                             #
 #      d > 1 reports an error instead of aborting when the alignment          #
 #                      buffers would exceed the RAM                           #
 #                                                                             #
