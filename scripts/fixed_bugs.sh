@@ -3165,4 +3165,61 @@ awk 'BEGIN{printf ">s_1\n" ; for (i = 0 ; i < 2000000 ; i++) printf "A" ; printf
         failure "${DESCRIPTION}"
 
 
+# *************************************************************************** #
+#                                                                             #
+#          sequence labels are compared as unsigned bytes, on every           #
+#                              architecture                                   #
+#                                                                             #
+# *************************************************************************** #
+
+## issue reported outside GitHub
+##
+## Labels are compared as unsigned bytes, like strcmp and LC_ALL=C sort,
+## so that the tie-break order does not depend on whether the compiler
+## makes char signed (x86-64, Windows) or unsigned (ARM, PowerPC). 'ø'
+## leads with byte 0xC3, which sorts after every ASCII byte when bytes
+## are read as unsigned, and before all of them when they are read as
+## signed.
+##
+## Three sort comparators tie-break on the label, so there is one test
+## each: the input order that fixes the cluster order (-o, -i, -s, -u),
+## the d = 1 seed order (-w), and the d > 1 seed order (-w). Equal
+## abundances make the label the only tie-break, and the three sequences
+## are 3 differences apart so each stays its own cluster at both d = 1
+## and d = 2.
+##
+## The patterns below are literal byte sequences, so they match whether
+## grep reads 'ø' as one character (UTF-8 locale) or as two bytes
+## (LC_ALL=C): do not "fix" them.
+DESCRIPTION="label tie-break orders high-bit bytes last (cluster order)"
+printf ">sa_1\nAAA\n>sz_1\nCCC\n>sø_1\nGGG\n" | \
+    "${SWARM}" -o - 2> /dev/null | \
+    tr -d "\n" | \
+    grep -q "^sa_1sz_1sø_1$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="label tie-break orders high-bit bytes last (-w, d = 1)"
+printf ">sa_1\nAAA\n>sz_1\nCCC\n>sø_1\nGGG\n" | \
+    "${SWARM}" \
+        -d 1 \
+        -o /dev/null \
+        -w - 2> /dev/null | \
+    tr -d "\n" | \
+    grep -q "^>sa_1AAA>sz_1CCC>sø_1GGG$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="label tie-break orders high-bit bytes last (-w, d = 2)"
+printf ">sa_1\nAAA\n>sz_1\nCCC\n>sø_1\nGGG\n" | \
+    "${SWARM}" \
+        -d 2 \
+        -o /dev/null \
+        -w - 2> /dev/null | \
+    tr -d "\n" | \
+    grep -q "^>sa_1AAA>sz_1CCC>sø_1GGG$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+
 exit 0
