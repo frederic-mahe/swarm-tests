@@ -531,6 +531,34 @@ for i in {1..9} 11 12 {14..64} 66 {68..70} {72..83} {86..96} 98 {100..102} {104.
 done
 unset OCTAL
 
+## A NUL inside a sequence line truncates the sequence there, silently:
+## "AC\x00GT" is read as "AC", so the amplicon is 2 nt long, not 4. The
+## "ascii character 0 is allowed in sequences" test above checks only the
+## exit status, so it cannot see the truncation. Assert the length the
+## -u record reports instead (field 3 of the S line).
+DESCRIPTION="a NUL inside a sequence line truncates the sequence (2 nt, not 4)"
+printf ">s_1\nAC%bGT\n" "\x00" | \
+    "${SWARM}" \
+        -o /dev/null \
+        -u - 2> /dev/null | \
+    awk -F'\t' '$1 == "S" {print $3}' | \
+    grep -qx "2" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## A NUL inside a header truncates the identifier there, so the abundance
+## annotation that follows it is not seen, and the error message reports
+## the truncated identifier. Complements the issue 72 tests in
+## fixed_bugs.sh, which assert that this input is rejected without
+## showing what swarm read.
+DESCRIPTION="a NUL inside a header truncates the identifier before the annotation"
+printf ">s%b_1\nA\n" "\x00" | \
+    "${SWARM}" \
+        -o /dev/null 2>&1 | \
+    grep -q "^>s$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 ## Swarm aborts if fasta identifiers are not unique
 DESCRIPTION="swarm aborts if fasta headers are not unique"
 printf ">s_1\nA\n>s_1\nC\n" | \
