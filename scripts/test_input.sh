@@ -531,6 +531,36 @@ for i in {1..9} 11 12 {14..64} 66 {68..70} {72..83} {86..96} 98 {100..102} {104.
 done
 unset OCTAL
 
+## Bytes with the high bit set are not nucleotides either. The manual
+## states that swarm "exits with an error message if any other symbol is
+## present", and these are the byte values the accept/reject loops above
+## do not reach: 128 to 255 cannot be spelled as an ascii character, but
+## they occur in real input (a latin-1 file, a UTF-8 byte-order mark,
+## non-ascii text pasted into a sequence line).
+for i in {128..255} ; do
+    DESCRIPTION="byte ${i} is not allowed in sequences"
+    OCTAL=$(printf "\%04o" "${i}")
+    echo -e ">s_1\nAC${OCTAL}GT\n" | \
+        "${SWARM}" > /dev/null 2>&1 && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+done
+unset OCTAL
+
+## The loop above checks the exit status, which cannot tell a clean
+## rejection from a crash. Before the classification table was sized to
+## the whole byte range, byte 144 indexed past its end: in a release build
+## it was silently read as a 'C' (so "AC<144>GT" clustered as the 5
+## nucleotide sequence ACCGT), and in a sanitizer build the same read
+## aborted inside the redzone. Both exit non-zero for the wrong reason, so
+## assert the message too.
+DESCRIPTION="a byte with the high bit set is reported as an illegal character"
+printf ">s_1\nAC%bGT\n" "\x90" | \
+    "${SWARM}" 2>&1 > /dev/null | \
+    grep -qx "Error: Illegal character (ascii no 144) in sequence on line 2." && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 ## A NUL inside a sequence line truncates the sequence there, silently:
 ## "AC\x00GT" is read as "AC", so the amplicon is 2 nt long, not 4. The
 ## "ascii character 0 is allowed in sequences" test above checks only the
