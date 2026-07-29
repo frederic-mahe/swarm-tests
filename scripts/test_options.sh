@@ -2790,6 +2790,40 @@ printf ">s1_2\nAAA\n>s2_2\nCCC\n>s3_1\nCCCC\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+## -w -z when the abundance annotation is not at either end of the
+## header: ">s;size=1;length=1" is parsed as "s" + size=1 + "length=1",
+## so the seed header is rebuilt from a leading slice, the new abundance,
+## and a trailing slice. The -i and -s sections cover that shape without
+## a new abundance value; this is the only output that rewrites the
+## abundance between the two slices.
+DESCRIPTION="-w -z rebuilds a header whose annotation is not at either end"
+printf ">s1;size=1;length=1\nAAA\n>s2;size=1;length=1\nAAT\n" | \
+    "${SWARM}" -d 1 -z -o /dev/null -w - 2> /dev/null | \
+    tr -d "\n" | \
+    grep -q "^>s1;size=2;length=1AAA$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -w decodes the packed sequence 4 nucleotides per byte, so a length
+## that is an exact multiple of 4 and one that is not exercise different
+## residue paths. Both seeds here are also the longest sequence in their
+## input, which is what sizes the decoding buffer.
+DESCRIPTION="-w prints a seed whose length is an exact multiple of 4"
+printf ">s1_2\nACGTACGT\n>s2_1\nACGTACGA\n" | \
+    "${SWARM}" -d 1 -o /dev/null -w - 2> /dev/null | \
+    tr -d "\n" | \
+    grep -q "^>s1_3ACGTACGT$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="-w prints a seed whose length is not a multiple of 4"
+printf ">s1_2\nACGTACG\n>s2_1\nACGTACA\n" | \
+    "${SWARM}" -d 1 -o /dev/null -w - 2> /dev/null | \
+    tr -d "\n" | \
+    grep -q "^>s1_3ACGTACG$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 
 ## --------------------------------------------------------------- disable-sse3
 
