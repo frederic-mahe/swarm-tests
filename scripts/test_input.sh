@@ -557,7 +557,7 @@ unset OCTAL
 DESCRIPTION="a byte with the high bit set is reported as an illegal character"
 printf ">s_1\nAC%bGT\n" "\x90" | \
     "${SWARM}" 2>&1 > /dev/null | \
-    grep -qx "Error: Illegal character (ascii no 144) in sequence on line 2." && \
+    grep -qx "Error: Illegal character (byte value 144) in sequence on line 2." && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
