@@ -589,6 +589,27 @@ printf ">s%b_1\nA\n" "\x00" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+## A null byte at the *start* of a line yields a zero-length line, not
+## end-of-input. It used to be indistinguishable from end-of-input, so
+## swarm silently discarded the rest of the file: the second amplicon
+## below simply vanished and swarm still exited 0. Note this is distinct
+## from a null byte *inside* a line, which still truncates that line
+## (see the two tests above).
+DESCRIPTION="a line starting with a NUL does not truncate the input"
+printf ">s_1\nAAAA\n%b\n>t_1\nCCCC\n" "\x00" | \
+    "${SWARM}" -o /dev/null 2>&1 | \
+    grep -q "2 sequences" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## a null byte before the first header leaves swarm looking at a
+## zero-length line where a header is required
+DESCRIPTION="a NUL before the first header is rejected"
+printf "%b>s_1\nA\n" "\x00" | \
+    "${SWARM}" > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
 ## Swarm aborts if fasta identifiers are not unique
 DESCRIPTION="swarm aborts if fasta headers are not unique"
 printf ">s_1\nA\n>s_1\nC\n" | \
