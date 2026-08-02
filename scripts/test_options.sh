@@ -1038,18 +1038,29 @@ printf ">a_5\nAAAAAAAAAA\n>b_5\nCCCCCCCCCC\n" | \
 ## The Bloom filter size grows with the number of nucleotides held in
 ## light swarms (mass < boundary). A heavy seed (abundance >= boundary)
 ## is required for the filter to be built at all. Feeding swarm a large
-## set of distinct singletons (here ~1,050,000 nucleotides across 7000
+## set of distinct singletons (here ~2,700,000 nucleotides across 18000
 ## light amplicons, pairwise distance >= 2 so none cluster at d = 1)
-## inflates the requested size beyond the lowest possible --ceiling (40
-## MB) when --bloom-bits is at its maximum (64). swarm must then shrink
-## the number of bits to honor the ceiling. The amount of data exceeds
-## the worst-case threshold (~749,000 nucleotides, reached when no
-## memory is yet in use), so the reduction is triggered on any machine.
+## inflates the requested size beyond a --ceiling of 100 MB when
+## --bloom-bits is at its maximum (64). swarm must then shrink the
+## number of bits to honor the ceiling. The amount of data exceeds the
+## worst-case threshold (~1,872,000 nucleotides, reached when no memory
+## is yet in use), so the reduction is triggered on any machine.
+##
+## The ceiling is deliberately not the lowest one the option accepts (40
+## MB). It is measured against the whole resident set of the process
+## (getrusage ru_maxrss), so an instrumented binary spends much of it
+## before swarm sizes anything: a DEBUG=1 build -- the one swarm's
+## CLAUDE.md says to run this suite with -- is already past 40 MB when
+## the check runs, and dies with "Memory ceiling for Bloom filter is too
+## low" without ever reaching the reduction. At 100 MB both builds
+## reduce, 64 -> 38 bits for a release binary and 64 -> 24 for a
+## sanitized one, and both stay clear of the two-bit floor below which
+## swarm gives up instead.
 DESCRIPTION="d = 1 -f reduces the Bloom filter size to honor the --ceiling option"
 { printf ">heavy_5\n%s\n" "$(printf 'G%.0s' $(seq 1 150))"
   awk 'BEGIN{
          split("ACGT", b, "")
-         for (i = 0 ; i < 7000 ; i++) {
+         for (i = 0 ; i < 18000 ; i++) {
            s = "" ; x = i
            for (d = 0 ; d < 8 ; d++) { c = b[(x % 4) + 1] ; s = s c c ; x = int(x / 4) }
            while (length(s) < 150) s = s "A"
@@ -1057,7 +1068,7 @@ DESCRIPTION="d = 1 -f reduces the Bloom filter size to honor the --ceiling optio
          }
        }'
 } | \
-    "${SWARM}" -d 1 -f --ceiling 40 --bloom-bits 64 -o /dev/null 2>&1 | \
+    "${SWARM}" -d 1 -f --ceiling 100 --bloom-bits 64 -o /dev/null 2>&1 | \
     grep -q "^Reducing memory used for Bloom filter" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
