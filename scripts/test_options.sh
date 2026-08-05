@@ -989,6 +989,28 @@ printf ">s1_3\nAA\n>s2_1\nCC\n" | \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
+## the bounds in the message are interpolated from the constants
+## min_ceiling and max_ceiling, so the message cannot go stale: it used
+## to announce "the range 8" long after 40 became the lowest accepted
+## value, and it spelled 2^30 with thousands separators
+DESCRIPTION="--ceiling message states the accepted range (value too low)"
+printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" \
+        -f \
+        -c 39 2>&1 > /dev/null | \
+    grep -qx "Error: Illegal memory ceiling specified with -c or --ceiling, must be in the range 40 to 1073741824 MB." && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="--ceiling message states the accepted range (value too high)"
+printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" \
+        -f \
+        -c $(( (1 << 30) + 1 )) 2>&1 > /dev/null | \
+    grep -qx "Error: Illegal memory ceiling specified with -c or --ceiling, must be in the range 40 to 1073741824 MB." && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 ## Passing the --ceiling option without the fastidious option should fail
 DESCRIPTION="swarm errors out when the ceiling option is specified without -f"
 printf ">s1_3\nAA\n>s2_1\nCC\n" | \
@@ -1136,6 +1158,27 @@ for ((y=MIN ; y<=MAX ; y++)) ; do
         failure "swarm runs normally when --bloom-bits equals ${y}"
 done || success "${DESCRIPTION}"
 unset MIN MAX y
+
+## the bounds in the message are interpolated from the constants
+## min_bits_per_entry and max_bits_per_entry, so the message cannot go
+## stale (the wording itself is unchanged)
+DESCRIPTION="--bloom-bits message states the accepted range (value too low)"
+printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" \
+        -f \
+        -y 1 2>&1 > /dev/null | \
+    grep -qx "Error: Illegal number of Bloom filter bits specified with -y or --bloom-bits, must be in the range 2 to 64." && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="--bloom-bits message states the accepted range (value too high)"
+printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" \
+        -f \
+        -y 65 2>&1 > /dev/null | \
+    grep -qx "Error: Illegal number of Bloom filter bits specified with -y or --bloom-bits, must be in the range 2 to 64." && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
 
 ## Passing the --bloom-bits option without the fastidious option should fail
 DESCRIPTION="swarm errors out when the --bloom-bits option is specified without -f"
