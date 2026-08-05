@@ -107,6 +107,29 @@ DESCRIPTION="swarm reads from a process substitution (unseekable)"
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+## swarm now checks its streams when it closes them, and a failed read
+## is one of the failures that reports. A directory can be opened but
+## not read, so it reaches that check; swarm used to treat the failed
+## read as the end of the input, cluster nothing, and return 0.
+DESCRIPTION="an input that cannot be read is reported"
+TMP=$(mktemp -d)
+"${SWARM}" -o /dev/null "${TMP}" 2>&1 > /dev/null | \
+    grep -qx "Error: I/O error on a swarm file; the output may be incomplete." && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rmdir "${TMP}"
+unset TMP
+
+DESCRIPTION="an input that cannot be read returns a status of 1"
+TMP=$(mktemp -d)
+"${SWARM}" -o /dev/null "${TMP}" > /dev/null 2>&1
+STATUS=$?
+rmdir "${TMP}"
+[[ "${STATUS}" -eq 1 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+unset TMP STATUS
+
 
 #*****************************************************************************#
 #                                                                             #
