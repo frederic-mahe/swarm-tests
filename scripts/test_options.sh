@@ -2913,6 +2913,28 @@ if [[ "${ARCHITECTURE}" == "x86_64" ]] ; then
         grep -q "sse3" && \
         failure "${DESCRIPTION}" || \
             success "${DESCRIPTION}"
+
+    ## the reported features come from a table, and the printed order is
+    ## a property of that table: each feature must appear later in the
+    ## canonical list than the one before it (a name absent from the list
+    ## gives position 0 and breaks the walk)
+    DESCRIPTION="cpu features are reported in a fixed order (-d 2)"
+    printf ">s1_1\nA\n" | \
+        "${SWARM}" -d 2 2>&1 > /dev/null | \
+        grep "^CPU features" | \
+        awk '{
+               order = " mmx sse sse2 sse3 ssse3 sse4.1 sse4.2 popcnt avx avx2 "
+               previous = 0
+               ordered = (NF > 2)
+               for (i = 3 ; i <= NF ; i++) {
+                   position = index(order, " " $i " ")
+                   if (position <= previous) { ordered = 0 }
+                   previous = position
+               }
+             }
+             END {exit (NR == 1 && ordered) ? 0 : 1}' && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
 fi
 unset ARCHITECTURE
 
