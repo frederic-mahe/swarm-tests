@@ -3383,6 +3383,267 @@ unset LENGTH SEQUENCE_1 SEQUENCE_2
 
 #*****************************************************************************#
 #                                                                             #
+#                                 Exit status                                 #
+#                                                                             #
+#*****************************************************************************#
+
+## the manpage documents the exit status: 0 when swarm completes, 1 when
+## it stops with an error. A status of 1 always comes with a message
+## starting with 'Error:' on stderr, never in the --log file.
+
+
+## ------------------------------------------------------------ successful runs
+
+## swarm now checks whether its writes succeeded, so a run that writes
+## every output file must still return 0. One test per resolution, since
+## each has its own writers (dereplicate, d = 1, and d > 1); -j is only
+## accepted when d equals 1.
+DESCRIPTION="a complete run returns a status of 0 (-d 0)"
+printf ">s1_3\nAA\n>s2_1\nAT\n" | \
+    "${SWARM}" \
+        -d 0 \
+        -i /dev/null \
+        -l /dev/null \
+        -o /dev/null \
+        -s /dev/null \
+        -u /dev/null \
+        -w /dev/null 2> /dev/null && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="a complete run returns a status of 0 (-d 1)"
+printf ">s1_3\nAA\n>s2_1\nAT\n" | \
+    "${SWARM}" \
+        -d 1 \
+        -i /dev/null \
+        -j /dev/null \
+        -l /dev/null \
+        -o /dev/null \
+        -s /dev/null \
+        -u /dev/null \
+        -w /dev/null 2> /dev/null && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="a complete run returns a status of 0 (-d 1 -f)"
+printf ">s1_3\nAA\n>s2_1\nAT\n" | \
+    "${SWARM}" \
+        -d 1 \
+        -f \
+        -i /dev/null \
+        -l /dev/null \
+        -o /dev/null \
+        -s /dev/null \
+        -u /dev/null \
+        -w /dev/null 2> /dev/null && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="a complete run returns a status of 0 (-d 2)"
+printf ">s1_3\nAA\n>s2_1\nAT\n" | \
+    "${SWARM}" \
+        -d 2 \
+        -i /dev/null \
+        -l /dev/null \
+        -o /dev/null \
+        -s /dev/null \
+        -u /dev/null \
+        -w /dev/null 2> /dev/null && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## a consumer that stops reading is not a write error: the output is
+## small enough to fit in the stdio buffer, so nothing is written before
+## head has read its line (PIPESTATUS[1] is swarm's own status)
+DESCRIPTION="a run whose output is read by head returns a status of 0"
+printf ">s1_3\nAA\n>s2_1\nAT\n" | \
+    "${SWARM}" -d 1 2> /dev/null | \
+    head -n 1 > /dev/null
+[[ "${PIPESTATUS[1]}" -eq 0 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+
+## -------------------------------------------------------------- failed writes
+
+## swarm used to discard the return value of every write, so a full
+## device produced no output, no message, and a status of 0. Failures
+## are now noticed when the stream is closed (std::ferror and the return
+## value of std::fclose). /dev/full accepts writes and reports ENOSPC;
+## it is a Linux-specific device, hence the guard.
+if [[ -c /dev/full ]] ; then
+
+    ## every output file goes through the same close, so every option
+    ## that names one reports a failed write
+    for OPTION in "-i" "-j" "-l" "-o" "-s" "-u" "-w" ; do
+        DESCRIPTION="a write error on the ${OPTION} file is reported"
+        printf ">s1_3\nAA\n>s2_1\nAT\n" | \
+            "${SWARM}" \
+                -d 1 \
+                "${OPTION}" /dev/full 2>&1 > /dev/null | \
+            grep -qx "Error: I/O error on a swarm file; the output may be incomplete." && \
+            success "${DESCRIPTION}" || \
+                failure "${DESCRIPTION}"
+    done
+    unset OPTION
+
+    ## the default output stream (stdout) is checked too
+    DESCRIPTION="a write error on the default output is reported"
+    printf ">s1_3\nAA\n>s2_1\nAT\n" | \
+        "${SWARM}" -d 1 2>&1 > /dev/full | \
+        grep -qx "Error: I/O error on a swarm file; the output may be incomplete." && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
+    ## the run stops with a status of 1, where it used to return 0
+    DESCRIPTION="a write error returns a status of 1"
+    printf ">s1_3\nAA\n>s2_1\nAT\n" | \
+        "${SWARM}" -d 1 -o /dev/full > /dev/null 2>&1
+    [[ $? -eq 1 ]] && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
+    ## output already written is left in place, as the manpage states, so
+    ## a failed write on one file does not discard another one's content
+    DESCRIPTION="a write error on the log leaves the clusters readable"
+    printf ">s1_3\nAA\n>s2_1\nAT\n" | \
+        "${SWARM}" -d 1 -l /dev/full -o - 2> /dev/null | \
+        grep -qx "s1_3 s2_1" && \
+        success "${DESCRIPTION}" || \
+            failure "${DESCRIPTION}"
+
+fi
+
+
+## --------------------------------------------------- unusable command lines
+
+DESCRIPTION="an unknown option returns a status of 1"
+printf ">s1_1\nA\n" | \
+    "${SWARM}" --no-such-option > /dev/null 2>&1
+[[ $? -eq 1 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="an option given twice returns a status of 1"
+printf ">s1_1\nA\n" | \
+    "${SWARM}" -d 1 -d 1 > /dev/null 2>&1
+[[ $? -eq 1 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="a non-numeric argument returns a status of 1"
+printf ">s1_1\nA\n" | \
+    "${SWARM}" -d "a" > /dev/null 2>&1
+[[ $? -eq 1 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="an out-of-range argument returns a status of 1"
+printf ">s1_1\nA\n" | \
+    "${SWARM}" -d 4294967296 > /dev/null 2>&1
+[[ $? -eq 1 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="--fastidious with a resolution other than 1 returns a status of 1"
+printf ">s1_1\nA\n" | \
+    "${SWARM}" -d 2 -f > /dev/null 2>&1
+[[ $? -eq 1 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="--bloom-bits without --fastidious returns a status of 1"
+printf ">s1_1\nA\n" | \
+    "${SWARM}" -y 16 > /dev/null 2>&1
+[[ $? -eq 1 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+
+## -------------------------------------------------------- unusable inputs
+
+DESCRIPTION="a missing input file returns a status of 1"
+TMP=$(mktemp -u)
+"${SWARM}" "${TMP}" > /dev/null 2>&1
+[[ $? -eq 1 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+unset TMP
+
+DESCRIPTION="an output file that cannot be opened returns a status of 1"
+TMP=$(mktemp) && chmod u-w "${TMP}"  # remove write permission
+printf ">s1_1\nA\n" | \
+    "${SWARM}" -o "${TMP}" > /dev/null 2>&1
+STATUS=$?
+chmod u+w "${TMP}" && rm -f "${TMP}"
+[[ "${STATUS}" -eq 1 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+unset TMP STATUS
+
+DESCRIPTION="an illegal character returns a status of 1"
+printf ">s1_1\nA!A\n" | \
+    "${SWARM}" -o /dev/null > /dev/null 2>&1
+[[ $? -eq 1 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="an empty sequence returns a status of 1"
+printf ">s1_1\n\n" | \
+    "${SWARM}" -o /dev/null > /dev/null 2>&1
+[[ $? -eq 1 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="a missing abundance annotation returns a status of 1"
+printf ">s1\nA\n" | \
+    "${SWARM}" -o /dev/null > /dev/null 2>&1
+[[ $? -eq 1 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="input that was not dereplicated returns a status of 1 (-d 1)"
+printf ">s1_1\nA\n>s2_1\nA\n" | \
+    "${SWARM}" -d 1 -o /dev/null > /dev/null 2>&1
+[[ $? -eq 1 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+
+## ------------------------------------------------------------ error messages
+
+## a status of 1 always comes with a message on stderr
+DESCRIPTION="an error message starts with 'Error:' on stderr"
+printf ">s1_1\nA!A\n" | \
+    "${SWARM}" -o /dev/null 2>&1 > /dev/null | \
+    grep -q "^Error: " && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## --log redirects the run report, not the errors
+DESCRIPTION="--log does not capture the error message"
+TMP=$(mktemp)
+printf ">s1_1\nA!A\n" | \
+    "${SWARM}" -l "${TMP}" -o /dev/null 2> /dev/null
+grep -q "^Error: " "${TMP}" && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+rm -f "${TMP}"
+unset TMP
+
+DESCRIPTION="the error message goes to stderr when --log is used"
+TMP=$(mktemp)
+printf ">s1_1\nA!A\n" | \
+    "${SWARM}" -l "${TMP}" -o /dev/null 2>&1 > /dev/null | \
+    grep -q "^Error: " && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm -f "${TMP}"
+unset TMP
+
+
+#*****************************************************************************#
+#                                                                             #
 #                 search for leaks and errors with valgrind                   #
 #                                                                             #
 #*****************************************************************************#
