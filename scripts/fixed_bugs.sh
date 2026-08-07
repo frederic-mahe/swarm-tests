@@ -3222,4 +3222,33 @@ printf ">sa_1\nAAA\n>sz_1\nCCC\n>sø_1\nGGG\n" | \
         failure "${DESCRIPTION}"
 
 
+## Once per channel swap, the 16-bit alignment kernel seeds one lane of
+## its H0 and F0 vectors. Writing that lane through a WORD * cast is a
+## strict-aliasing violation: the compiler is entitled to keep a stale
+## copy of the vector in a register, drop the write, and silently
+## misalign the pair. swarm then reports two clusters where there is
+## one. The run succeeds and the cluster count looks plausible, so
+## nothing but a value check catches it.
+##
+## The two sequences below are a one-nucleotide frameshift of each
+## other, so they are well within 4 differences and must end up in a
+## single cluster. The high gap-open penalty is what selects the 16-bit
+## kernel at a low d: with the default penalties swarm stays in 8-bit
+## mode until d = 16.
+##
+## Caveat: this test only bites on an optimized build. At -O0 the
+## compiler does not exploit the aliasing rule, so a swarm built with
+## DEBUG=1 passes it whether or not the defect is present.
+DESCRIPTION="d > 1: 16-bit kernel keeps its H0/F0 lane seeding"
+printf ">a_2\nACGTACGTACGTACGT\n>b_1\nTACGTACGTACGTACG\n" | \
+    "${SWARM}" \
+        -d 4 \
+        -g 60 \
+        -o - 2> /dev/null | \
+    tr -d "\n" | \
+    grep -q "^a_2 b_1$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+
 exit 0
