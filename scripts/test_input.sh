@@ -952,6 +952,49 @@ printf ">s1_2\nAA\n>s2_1\nAT\n" | \
         failure "${DESCRIPTION}"
 
 
+## An empty positional argument is rejected at parse time. swarm's input
+## filename defaults to '-' (stdin), so downstream code takes "the
+## filename is always set" for granted and asserts it. Without the parse
+## time check the empty string reached that assert, which aborted a
+## DEBUG build (SIGABRT) on what is ordinary bad input, while a release
+## build reported the fopen failure instead. The next three tests pin the
+## rejection, its message, and the two neighbouring cases that must keep
+## their own behaviour.
+## a status of exactly 1, not merely non-zero: the manpage requires 1 for
+## any error, and the abort this used to produce exited 134, which a plain
+## '|| success' would have accepted
+DESCRIPTION="swarm rejects an empty input file name with a status of 1"
+printf ">s1_1\nA\n" | \
+    "${SWARM}" "" > /dev/null 2>&1
+[[ $? -eq 1 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="swarm reports an empty input file name as such"
+printf ">s1_1\nA\n" | \
+    "${SWARM}" "" 2>&1 > /dev/null | \
+    grep -q "Empty input file name" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## '-' is the documented way to ask for stdin, and is what the option
+## defaults to: it must not be caught by the check above
+DESCRIPTION="swarm accepts '-' as the input file name (stdin)"
+printf ">s1_1\nA\n" | \
+    "${SWARM}" - 2> /dev/null | \
+    grep -q "^s1_1$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## a non-empty name that cannot be opened still reports the open failure,
+## not the empty-name message
+DESCRIPTION="swarm reports an unopenable input file name as such"
+"${SWARM}" /dev/null/nonexistent 2>&1 > /dev/null | \
+    grep -q "Unable to open input data file" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+
 #*****************************************************************************#
 #                                                                             #
 #                           Realistic input file                              #
