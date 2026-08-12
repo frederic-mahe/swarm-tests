@@ -1271,6 +1271,55 @@ DESCRIPTION="d = 1 -f reduces the Bloom filter size to honor the --ceiling optio
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+## The other end of the same check: when the ceiling is already spent by
+## the time swarm sizes the Bloom filter, there is nothing left to
+## reduce and swarm gives up instead. The manpage lists that case in
+## EXIT STATUS, as the one memory failure that is diagnosed normally and
+## returns 1, rather than aborting the process with SIGABRT.
+##
+## Same data as the test above, so the same ~2,700,000 nucleotides are
+## held in light swarms, but asking for the lowest ceiling the option
+## accepts (40 MB). The measurement is the resident set of the whole
+## process (getrusage ru_maxrss), which is past 50 MB with that much
+## data in a release build, and higher still in an instrumented one, so
+## the run never reaches the reduction. A build lean enough to sit under
+## 40 MB there would reduce and succeed, and this test would report a
+## failure rather than pass silently.
+DESCRIPTION="d = 1 -f reports a --ceiling that is already spent"
+{ printf ">heavy_5\n%s\n" "$(printf 'G%.0s' $(seq 1 150))"
+  awk 'BEGIN{
+         split("ACGT", b, "")
+         for (i = 0 ; i < 18000 ; i++) {
+           s = "" ; x = i
+           for (d = 0 ; d < 8 ; d++) { c = b[(x % 4) + 1] ; s = s c c ; x = int(x / 4) }
+           while (length(s) < 150) s = s "A"
+           printf ">s%d_1\n%s\n", i + 1, substr(s, 1, 150)
+         }
+       }'
+} | \
+    "${SWARM}" -d 1 -f --ceiling 40 -o /dev/null 2>&1 >/dev/null | \
+    grep -qx "Error: Memory ceiling for Bloom filter is too low." && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## same run, checking the status the manpage documents for that case
+DESCRIPTION="d = 1 -f returns a status of 1 when the --ceiling is already spent"
+{ printf ">heavy_5\n%s\n" "$(printf 'G%.0s' $(seq 1 150))"
+  awk 'BEGIN{
+         split("ACGT", b, "")
+         for (i = 0 ; i < 18000 ; i++) {
+           s = "" ; x = i
+           for (d = 0 ; d < 8 ; d++) { c = b[(x % 4) + 1] ; s = s c c ; x = int(x / 4) }
+           while (length(s) < 150) s = s "A"
+           printf ">s%d_1\n%s\n", i + 1, substr(s, 1, 150)
+         }
+       }'
+} | \
+    "${SWARM}" -d 1 -f --ceiling 40 -o /dev/null > /dev/null 2>&1
+[[ $? -eq 1 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 
 ## Bloom bits -----------------------------------------------------------------
 
