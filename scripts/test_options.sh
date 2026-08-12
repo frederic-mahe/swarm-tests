@@ -322,6 +322,41 @@ microvariant_substitutions() {
 unset SEQUENCE MICROVARIANT microvariant_substitutions
 
 
+## The number of threads must not change the results, so the three
+## tests below pin the results a single-threaded run produces, and ask
+## for them with four threads. The input is the same in all three: two
+## families of amplicons (a to e, and f and g) plus h_1, which is two
+## differences away from f_4 and one difference away from nothing. The
+## three outputs cover the clustering itself, the internal structure
+## (built while clustering, so it is the output most exposed to a race),
+## and the fastidious pass, which is the parallelised part of the second
+## clustering pass and grafts h_1 onto f_4's cluster.
+DESCRIPTION="-t 4 produces the expected clusters"
+printf ">a_9\nAAAAAA\n>b_8\nAAAAAT\n>c_7\nAAAATT\n>d_6\nAAATTT\n>e_5\nAATTTT\n>f_4\nGGGGGG\n>g_3\nGGGGGA\n>h_1\nGGGGTT\n" | \
+    "${SWARM}" -t 4 2> /dev/null | \
+    tr "\n" "@" | \
+    grep -qx "a_9 b_8 c_7 d_6 e_5@f_4 g_3@h_1@" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="-t 4 produces the expected internal structure (-i)"
+printf ">a_9\nAAAAAA\n>b_8\nAAAAAT\n>c_7\nAAAATT\n>d_6\nAAATTT\n>e_5\nAATTTT\n>f_4\nGGGGGG\n>g_3\nGGGGGA\n>h_1\nGGGGTT\n" | \
+    "${SWARM}" -t 4 -o /dev/null -i - 2> /dev/null | \
+    tr '\t' '@' | \
+    tr "\n" "%" | \
+    grep -qx "a@b@1@1@1%b@c@1@1@2%c@d@1@1@3%d@e@1@1@4%f@g@1@2@1%" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="-t 4 produces the expected clusters (-f)"
+printf ">a_9\nAAAAAA\n>b_8\nAAAAAT\n>c_7\nAAAATT\n>d_6\nAAATTT\n>e_5\nAATTTT\n>f_4\nGGGGGG\n>g_3\nGGGGGA\n>h_1\nGGGGTT\n" | \
+    "${SWARM}" -t 4 -f 2> /dev/null | \
+    tr "\n" "@" | \
+    grep -qx "a_9 b_8 c_7 d_6 e_5@f_4 g_3 h_1@" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+
 #*****************************************************************************#
 #                                                                             #
 #                            Options --differences                            #
