@@ -1277,23 +1277,35 @@ DESCRIPTION="d = 1 -f reduces the Bloom filter size to honor the --ceiling optio
 ## EXIT STATUS, as the one memory failure that is diagnosed normally and
 ## returns 1, rather than aborting the process with SIGABRT.
 ##
-## Same data as the test above, so the same ~2,700,000 nucleotides are
-## held in light swarms, but asking for the lowest ceiling the option
-## accepts (40 MB). The measurement is the resident set of the whole
-## process (getrusage ru_maxrss), which is past 50 MB with that much
-## data in a release build, and higher still in an instrumented one, so
-## the run never reaches the reduction. A build lean enough to sit under
-## 40 MB there would reduce and succeed, and this test would report a
-## failure rather than pass silently.
+## What is compared to the ceiling is the resident set of the whole
+## process (getrusage ru_maxrss), not the size of the Bloom filter, so
+## the input has to push that resident set past the lowest ceiling the
+## option accepts (40 MB) before swarm reaches the check. Headers are
+## the cheapest way to get there: swarm holds the whole input in memory
+## and stores headers verbatim (sequences are packed, two bits per
+## nucleotide), and a header costs nothing to cluster. Here 2500 light
+## amplicons carry a 20,000-character header each, so ~50 MB of input
+## data are resident, and the buffer holding them doubles its capacity
+## as it grows, so the peak is about twice that: ~95 MB for a release
+## binary, ~215 MB for a sanitized one. Both are well past 40 MB, and a
+## build lean enough to stay under the ceiling would reduce the filter
+## and succeed, so this test would report a failure rather than pass
+## silently.
+##
+## The sequences are 16 nucleotides of doubled bases, so no two of them
+## are one substitution or one indel apart: each singleton stays in its
+## own light swarm, and the heavy seed is the only large swarm.
 DESCRIPTION="d = 1 -f reports a --ceiling that is already spent"
-{ printf ">heavy_5\n%s\n" "$(printf 'G%.0s' $(seq 1 150))"
+{ printf ">heavy_5\nGGGGGGGGGGGGGGGGGGGG\n"
   awk 'BEGIN{
          split("ACGT", b, "")
-         for (i = 0 ; i < 18000 ; i++) {
+         pad = "A"
+         while (length(pad) < 20000) pad = pad pad
+         pad = substr(pad, 1, 20000)
+         for (i = 0 ; i < 2500 ; i++) {
            s = "" ; x = i
            for (d = 0 ; d < 8 ; d++) { c = b[(x % 4) + 1] ; s = s c c ; x = int(x / 4) }
-           while (length(s) < 150) s = s "A"
-           printf ">s%d_1\n%s\n", i + 1, substr(s, 1, 150)
+           printf ">%s%d_1\n%s\n", pad, i + 1, s
          }
        }'
 } | \
@@ -1304,14 +1316,16 @@ DESCRIPTION="d = 1 -f reports a --ceiling that is already spent"
 
 ## same run, checking the status the manpage documents for that case
 DESCRIPTION="d = 1 -f returns a status of 1 when the --ceiling is already spent"
-{ printf ">heavy_5\n%s\n" "$(printf 'G%.0s' $(seq 1 150))"
+{ printf ">heavy_5\nGGGGGGGGGGGGGGGGGGGG\n"
   awk 'BEGIN{
          split("ACGT", b, "")
-         for (i = 0 ; i < 18000 ; i++) {
+         pad = "A"
+         while (length(pad) < 20000) pad = pad pad
+         pad = substr(pad, 1, 20000)
+         for (i = 0 ; i < 2500 ; i++) {
            s = "" ; x = i
            for (d = 0 ; d < 8 ; d++) { c = b[(x % 4) + 1] ; s = s c c ; x = int(x / 4) }
-           while (length(s) < 150) s = s "A"
-           printf ">s%d_1\n%s\n", i + 1, substr(s, 1, 150)
+           printf ">%s%d_1\n%s\n", pad, i + 1, s
          }
        }'
 } | \
