@@ -764,6 +764,53 @@ printf ">s1_3\nAA\n>s2_1\nCC\n" | \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
+## -f requires d = 1 and the pairwise alignment options require d > 1,
+## so the two families can never be combined: whichever resolution is
+## used, one of the two is out of its range. The alignment options are
+## checked before the fastidious ones, so the alignment option is
+## reported when d is 1, and the fastidious mismatch when it is not. The
+## next four tests pin both messages, for a boolean option (-x) and for
+## an option taking a value (-m).
+DESCRIPTION="-f combined with -x is rejected (d = 1, -x is reported)"
+printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" \
+        -d 1 \
+        -f \
+        -x 2>&1 > /dev/null | \
+    grep -qx "Error: Option --disable-sse3 or -x has no effect when d < 2 (SSE3 instructions are only used when d > 1)." && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="-f combined with -x is rejected (d = 2, -f is reported)"
+printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" \
+        -d 2 \
+        -f \
+        -x 2>&1 > /dev/null | \
+    grep -qx "Error: Fastidious mode (specified with -f or --fastidious) only works when the resolution (specified with -d or --differences) is 1." && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="-f combined with -m is rejected (d = 1, -m is reported)"
+printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" \
+        -d 1 \
+        -f \
+        -m 5 2>&1 > /dev/null | \
+    grep -qx "Error: Option -m or --match-reward specified when d < 2." && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="-f combined with -m is rejected (d = 2, -f is reported)"
+printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" \
+        -d 2 \
+        -f \
+        -m 5 2>&1 > /dev/null | \
+    grep -qx "Error: Fastidious mode (specified with -f or --fastidious) only works when the resolution (specified with -d or --differences) is 1." && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 ## Swarm performs a second clustering (aka fastidious)
 DESCRIPTION="swarm groups small clusters with large clusters (boundary = 3)"
 printf ">s1_3\nAA\n>s2_1\nCC\n" | \
