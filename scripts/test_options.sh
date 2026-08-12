@@ -680,6 +680,68 @@ printf ">s1_9\nAA\n>s2_8\nCC\n>s3_1\nAC\n" | \
         failure "${DESCRIPTION}"
 
 
+## Cluster breaking changes the clusters themselves, so it changes
+## every output file that describes them, not just the cluster
+## listing. In the input used by the next four tests, s2_1 sits between
+## s1_5 and s3_5; the default run breaks the chain at s2_1 (because
+## s3_5 is more abundant than s2_1) and reports two clusters, whereas
+## -n keeps the link and reports a single cluster of three amplicons.
+## Each test below therefore fails if -n is not taken into account by
+## that particular writer.
+DESCRIPTION="-n is taken into account in the statistics file (-s)"
+printf ">s1_5\nAA\n>s2_1\nAT\n>s3_5\nGT\n" | \
+    "${SWARM}" -n -o /dev/null -s - 2> /dev/null | \
+    tr '\t' '@' | \
+    grep -qx "3@11@s1@5@1@2@2" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## without -n, s3_5 is the seed of a second cluster (a S line)
+DESCRIPTION="-n is taken into account in the uclust file (-u)"
+printf ">s1_5\nAA\n>s2_1\nAT\n>s3_5\nGT\n" | \
+    "${SWARM}" -n -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "H" && $9 == "s3_5" {n++} END {exit n == 1 ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## the second link (s2 to s3) only exists when the chain is not broken
+DESCRIPTION="-n is taken into account in the internal structure file (-i)"
+printf ">s1_5\nAA\n>s2_1\nAT\n>s3_5\nGT\n" | \
+    "${SWARM}" -n -o /dev/null -i - 2> /dev/null | \
+    tr '\t' '@' | \
+    grep -qx "s2@s3@1@1@2" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## a single representative, with the mass of the three amplicons
+DESCRIPTION="-n is taken into account in the seeds file (-w)"
+printf ">s1_5\nAA\n>s2_1\nAT\n>s3_5\nGT\n" | \
+    "${SWARM}" -n -o /dev/null -w - 2> /dev/null | \
+    tr -d "\n" | \
+    grep -qx ">s1_11AA" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+
+## Cluster breaking is a d = 1 feature, so -n is accepted but has
+## nothing to deactivate at other resolutions. The two tests below pin
+## the results a run without -n produces, so they fail if -n starts
+## modifying clusters when d is not 1.
+DESCRIPTION="-n is accepted and has no effect when d = 0"
+printf ">s1_5\nAA\n>s2_1\nAA\n" | \
+    "${SWARM}" -d 0 -n -o - 2> /dev/null | \
+    grep -qx "s1_5 s2_1" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="-n is accepted and has no effect when d = 2"
+printf ">s1_5\nAA\n>s2_1\nAT\n>s3_5\nGT\n" | \
+    "${SWARM}" -d 2 -n -o - 2> /dev/null | \
+    grep -qx "s1_5 s3_5 s2_1" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+
 #*****************************************************************************#
 #                                                                             #
 #                             Fastidious options                              #
