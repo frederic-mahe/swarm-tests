@@ -3470,6 +3470,27 @@ printf ">s1_1\nA\n>s2_5\nA\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+## d = 0 is the only resolution where a hit can be identical to its
+## centroid: with d >= 1 the input has to be dereplicated, so every hit
+## differs from its centroid by at least one nucleotide. The manpage
+## documents '=' in column 8 for an identical query, and the identity
+## reported in column 4 is then 100.0. Both tests count the H lines they
+## accept, so they fail rather than pass silently if the uclust file
+## holds no hit at all.
+DESCRIPTION="-u column 8 (CIGAR) is = for a hit (-d 0)"
+printf ">s1_1\nA\n>s2_5\nA\n" | \
+    "${SWARM}" -d 0 -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "H" && $8 == "=" {n++} END {exit n == 1 ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="-u column 4 (identity) is 100.0 for a hit (-d 0)"
+printf ">s1_1\nA\n>s2_5\nA\n" | \
+    "${SWARM}" -d 0 -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "H" && $4 == "100.0" {n++} END {exit n == 1 ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 ## d = 0 produces mothur-like output
 DESCRIPTION="swarm produces a mothur-like output (-d 0)"
 printf ">s1_1\nA\n>s2_5\nA\n" | \
