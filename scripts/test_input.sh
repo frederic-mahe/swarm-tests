@@ -995,6 +995,58 @@ DESCRIPTION="swarm reports an unopenable input file name as such"
         failure "${DESCRIPTION}"
 
 
+## The fastidious pass (-f) grafts light clusters onto heavy ones and
+## flags the light ones as attached, so the result writers skip them.
+## Two of those writers (-s and -r) instead asserted that no cluster is
+## ever attached, which is the opposite of what -f produces: a DEBUG
+## build aborted (SIGABRT) halfway through the output phase, leaving the
+## cluster file truncated at whatever stdio had not flushed, while a
+## release build (NDEBUG) dropped the asserts and wrote correct results.
+## Input below: s1 is heavy (mass 4, above the default boundary of 3),
+## s2 is light (mass 1) and two differences away, so -f grafts s2 onto
+## s1 and flags s2's cluster as attached. The next five tests pin the
+## two option combinations that used to abort.
+DESCRIPTION="issue: -f combined with -s does not abort"
+printf ">s1_4\nAA\n>s2_1\nTT\n" | \
+    "${SWARM}" -d 1 -f -s /dev/stdout -o /dev/null > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## the abort used to leave the cluster file empty, so this also pins the
+## truncation, not just the exit status
+DESCRIPTION="issue: -f combined with -s still writes the whole cluster file"
+printf ">s1_4\nAA\n>s2_1\nTT\n" | \
+    "${SWARM}" -d 1 -f -s /dev/null 2> /dev/null | \
+    grep -qx "s1_4 s2_1" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## one line per reported cluster: the grafted cluster is skipped, and its
+## amplicon is counted in the heavy cluster instead (size 2, mass 5)
+DESCRIPTION="issue: -f combined with -s reports only non-attached clusters"
+printf ">s1_4\nAA\n>s2_1\nTT\n" | \
+    "${SWARM}" -d 1 -f -s /dev/stdout -o /dev/null 2> /dev/null | \
+    tr '\t' '@' | \
+    grep -qx "2@5@s1@4@1@0@0" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="issue: -f combined with -r does not abort"
+printf ">s1_4\nAA\n>s2_1\nTT\n" | \
+    "${SWARM}" -d 1 -f -r > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## the grafted amplicon belongs to the single reported cluster
+DESCRIPTION="issue: -f combined with -r lists the grafted amplicon"
+printf ">s1_4\nAA\n>s2_1\nTT\n" | \
+    "${SWARM}" -d 1 -f -r 2> /dev/null | \
+    tr '\t' '@' | \
+    grep -qx "swarm_1@1@s1_4,s2_1" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+
 #*****************************************************************************#
 #                                                                             #
 #                           Realistic input file                              #
