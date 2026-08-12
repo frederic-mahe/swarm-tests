@@ -2194,6 +2194,54 @@ printf ">s1\nA\n>s2;size=2\nT\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+## -r replaces the cluster listing written to -o, and nothing else: the
+## other output files have formats of their own and must be written
+## exactly as they would be without -r. The next four tests use the same
+## input (one cluster of two amplicons) and pin the full expected line
+## for each of those files, so any contamination by the mothur format is
+## caught.
+DESCRIPTION="-r does not modify the statistics file (-s)"
+printf ">s1_3\nAA\n>s2_1\nAT\n" | \
+    "${SWARM}" -r -o /dev/null -s - 2> /dev/null | \
+    tr '\t' '@' | \
+    grep -qx "2@4@s1@3@1@1@1" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="-r does not modify the internal structure file (-i)"
+printf ">s1_3\nAA\n>s2_1\nAT\n" | \
+    "${SWARM}" -r -o /dev/null -i - 2> /dev/null | \
+    tr '\t' '@' | \
+    grep -qx "s1@s2@1@1@1" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="-r does not modify the uclust file (-u)"
+printf ">s1_3\nAA\n>s2_1\nAT\n" | \
+    "${SWARM}" -r -o /dev/null -u - 2> /dev/null | \
+    tr '\t' '@' | \
+    grep -qx "H@0@2@50.0@+@0@0@2M@s2_1@s1_3" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="-r does not modify the seeds file (-w)"
+printf ">s1_3\nAA\n>s2_1\nAT\n" | \
+    "${SWARM}" -r -o /dev/null -w - 2> /dev/null | \
+    tr -d "\n" | \
+    grep -qx ">s1_4AA" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## the network file is written by its own writer too, and -r does not
+## reach it either
+DESCRIPTION="-r does not modify the network file (-j)"
+printf ">s1_3\nAA\n>s2_1\nAT\n" | \
+    "${SWARM}" -r -o /dev/null -j - 2> /dev/null | \
+    tr '\t' '@' | \
+    grep -qx "s1_3@s2_1" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 
 ## ------------------------------------------------------------ statistics-file
 
