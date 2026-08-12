@@ -1615,10 +1615,16 @@ printf ">s1_1\nA\n>s2_1\nT\n" | \
         failure "${DESCRIPTION}"
 
 ## -i number of differences is correct (0 expected)
-DESCRIPTION="-i number of differences is correct (0 expected)"
+## Two amplicons are zero differences apart only when they are
+## identical, and the input has to be free of that at d >= 1: this input
+## was rejected there ("some fasta entries have identical sequences"),
+## so no internal structure file was written. The test passed anyway,
+## because an awk program with no line to read exits 0. Counting the
+## accepted lines is what makes an empty file fail here.
+DESCRIPTION="-i number of differences is correct (0 expected) (-d 0)"
 printf ">s1_1\nA\n>s2_1\nA\n" | \
-    "${SWARM}" -o /dev/null -i - 2> /dev/null | \
-    awk '{exit ($3 == 0) ? 0 : 1}' && \
+    "${SWARM}" -d 0 -o /dev/null -i - 2> /dev/null | \
+    awk '$3 == 0 {n++} END {exit n == 1 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -2845,19 +2851,27 @@ printf ">s1_2\nA\n>s2_1\nC\n" | \
 
 ## -u column 8 (CIGAR) is M for hit
 ## (1 match/mismatch)
+## The four tests below used to give the two amplicons the same
+## sequence, which d >= 1 rejects ("some fasta entries have identical
+## sequences"): no uclust file was written, the awk rule never fired,
+## and awk exits 0 when that happens, so all four passed on nothing. A
+## CIGAR of N matches/mismatches needs two sequences of the same length
+## that are not identical, so each pair now differs by its last
+## nucleotide, as the 4M test below already did. Counting the H lines
+## that are accepted is what makes an empty uclust file fail.
 DESCRIPTION="-u column 8 (CIGAR) is M for hit (single nucleotide)"
-printf ">s1_1\nA\n>s2_1\nA\n" | \
+printf ">s1_1\nA\n>s2_1\nC\n" | \
     "${SWARM}" -o /dev/null -u - 2> /dev/null | \
-    awk 'BEGIN {FS = "\t"} $1 == "H" {exit $8 == "M" ? 0 : 1}' && \
+    awk 'BEGIN {FS = "\t"} $1 == "H" && $8 == "M" {n++} END {exit n == 1 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
 ## -u column 8 (CIGAR) is 10M for hit
 ## (10 matches/mismatches)
 DESCRIPTION="-u column 8 (CIGAR) is 10M for hit (double-digit)"
-printf ">s1_1\nAAAAAAAAAA\n>s2_1\nAAAAAAAAAA\n" | \
+printf ">s1_1\nAAAAAAAAAA\n>s2_1\nAAAAAAAAAC\n" | \
     "${SWARM}" -o /dev/null -u - 2> /dev/null | \
-    awk 'BEGIN {FS = "\t"} $1 == "H" {exit $8 == "10M" ? 0 : 1}' && \
+    awk 'BEGIN {FS = "\t"} $1 == "H" && $8 == "10M" {n++} END {exit n == 1 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -2865,9 +2879,9 @@ printf ">s1_1\nAAAAAAAAAA\n>s2_1\nAAAAAAAAAA\n" | \
 ## (100 matches/mismatches)
 DESCRIPTION="-u column 8 (CIGAR) is 100M for hit (triple-digit)"
 SEQ="$(for i in {1..10} ; do printf "AAAAAAAAAA" ; done)"
-printf ">s1_1\n%s\n>s2_1\n%s\n" "${SEQ}" "${SEQ}" | \
+printf ">s1_1\n%s\n>s2_1\n%s\n" "${SEQ}" "${SEQ%A}C" | \
     "${SWARM}" -o /dev/null -u - 2> /dev/null | \
-    awk 'BEGIN {FS = "\t"} $1 == "H" {exit $8 == "100M" ? 0 : 1}' && \
+    awk 'BEGIN {FS = "\t"} $1 == "H" && $8 == "100M" {n++} END {exit n == 1 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 unset SEQ
@@ -2876,9 +2890,9 @@ unset SEQ
 ## (1000 matches/mismatches)
 DESCRIPTION="-u column 8 (CIGAR) is 1000M for hit (quadruple-digit)"
 SEQ="$(for i in {1..100} ; do printf "AAAAAAAAAA" ; done)"
-printf ">s1_1\n%s\n>s2_1\n%s\n" "${SEQ}" "${SEQ}" | \
+printf ">s1_1\n%s\n>s2_1\n%s\n" "${SEQ}" "${SEQ%A}C" | \
     "${SWARM}" -o /dev/null -u - 2> /dev/null | \
-    awk 'BEGIN {FS = "\t"} $1 == "H" {exit $8 == "1000M" ? 0 : 1}' && \
+    awk 'BEGIN {FS = "\t"} $1 == "H" && $8 == "1000M" {n++} END {exit n == 1 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 unset SEQ
@@ -2911,10 +2925,17 @@ printf ">s1_1\nAAAA\n>s2_1\nAAAAA\n" | \
         failure "${DESCRIPTION}"
 
 ## -u column 8 (CIGAR) is = for hit (perfect alignment)
-DESCRIPTION="-u column 8 (CIGAR) is = for hit"
+## A hit is identical to its centroid only when d = 0: at any higher
+## resolution the input has to be dereplicated, so these two identical
+## sequences were rejected ("some fasta entries have identical
+## sequences") and no uclust file was written at all. The test passed
+## regardless, because an awk rule that never fires leaves awk exiting
+## 0. Counting the H lines that are accepted is what makes an empty
+## uclust file fail here.
+DESCRIPTION="-u column 8 (CIGAR) is = for hit (-d 0)"
 printf ">s1_1\nAAAA\n>s2_1\nAAAA\n" | \
-    "${SWARM}" -o /dev/null -u - 2> /dev/null | \
-    awk 'BEGIN {FS = "\t"} $1 == "H" {exit $8 == "=" ? 0 : 1}' && \
+    "${SWARM}" -d 0 -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "H" && $8 == "=" {n++} END {exit n == 1 ? 0 : 1}' && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
@@ -3521,18 +3542,11 @@ printf ">s1_1\nA\n>s2_5\nA\n" | \
 
 ## d = 0 is the only resolution where a hit can be identical to its
 ## centroid: with d >= 1 the input has to be dereplicated, so every hit
-## differs from its centroid by at least one nucleotide. The manpage
-## documents '=' in column 8 for an identical query, and the identity
-## reported in column 4 is then 100.0. Both tests count the H lines they
-## accept, so they fail rather than pass silently if the uclust file
-## holds no hit at all.
-DESCRIPTION="-u column 8 (CIGAR) is = for a hit (-d 0)"
-printf ">s1_1\nA\n>s2_5\nA\n" | \
-    "${SWARM}" -d 0 -o /dev/null -u - 2> /dev/null | \
-    awk 'BEGIN {FS = "\t"} $1 == "H" && $8 == "=" {n++} END {exit n == 1 ? 0 : 1}' && \
-    success "${DESCRIPTION}" || \
-        failure "${DESCRIPTION}"
-
+## differs from its centroid by at least one nucleotide. The identity
+## reported in column 4 is then 100.0, and column 8 holds '=' (see the
+## uclust section for that one). The test counts the H lines it accepts,
+## so it fails rather than passes silently if the uclust file holds no
+## hit at all.
 DESCRIPTION="-u column 4 (identity) is 100.0 for a hit (-d 0)"
 printf ">s1_1\nA\n>s2_5\nA\n" | \
     "${SWARM}" -d 0 -o /dev/null -u - 2> /dev/null | \
