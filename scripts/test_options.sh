@@ -1449,6 +1449,25 @@ printf ">s1\nA\n>s2_1\nT\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+## the network file reports headers, abundance annotations included, so
+## the annotation added by -a has to appear there too
+DESCRIPTION="-a abundance annotation appears in -j output"
+printf ">s1_3\nAA\n>s2\nAT\n" | \
+    "${SWARM}" -a 1 -o /dev/null -j - 2> /dev/null | \
+    tr '\t' '@' | \
+    grep -qx "s1_3@s2_1" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## same, with the usearch-style annotation requested by -z
+DESCRIPTION="-a abundance annotation appears in -j output (-z)"
+printf ">s1;size=3;\nAA\n>s2\nAT\n" | \
+    "${SWARM}" -z -a 1 -o /dev/null -j - 2> /dev/null | \
+    tr '\t' '@' | \
+    grep -qx "s1;size=3;@s2;size=1;" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 
 ## --------------------------------------------------------- internal structure
 
@@ -3129,6 +3148,26 @@ DESCRIPTION="in -i ouput, -z has no visible effect (-i reports only labels)"
 printf ">s1;size=1;\nA\n>s2;size=1;\nT\n" | \
     "${SWARM}" -z -o /dev/null -i - 2> /dev/null | \
     grep -qE "^s1[[:blank:]]s2[[:blank:]]" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## the network file reports headers, so -z changes the annotation style
+## there, exactly as it does in the -o output
+DESCRIPTION="in -j output, -z modifies the header format"
+printf ">s1;size=3;\nAA\n>s2;size=1;\nAT\n" | \
+    "${SWARM}" -z -o /dev/null -j - 2> /dev/null | \
+    tr '\t' '@' | \
+    grep -qx "s1;size=3;@s2;size=1;" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -z reports the annotation as it was written in the input, so a
+## missing terminal ';' stays missing (see the -o tests above)
+DESCRIPTION="in -j output, -z reports headers verbatim (no terminal ';')"
+printf ">s1;size=3\nAA\n>s2;size=1\nAT\n" | \
+    "${SWARM}" -z -o /dev/null -j - 2> /dev/null | \
+    tr '\t' '@' | \
+    grep -qx "s1;size=3@s2;size=1" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
