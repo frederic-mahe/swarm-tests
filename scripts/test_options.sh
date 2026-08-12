@@ -1017,6 +1017,38 @@ printf ">s1_3\nAA\n>s2_2\nCC\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+## The boundary decides which clusters are light, and the fastidious
+## pass removes the light clusters it grafts from all the outputs, so
+## the boundary is visible in each of them. In the input used by the
+## next three tests, s2_2 is light with the default boundary of 3 and is
+## grafted onto s1_3, whereas -b 2 makes it heavy: it then stays a
+## cluster of its own. Each test fails if that particular writer ignores
+## the boundary.
+DESCRIPTION="boundary value is taken into account in the statistics file (-b 2)"
+printf ">s1_3\nAA\n>s2_2\nCC\n" | \
+    "${SWARM}" -f -b 2 -o /dev/null -s - 2> /dev/null | \
+    tr '\t' '@' | \
+    grep -qx "1@2@s2@2@0@0@0" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## with the default boundary, the only representative is s1_5 (mass 5)
+DESCRIPTION="boundary value is taken into account in the seeds file (-b 2)"
+printf ">s1_3\nAA\n>s2_2\nCC\n" | \
+    "${SWARM}" -f -b 2 -o /dev/null -w - 2> /dev/null | \
+    tr -d "\n" | \
+    grep -qx ">s1_3AA>s2_2CC" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## with the default boundary, s2_2 is a hit (H) in s1_3's cluster
+DESCRIPTION="boundary value is taken into account in the uclust file (-b 2)"
+printf ">s1_3\nAA\n>s2_2\nCC\n" | \
+    "${SWARM}" -f -b 2 -o /dev/null -u - 2> /dev/null | \
+    awk 'BEGIN {FS = "\t"} $1 == "S" && $9 == "s2_2" {n++} END {exit n == 1 ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 ## Passing the --boundary option without the fastidious option should fail
 DESCRIPTION="swarm errors out when the boundary option is specified without -f"
 printf ">s1_3\nAA\n>s2_1\nCC\n" | \
