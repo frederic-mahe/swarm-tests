@@ -528,6 +528,21 @@ printf ">ø_1\nA\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+## a TAB (ascii 9) does not end the header: it is part of the label
+## (the header ends at the first space, null byte or end of line)
+DESCRIPTION="a TAB inside a header is part of the label (accepted)"
+printf ">x\ty_1\nA\n" | \
+    "${SWARM}" > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="a TAB inside a header is part of the label (-o output)"
+printf ">x\ty_1\nA\n" | \
+    "${SWARM}" 2> /dev/null | \
+    grep -qx "$(printf "x\ty_1")" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 ## Define ASCII characters accepted in fasta sequences
 # 10: "\n"
 # 13: "\r"
@@ -671,6 +686,14 @@ printf ">size=10;ampliconid\nA\n>ampliconid;size=1\nC\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+## the identifier is the header minus the annotation, so mid-header
+## annotations can make two different headers collide
+DESCRIPTION="swarm detects duplicated identifiers with mid-header annotations (-z)"
+printf ">x;size=3;y\nA\n>x;size=5;y\nC\n" | \
+    "${SWARM}" -z > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
 ## Fasta headers can contain more than one underscore symbol
 DESCRIPTION="fasta headers can contain more than one underscore symbol"
 printf ">s_2_2_3\nA\n" | \
@@ -690,6 +713,14 @@ printf ">asize=;size=1\nA\n" | \
 DESCRIPTION="swarm aborts if fasta headers lacks abundance value"
 printf ">s s_1\nA\n" | \
     "${SWARM}" 2> /dev/null && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+## everything after the first space is discarded, so a usearch
+## annotation placed after a space is not seen by -z
+DESCRIPTION="swarm aborts if the ;size= annotation is placed after a space (-z)"
+printf ">a_1 ;size=2\nA\n" | \
+    "${SWARM}" -z > /dev/null 2>&1 && \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 

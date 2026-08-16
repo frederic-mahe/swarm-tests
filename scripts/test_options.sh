@@ -75,6 +75,25 @@ printf ">s_1\nA\n" > "${FASTA}"
 rm "${FASTA}"
 unset FASTA
 
+## Only one input file name is accepted (extra operands used to be
+## silently ignored)
+DESCRIPTION="swarm rejects more than one input file name"
+FASTA1=$(mktemp)
+FASTA2=$(mktemp)
+printf ">a_1\nA\n" > "${FASTA1}"
+printf ">b_1\nC\n" > "${FASTA2}"
+"${SWARM}" "${FASTA1}" "${FASTA2}" > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+DESCRIPTION="swarm rejects more than one input file name (error message)"
+"${SWARM}" "${FASTA1}" "${FASTA2}" 2>&1 > /dev/null | \
+    grep -q "^Error: Too many input files" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm "${FASTA1}" "${FASTA2}"
+unset FASTA1 FASTA2
+
 
 #*****************************************************************************#
 #                                                                             #
@@ -776,6 +795,25 @@ printf ">s1_5\nAA\n>s2_1\nAT\n>s3_5\nGT\n" | \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 
+## The abundance-ordering rule (a link goes only from an amplicon to
+## another of equal or lesser abundance) also applies when d > 1:
+## without -n, c_5 cannot be reached through the less abundant b_1
+## and forms its own cluster...
+DESCRIPTION="-d 2 without -n: more abundant amplicons are not linked via lesser ones"
+printf ">a_9\nAAAAAA\n>b_1\nAAAATT\n>c_5\nAATTTT\n" | \
+    "${SWARM}" -d 2 -o - 2> /dev/null | \
+    awk '/^c_5$/ {found = 1} END {exit found ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## ... and -n lifts that restriction (a single cluster)
+DESCRIPTION="-n deactivates cluster breaking when d = 2"
+printf ">a_9\nAAAAAA\n>b_1\nAAAATT\n>c_5\nAATTTT\n" | \
+    "${SWARM}" -d 2 -n -o - 2> /dev/null | \
+    grep -qx "a_9 b_1 c_5" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 
 #*****************************************************************************#
 #                                                                             #
@@ -1426,6 +1464,14 @@ printf ">s1_3\nAA\n>s2_1\nCC\n" | \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
+## The ceiling and bloom-bits options can be combined (-c can only
+## lower the number of bits per entry set with -y)
+DESCRIPTION="swarm accepts a combination of -c and -y"
+printf ">s1_3\nAA\n>s2_1\nCC\n" | \
+    "${SWARM}" -f -c 40 -y 8 > /dev/null 2>&1 && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 
 #*****************************************************************************#
 #                                                                             #
@@ -1990,6 +2036,13 @@ printf ">s1_3\nA\n>s2_1\nC\n>s3_1\nG\n" | \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
+# also rejected with d = 0
+DESCRIPTION="-j is rejected when -d 0"
+printf ">s1_3\nA\n>s2_1\nC\n" | \
+    "${SWARM}" -d 0 -o /dev/null -j - > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
 # using fastidious option: we expect no error
 DESCRIPTION="-j works with -f"
 printf ">s1_3\nA\n>s2_1\nCC\n" | \
@@ -2092,6 +2145,17 @@ printf ">s_1\nA\n" | \
     "${SWARM}" -o /dev/null -l - >> "${LOG}"
 head -n 1 "${LOG}" | \
     grep -q "^pass 1$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+rm -f "${LOG}"
+unset LOG
+
+## --version (and --help) exit before any output file is opened, so
+## -l does not create the log file
+DESCRIPTION="-v with -l does not create the log file"
+LOG=$(mktemp -u)
+"${SWARM}" -v -l "${LOG}" > /dev/null 2>&1
+[[ ! -e "${LOG}" ]] && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 rm -f "${LOG}"
