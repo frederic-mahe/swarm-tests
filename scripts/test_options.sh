@@ -241,6 +241,26 @@ DESCRIPTION="return an error if an option is specified more than once"
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
+## help and version reports are printed on standard output (GNU
+## convention)
+DESCRIPTION="-v prints the version on standard output"
+"${SWARM}" -v 2> /dev/null | \
+    grep -q "^Swarm" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="-v prints nothing on standard error"
+"${SWARM}" -v 2>&1 > /dev/null | \
+    grep -q "." && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+DESCRIPTION="-h prints the usage on standard output"
+"${SWARM}" -h 2> /dev/null | \
+    grep -q "^Usage:" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 
 #*****************************************************************************#
 #                                                                             #

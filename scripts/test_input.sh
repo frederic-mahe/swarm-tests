@@ -895,6 +895,31 @@ printf ">s_123456789012345678901\nA\n" | \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
+## with the same input, the error must be about the value being too
+## large, not about a missing annotation
+DESCRIPTION="a more than 20-digit abundance value is reported as too large"
+printf ">s_123456789012345678901\nA\n" | \
+    "${SWARM}" 2>&1 > /dev/null | \
+    grep -q "is too large" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## -a fills only missing annotations: it must not silence an
+## over-long abundance value
+DESCRIPTION="a more than 20-digit abundance value is rejected even with -a"
+printf ">s_123456789012345678901\nA\n" | \
+    "${SWARM}" -a 1 > /dev/null 2>&1 && \
+    failure "${DESCRIPTION}" || \
+        success "${DESCRIPTION}"
+
+## leading zeros are accepted, whatever the length of the digit run
+DESCRIPTION="a zero-padded abundance value of any length is accepted (_0...07)"
+printf ">s_0000000000000000000007\nA\n" | \
+    "${SWARM}" -o /dev/null -s - 2> /dev/null | \
+    awk '{exit $4 == 7 ? 0 : 1}' && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
 ## swarm ignores stdin output if file is given
 DESCRIPTION="swarm ignores stdin output if file is given"
 printf ">s1_1\nA\n" | \
