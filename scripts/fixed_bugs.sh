@@ -115,7 +115,7 @@ rm "${TMP}"
 
 DESCRIPTION="non-github issue 2 --- file capturing /dev/stderr starts with the expected string"
 TMP=$(mktemp)
-(echo "1" 1>&2 ; "${SWARM}" -v ; echo "2" 1>&2) 2> "${TMP}"
+(echo "1" 1>&2 ; "${SWARM}" -v > /dev/null ; echo "2" 1>&2) 2> "${TMP}"
 grep -q "^1" "${TMP}" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
@@ -1427,7 +1427,7 @@ done
 ## Return status should be 0 after -h and -v
 for OPTION in "-h" "--help" "-v" "--version" ; do
     DESCRIPTION="issue 73 --- return status should be 0 after ${OPTION}"
-    "${SWARM}" "${OPTION}" 2> /dev/null && \
+    "${SWARM}" "${OPTION}" > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done

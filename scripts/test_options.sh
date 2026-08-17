@@ -230,7 +230,7 @@ unset ARCHITECTURE SSE2
 ## Return status should be 0 after -h and -v (GNU standards)
 for OPTION in "-h" "--help" "-v" "--version" ; do
     DESCRIPTION="return status should be 0 after ${OPTION}"
-    "${SWARM}" "${OPTION}" 2> /dev/null && \
+    "${SWARM}" "${OPTION}" > /dev/null 2>&1 && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
 done
