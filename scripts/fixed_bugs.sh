@@ -3234,7 +3234,7 @@ printf ">sa_1\nAAA\n>sz_1\nCCC\n>sø_1\nGGG\n" | \
 ## other, so they are well within 4 differences and must end up in a
 ## single cluster. The high gap-open penalty is what selects the 16-bit
 ## kernel at a low d: with the default penalties swarm stays in 8-bit
-## mode until d = 16.
+## mode up to d = 6.
 ##
 ## Caveat: this test only bites on an optimized build. At -O0 the
 ## compiler does not exploit the aliasing rule, so a swarm built with
