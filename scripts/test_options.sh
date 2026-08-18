@@ -3811,11 +3811,11 @@ printf ">s_1\nA\n" | \
     failure "${DESCRIPTION}" || \
         success "${DESCRIPTION}"
 
-## trigger case score = uint16_max in search16.cc
-DESCRIPTION="swarm: trigger saturation of diff (diff = uint16_max, search16)"
+## trigger case score = score_ceiling_16 in search16.cpp
+DESCRIPTION="swarm: trigger saturation of diff (diff = score_ceiling_16, search16)"
 # penalty value: 122 (highest possible?)
 # align two completely mismatching sequences (all gap extensions)
-# 'score' saturates at uint16_max
+# 'score' saturates at score_ceiling_16
 LENGTH=2519
 SEQUENCE_1="$(head -c ${LENGTH} < /dev/zero | tr '\0' 'A')"
 SEQUENCE_2="$(head -c ${LENGTH} < /dev/zero | tr '\0' 'G')"
