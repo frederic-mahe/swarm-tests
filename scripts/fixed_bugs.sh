@@ -3251,4 +3251,33 @@ printf ">a_2\nACGTACGTACGTACGT\n>b_1\nTACGTACGTACGTACG\n" | \
         failure "${DESCRIPTION}"
 
 
+## An 8-bit alignment lane that saturates sticks at exactly 255, so
+## swarm treats a final score of 255 as an overflow and rejects the
+## candidate without backtracking. The 8-bit kernel was however still
+## selected for scoring systems whose worst in-range score lands
+## exactly on 255: with -m 16 -p 1 -g 1 -e 1 the internal mismatch
+## penalty is 17, so at d = 15 a pair at exactly 15 mismatches scores
+## 15 * 17 = 255, was misread as saturated, and was split into two
+## clusters instead of one. Fixed by capping the worst reliable 8-bit
+## score at 254, which routes such scoring systems to the 16-bit
+## kernel.
+##
+## The two sequences below differ by 15 isolated substitutions, six
+## nucleotides apart, so gaps cannot beat the mismatch cost and the
+## optimal score is exactly 255. They must form a single cluster.
+DESCRIPTION="d > 1: genuine score of exactly 255 is not mistaken for saturation"
+printf ">s1_10\nGCTAAAGACAATTACATAACATACACGTCAGCACGAAACTTGTTGGCCCAGTGTGAATCGCTTAAGGGTTAAGTAAGTGTGATGCATACGCCTTTACTTG\n>s2_1\nGCTAAATACAATAACATACCATACCCGTCATCACGACACTTGATGGCCGAGTGTTAATCGGTTAAGTGTTAATTAAGTTTGATGGATACGGCTTTACTTG\n" | \
+    "${SWARM}" \
+        -d 15 \
+        -m 16 \
+        -p 1 \
+        -g 1 \
+        -e 1 \
+        -o - 2> /dev/null | \
+    tr -d "\n" | \
+    grep -q "^s1_10 s2_1$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+
 exit 0
