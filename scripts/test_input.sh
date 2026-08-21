@@ -1051,6 +1051,96 @@ DESCRIPTION="swarm reports an unopenable input file name as such"
         failure "${DESCRIPTION}"
 
 
+## The same mistake on an output option. All seven options that take a
+## file name are rejected at parse time now. Six of them (-i, -j, -l, -s,
+## -u, -w) used to be silently ignored: the empty name read as "option not
+## given", so swarm returned 0 without the file it was asked for, which is
+## how an unset shell variable ("swarm -l ${LOGFILE}") lost a log without
+## saying so. The seventh (-o) did fail, but blamed the filesystem for a
+## command-line error. std::fopen("") fails everywhere, so an empty name
+## can never be honoured, and empty means "default" nowhere in swarm: the
+## default for an optional output is to not write it, which is what
+## omitting the option does. The next ten tests pin the rejection, its
+## message for each of the seven options, and the two neighbouring cases
+## that must keep their own behaviour.
+## a status of exactly 1, as the manpage requires for any error
+DESCRIPTION="swarm rejects an empty output file name with a status of 1"
+printf ">s1_1\nA\n" | \
+    "${SWARM}" -l "" > /dev/null 2>&1
+[[ $? -eq 1 ]] && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## one per option: the message names the option that was given, so the
+## user is told which of them to fix
+DESCRIPTION="swarm reports an empty internal structure file name (-i)"
+printf ">s1_1\nA\n" | \
+    "${SWARM}" -i "" 2>&1 > /dev/null | \
+    grep -q "Empty file name given with option -i or --internal-structure" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="swarm reports an empty network file name (-j)"
+printf ">s1_1\nA\n" | \
+    "${SWARM}" -j "" 2>&1 > /dev/null | \
+    grep -q "Empty file name given with option -j or --network-file" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="swarm reports an empty log file name (-l)"
+printf ">s1_1\nA\n" | \
+    "${SWARM}" -l "" 2>&1 > /dev/null | \
+    grep -q "Empty file name given with option -l or --log" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="swarm reports an empty output file name (-o)"
+printf ">s1_1\nA\n" | \
+    "${SWARM}" -o "" 2>&1 > /dev/null | \
+    grep -q "Empty file name given with option -o or --output-file" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="swarm reports an empty statistics file name (-s)"
+printf ">s1_1\nA\n" | \
+    "${SWARM}" -s "" 2>&1 > /dev/null | \
+    grep -q "Empty file name given with option -s or --statistics-file" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="swarm reports an empty uclust file name (-u)"
+printf ">s1_1\nA\n" | \
+    "${SWARM}" -u "" 2>&1 > /dev/null | \
+    grep -q "Empty file name given with option -u or --uclust-file" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+DESCRIPTION="swarm reports an empty seeds file name (-w)"
+printf ">s1_1\nA\n" | \
+    "${SWARM}" -w "" 2>&1 > /dev/null | \
+    grep -q "Empty file name given with option -w or --seeds" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## '-' is the documented way to ask for stdout, and is what -o defaults
+## to: it must not be caught by the check above
+DESCRIPTION="swarm accepts '-' as an output file name (stdout)"
+printf ">s1_1\nA\n" | \
+    "${SWARM}" -o - 2> /dev/null | \
+    grep -q "^s1_1$" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+## a non-empty name that cannot be opened still reports the open failure,
+## not the empty-name message
+DESCRIPTION="swarm reports an unopenable output file name as such"
+printf ">s1_1\nA\n" | \
+    "${SWARM}" -l /dev/null/nonexistent 2>&1 > /dev/null | \
+    grep -q "Unable to open log file for writing" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+
+
 ## The fastidious pass (-f) grafts light clusters onto heavy ones and
 ## flags the light ones as attached, so the result writers skip them.
 ## Two of those writers (-s and -r) instead asserted that no cluster is
