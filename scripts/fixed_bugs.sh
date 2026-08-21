@@ -33,6 +33,21 @@ SWARM=$(which swarm 2> /dev/null)
 DESCRIPTION="check if swarm is executable"
 [[ -x "${SWARM}" ]] && success "${DESCRIPTION}" || failure "${DESCRIPTION}"
 
+## valgrind is only useful here if it can actually run the binary under
+## test. When it dies before reaching main -- a uprobe on the dynamic
+## loader does that, and so does an AddressSanitizer-instrumented binary
+## -- it still reports "ERROR SUMMARY: 0 errors" and "in use at exit: 0
+## bytes", which would silently turn every valgrind check below into a
+## pass. Probe it once here, so those checks are skipped, not passed.
+VALGRIND_WORKS=false
+if which valgrind > /dev/null 2>&1 ; then
+    VALGRIND_PROBE=$(valgrind "${SWARM}" -v 2>&1)
+    [[ "${VALGRIND_PROBE}" == *"ERROR SUMMARY"* && \
+       "${VALGRIND_PROBE}" != *"Process terminating"* ]] && \
+        VALGRIND_WORKS=true
+    unset VALGRIND_PROBE
+fi
+
 
 # *************************************************************************** #
 #                                                                             #
@@ -2199,7 +2214,7 @@ printf ">s1_1\nA\n>s2_1\nT\n" | \
 ## https://github.com/torognes/swarm/issues/123
 
 ## memory was not allocated correctly for sequences shorter than 6 nt
-if which valgrind > /dev/null 2>&1 ; then
+if [[ "${VALGRIND_WORKS}" == "true" ]] ; then
     DESCRIPTION="issue 123 --- no memory allocation error for short sequences"
     valgrind \
         "${SWARM}" -f -o /dev/null <(printf ">s1_10\nAA\n>s2_1\nCC\n") 2>&1 | \
@@ -2218,7 +2233,7 @@ fi
 ## https://github.com/torognes/swarm/issues/124
 
 ## the log file was not closed properly
-if which valgrind > /dev/null 2>&1  ; then
+if [[ "${VALGRIND_WORKS}" == "true" ]] ; then
     DESCRIPTION="issue 124 --- no memory leak when --log is not use"
     valgrind \
         "${SWARM}" -o /dev/null <(printf ">s1_10\nAA\n>s2_1\nCC\n") 2>&1 | \
@@ -2270,7 +2285,7 @@ printf ">s1_2\nA\n>s2_1\nA\n" | \
 ## triggers one memory allocation (heap). That memory allocation is
 ## not freed by swarm before exiting (it is freed by the operating
 ## system though).
-if which valgrind > /dev/null 2>&1  ; then
+if [[ "${VALGRIND_WORKS}" == "true" ]] ; then
     DESCRIPTION="issue 126 --- all memory allocations are freed"
     valgrind \
         "${SWARM}" \
