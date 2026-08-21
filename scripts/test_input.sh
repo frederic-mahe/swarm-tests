@@ -98,32 +98,51 @@ unset FASTA FASTA_LINK
 ## silent, which would make swarm read nothing, cluster nothing and still
 ## exit 0. See get_file_info() in db.cpp.
 ##
-## Both ends run under timeout and swarm runs in the foreground, so its
-## exit status is collected directly. The earlier version of this test was
-## disabled because it could not be torn down: opening a pipe blocks until
-## the other end opens, so a swarm that failed to open left the writer --
-## and the whole suite, since failure() exits -- blocked for good. Waiting
-## a fixed two seconds and then killing every process sharing swarm's name
-## was the workaround. Nothing here blocks indefinitely and nothing is
-## killed by name.
+## Both ends run under a time limit and swarm runs in the foreground, so
+## its exit status is collected directly. The earlier version of this test
+## was disabled because it could not be torn down: opening a pipe blocks
+## until the other end opens, so a swarm that failed to open left the
+## writer -- and the whole suite, since failure() exits -- blocked for
+## good. Waiting a fixed two seconds and then killing every process sharing
+## swarm's name was the workaround. Nothing here blocks indefinitely and
+## nothing is killed by name.
+##
+## coreutils' timeout would enforce the time limit, but macOS lacks it, so
+## a watchdog does the same job: the command runs in the background, the
+## watchdog kills it (by pid) if it is still running when the limit
+## expires, and wait collects its exit status
+run_with_timeout() {
+    local seconds="${1}"
+    shift
+    "${@}" &
+    local command_pid=$!
+    ( sleep "${seconds}" ; kill "${command_pid}" ) > /dev/null 2>&1 &
+    local watchdog_pid=$!
+    wait "${command_pid}"
+    local command_status=$?
+    kill "${watchdog_pid}" > /dev/null 2>&1
+    return "${command_status}"
+}
 DESCRIPTION="swarm accepts inputs from named pipes"
 TMP_DIR=$(mktemp -d)
 NAMED_PIPE="${TMP_DIR}/fifo"
 mkfifo "${NAMED_PIPE}"
-## the redirection has to happen inside the command timeout starts, not in
-## this shell, or the shell would block on open() before timeout could arm
-printf ">s_1\nA\n" | timeout 10 sh -c 'cat > "${1}"' sh "${NAMED_PIPE}" &
+## the redirection has to happen inside the command run_with_timeout
+## starts, not in this shell, or the shell would block on open() before the
+## watchdog could arm
+printf ">s_1\nA\n" | run_with_timeout 10 sh -c 'cat > "${1}"' sh "${NAMED_PIPE}" &
 WRITER_PID=$!
 ## the exit status alone would not do: the failure this guards against is a
 ## silent one, where swarm reads nothing, clusters nothing and still exits
 ## 0, so what is checked is the cluster it should have written
-timeout 10 "${SWARM}" "${NAMED_PIPE}" 2> /dev/null | \
+run_with_timeout 10 "${SWARM}" "${NAMED_PIPE}" 2> /dev/null | \
     grep -qx "s_1" && \
     success "${DESCRIPTION}" || \
         failure "${DESCRIPTION}"
 wait "${WRITER_PID}" 2> /dev/null
 rm -rf "${TMP_DIR}"
 unset DESCRIPTION TMP_DIR NAMED_PIPE WRITER_PID
+unset -f run_with_timeout
 
 ## swarm reads from a process substitution (anonymous pipe)
 DESCRIPTION="swarm reads from a process substitution (unseekable)"
