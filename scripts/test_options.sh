@@ -45,6 +45,23 @@ if which valgrind > /dev/null 2>&1 ; then
     unset VALGRIND_PROBE
 fi
 
+## The sanitizer checks below need a binary built with the address and
+## undefined-behaviour sanitizers, which is what "make DEBUG=1" produces.
+## Ask the binary itself instead of inspecting its dynamic dependencies:
+## that also recognises a statically linked sanitizer runtime, and it does
+## not rely on ldd. Against a release binary the checks are skipped, not
+## silently passed.
+##
+## The sanitizers complement valgrind, they do not replace it:
+## AddressSanitizer also catches stack and global overflows that memcheck
+## cannot see, but LeakSanitizer only reports memory that is unreachable
+## at exit, whereas valgrind's "in use at exit" also counts memory that is
+## still reachable. That last case is exactly what issues 124 and 126 are
+## about, so those two checks stay valgrind-only.
+SWARM_HAS_ASAN=false
+ASAN_OPTIONS=help=1 "${SWARM}" -v 2>&1 | \
+    grep -q "AddressSanitizer" && SWARM_HAS_ASAN=true
+
 
 #*****************************************************************************#
 #                                                                             #
@@ -4827,6 +4844,267 @@ if [[ "${VALGRIND_WORKS}" == "true" ]] ; then
         grep -q "in use at exit: 0 bytes" && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
+fi
+
+#*****************************************************************************#
+#                                                                             #
+#               search for leaks and errors with the sanitizers               #
+#                                                                             #
+#*****************************************************************************#
+
+## these run against a sanitizer build, where valgrind cannot run at
+## all; see the SWARM_HAS_ASAN probe at the top of this file
+if [[ "${SWARM_HAS_ASAN}" == "true" ]] ; then
+
+    ## basic options
+
+    DESCRIPTION="sanitizer check: -v"
+    "${SWARM}" -v 2>&1 > /dev/null | \
+        grep -qE "AddressSanitizer|LeakSanitizer|runtime error:" && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+
+    DESCRIPTION="sanitizer check: -h"
+    "${SWARM}" -h 2>&1 > /dev/null | \
+        grep -qE "AddressSanitizer|LeakSanitizer|runtime error:" && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+
+
+    ## options available when d = 1
+
+    DESCRIPTION="sanitizer check: default"
+    "${SWARM}" <(printf ">s_1\nA\n") 2>&1 > /dev/null | \
+        grep -qE "AddressSanitizer|LeakSanitizer|runtime error:" && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+
+    DESCRIPTION="sanitizer check: -a 1"
+    "${SWARM}" -a 1 <(printf ">s1\nAA\n>s2\nAC\n") \
+        2>&1 > /dev/null | \
+        grep -qE "AddressSanitizer|LeakSanitizer|runtime error:" && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+
+    DESCRIPTION="sanitizer check: -d 1"
+    "${SWARM}" -d 1 <(printf ">s_1\nA\n") 2>&1 > /dev/null | \
+        grep -qE "AddressSanitizer|LeakSanitizer|runtime error:" && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+
+    DESCRIPTION="sanitizer check: -n"
+    "${SWARM}" -n <(printf ">s1_2\nAA\n>s2_1\nAC\n>s3_2\nCC\n") \
+        2>&1 > /dev/null | \
+        grep -qE "AddressSanitizer|LeakSanitizer|runtime error:" && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+
+    DESCRIPTION="sanitizer check: -r"
+    "${SWARM}" -r <(printf ">s1_2\nAA\n>s2_1\nAC\n") \
+        2>&1 > /dev/null | \
+        grep -qE "AddressSanitizer|LeakSanitizer|runtime error:" && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+
+    DESCRIPTION="sanitizer check: -t 1"
+    "${SWARM}" -t 1 <(printf ">s1_2\nAA\n>s2_1\nAC\n") \
+        2>&1 > /dev/null | \
+        grep -qE "AddressSanitizer|LeakSanitizer|runtime error:" && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+
+    DESCRIPTION="sanitizer check: -z"
+    "${SWARM}" -z <(printf ">s;size=1\nA\n") \
+        2>&1 > /dev/null | \
+        grep -qE "AddressSanitizer|LeakSanitizer|runtime error:" && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+
+    DESCRIPTION="sanitizer check: -i"
+    "${SWARM}" -i - <(printf ">s_1\nA\n") 2>&1 > /dev/null | \
+        grep -qE "AddressSanitizer|LeakSanitizer|runtime error:" && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+
+    DESCRIPTION="sanitizer check: -l"
+    "${SWARM}" -l - <(printf ">s_1\nA\n") 2>&1 > /dev/null | \
+        grep -qE "AddressSanitizer|LeakSanitizer|runtime error:" && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+
+    DESCRIPTION="sanitizer check: -o"
+    "${SWARM}" -o - <(printf ">s_1\nA\n") 2>&1 > /dev/null | \
+        grep -qE "AddressSanitizer|LeakSanitizer|runtime error:" && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+
+    DESCRIPTION="sanitizer check: -s"
+    "${SWARM}" -s - <(printf ">s_1\nA\n") 2>&1 > /dev/null | \
+        grep -qE "AddressSanitizer|LeakSanitizer|runtime error:" && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+
+    DESCRIPTION="sanitizer check: -u"
+    "${SWARM}" -u - <(printf ">s_1\nA\n") 2>&1 > /dev/null | \
+        grep -qE "AddressSanitizer|LeakSanitizer|runtime error:" && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+
+    DESCRIPTION="sanitizer check: -w"
+    "${SWARM}" -w - <(printf ">s_1\nA\n") 2>&1 > /dev/null | \
+        grep -qE "AddressSanitizer|LeakSanitizer|runtime error:" && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+
+
+    ## fastidious options (the Bloom filter requires more memory in a
+    ## debug build, see issue 127)
+
+    DESCRIPTION="sanitizer check: -f"
+    "${SWARM}" -f <(printf ">s1_3\nAA\n>s2_1\nCC\n") \
+        2>&1 > /dev/null | \
+        grep -qE "AddressSanitizer|LeakSanitizer|runtime error:" && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+
+    DESCRIPTION="sanitizer check: -f -b 2"
+    "${SWARM}" -f -b 2 <(printf ">s1_3\nAA\n>s2_1\nCC\n") \
+        2>&1 > /dev/null | \
+        grep -qE "AddressSanitizer|LeakSanitizer|runtime error:" && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+
+    DESCRIPTION="sanitizer check: -f -c 100"
+    "${SWARM}" -f -c 100 <(printf ">s1_3\nAA\n>s2_1\nCC\n") \
+        2>&1 > /dev/null | \
+        grep -qE "AddressSanitizer|LeakSanitizer|runtime error:" && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+
+    DESCRIPTION="sanitizer check: -f -y 12"
+    "${SWARM}" -f -y 12 <(printf ">s1_3\nAA\n>s2_1\nCC\n") \
+        2>&1 > /dev/null | \
+        grep -qE "AddressSanitizer|LeakSanitizer|runtime error:" && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+
+
+    ## options available when d > 1
+
+    DESCRIPTION="sanitizer check: -d 2"
+    "${SWARM}" -d 2 <(printf ">s1_2\nAA\n>s2_1\nCC\n") \
+        2>&1 > /dev/null | \
+        grep -qE "AddressSanitizer|LeakSanitizer|runtime error:" && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+
+    DESCRIPTION="sanitizer check: -d 2 -e 3"
+    "${SWARM}" -d 2 -e 3 <(printf ">s1_2\nAA\n>s2_1\nCC\n") \
+        2>&1 > /dev/null | \
+        grep -qE "AddressSanitizer|LeakSanitizer|runtime error:" && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+
+    DESCRIPTION="sanitizer check: -d 2 -g 11"
+    "${SWARM}" -d 2 -g 11 <(printf ">s1_2\nAA\n>s2_1\nCC\n") \
+        2>&1 > /dev/null | \
+        grep -qE "AddressSanitizer|LeakSanitizer|runtime error:" && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+
+    DESCRIPTION="sanitizer check: -d 2 -m 4"
+    "${SWARM}" -d 2 -m 4 <(printf ">s1_2\nAA\n>s2_1\nCC\n") \
+        2>&1 > /dev/null | \
+        grep -qE "AddressSanitizer|LeakSanitizer|runtime error:" && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+
+    DESCRIPTION="sanitizer check: -d 2 -p 3"
+    "${SWARM}" -d 2 -p 3 <(printf ">s1_2\nAA\n>s2_1\nCC\n") \
+        2>&1 > /dev/null | \
+        grep -qE "AddressSanitizer|LeakSanitizer|runtime error:" && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+
+
+    ## options available when d = 0 (dereplication)
+
+    DESCRIPTION="sanitizer check (-d 0): default"
+    "${SWARM}" -d 0 <(printf ">s1_1\nA\n>s2_1\nA\n") \
+        2>&1 > /dev/null | \
+        grep -qE "AddressSanitizer|LeakSanitizer|runtime error:" && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+
+    DESCRIPTION="sanitizer check (-d 0): -a 1"
+    "${SWARM}" -d 0 -a 1 <(printf ">s1\nA\n>s2\nA\n") \
+        2>&1 > /dev/null | \
+        grep -qE "AddressSanitizer|LeakSanitizer|runtime error:" && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+
+    DESCRIPTION="sanitizer check (-d 0): -r"
+    "${SWARM}" -d 0 -r <(printf ">s1_1\nA\n>s2_1\nA\n") \
+        2>&1 > /dev/null | \
+        grep -qE "AddressSanitizer|LeakSanitizer|runtime error:" && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+
+    DESCRIPTION="sanitizer check (-d 0): -t 1"
+    "${SWARM}" -d 0 -t 1 <(printf ">s1_1\nA\n>s2_1\nA\n") \
+        2>&1 > /dev/null | \
+        grep -qE "AddressSanitizer|LeakSanitizer|runtime error:" && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+
+    DESCRIPTION="sanitizer check (-d 0): -z"
+    "${SWARM}" -d 0 -z <(printf ">s1;size=1\nA\n>s2;size=1\nA\n") \
+        2>&1 > /dev/null | \
+        grep -qE "AddressSanitizer|LeakSanitizer|runtime error:" && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+
+    DESCRIPTION="sanitizer check (-d 0): -i"
+    "${SWARM}" -d 0 -i - <(printf ">s1_1\nA\n>s2_1\nA\n") \
+        2>&1 > /dev/null | \
+        grep -qE "AddressSanitizer|LeakSanitizer|runtime error:" && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+
+    DESCRIPTION="sanitizer check (-d 0): -l"
+    "${SWARM}" -d 0 -l - <(printf ">s1_1\nA\n>s2_1\nA\n") \
+        2>&1 > /dev/null | \
+        grep -qE "AddressSanitizer|LeakSanitizer|runtime error:" && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+
+    DESCRIPTION="sanitizer check (-d 0): -o"
+    "${SWARM}" -d 0 -o - <(printf ">s1_1\nA\n>s2_1\nA\n") \
+        2>&1 > /dev/null | \
+        grep -qE "AddressSanitizer|LeakSanitizer|runtime error:" && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+
+    DESCRIPTION="sanitizer check (-d 0): -s"
+    "${SWARM}" -d 0 -s - <(printf ">s1_1\nA\n>s2_1\nA\n") \
+        2>&1 > /dev/null | \
+        grep -qE "AddressSanitizer|LeakSanitizer|runtime error:" && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+
+    DESCRIPTION="sanitizer check (-d 0): -u"
+    "${SWARM}" -d 0 -u - <(printf ">s1_1\nA\n>s2_1\nA\n") \
+        2>&1 > /dev/null | \
+        grep -qE "AddressSanitizer|LeakSanitizer|runtime error:" && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
+
+    DESCRIPTION="sanitizer check (-d 0): -w"
+    "${SWARM}" -d 0 -w - <(printf ">s1_1\nA\n>s2_1\nA\n") \
+        2>&1 > /dev/null | \
+        grep -qE "AddressSanitizer|LeakSanitizer|runtime error:" && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
 fi
 
 

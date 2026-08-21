@@ -48,6 +48,23 @@ if which valgrind > /dev/null 2>&1 ; then
     unset VALGRIND_PROBE
 fi
 
+## The sanitizer checks below need a binary built with the address and
+## undefined-behaviour sanitizers, which is what "make DEBUG=1" produces.
+## Ask the binary itself instead of inspecting its dynamic dependencies:
+## that also recognises a statically linked sanitizer runtime, and it does
+## not rely on ldd. Against a release binary the checks are skipped, not
+## silently passed.
+##
+## The sanitizers complement valgrind, they do not replace it:
+## AddressSanitizer also catches stack and global overflows that memcheck
+## cannot see, but LeakSanitizer only reports memory that is unreachable
+## at exit, whereas valgrind's "in use at exit" also counts memory that is
+## still reachable. That last case is exactly what issues 124 and 126 are
+## about, so those two checks stay valgrind-only.
+SWARM_HAS_ASAN=false
+ASAN_OPTIONS=help=1 "${SWARM}" -v 2>&1 | \
+    grep -q "AddressSanitizer" && SWARM_HAS_ASAN=true
+
 
 # *************************************************************************** #
 #                                                                             #
@@ -2221,6 +2238,16 @@ if [[ "${VALGRIND_WORKS}" == "true" ]] ; then
         grep -q "ERROR SUMMARY: 0 errors" && \
         success "${DESCRIPTION}" || \
             failure "${DESCRIPTION}"
+fi
+
+## the same input under AddressSanitizer, which runs where valgrind
+## cannot; a bad allocation is an error, so ASan sees it too
+if [[ "${SWARM_HAS_ASAN}" == "true" ]] ; then
+    DESCRIPTION="issue 123 --- no memory allocation error for short sequences (sanitizer)"
+    "${SWARM}" -f -o /dev/null <(printf ">s1_10\nAA\n>s2_1\nCC\n") 2>&1 > /dev/null | \
+        grep -qE "AddressSanitizer|runtime error:" && \
+        failure "${DESCRIPTION}" || \
+            success "${DESCRIPTION}"
 fi
 
 
