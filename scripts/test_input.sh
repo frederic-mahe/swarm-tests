@@ -91,15 +91,39 @@ DESCRIPTION="swarm reads from a symbolic link"
 rm -f "${FASTA}" "${FASTA_LINK}"
 unset FASTA FASTA_LINK
 
-## swarm accepts inputs from named pipes
-# DESCRIPTION="swarm accepts inputs from named pipes"
-# mkfifo fifo_test
-# "${SWARM}" fifo_test > /dev/null 2>&1 && \
-#     success "${DESCRIPTION}" || \
-#       failure "${DESCRIPTION}" &
-# printf ">s_1\nA\n" > fifo_test
-# rm fifo_test
-# sleep 2s && kill $(ps -C $(basename "${SWARM}") -o pid=) 2> /dev/null
+## swarm accepts inputs from named pipes. A named pipe is unseekable, so
+## swarm must learn the input's size and type by asking the operating
+## system about the file (fstat) rather than by seeking the stream: a seek
+## to the end fails here, and on a std::istream that failure is sticky and
+## silent, which would make swarm read nothing, cluster nothing and still
+## exit 0. See get_file_info() in db.cpp.
+##
+## Both ends run under timeout and swarm runs in the foreground, so its
+## exit status is collected directly. The earlier version of this test was
+## disabled because it could not be torn down: opening a pipe blocks until
+## the other end opens, so a swarm that failed to open left the writer --
+## and the whole suite, since failure() exits -- blocked for good. Waiting
+## a fixed two seconds and then killing every process sharing swarm's name
+## was the workaround. Nothing here blocks indefinitely and nothing is
+## killed by name.
+DESCRIPTION="swarm accepts inputs from named pipes"
+TMP_DIR=$(mktemp -d)
+NAMED_PIPE="${TMP_DIR}/fifo"
+mkfifo "${NAMED_PIPE}"
+## the redirection has to happen inside the command timeout starts, not in
+## this shell, or the shell would block on open() before timeout could arm
+printf ">s_1\nA\n" | timeout 10 sh -c 'cat > "${1}"' sh "${NAMED_PIPE}" &
+WRITER_PID=$!
+## the exit status alone would not do: the failure this guards against is a
+## silent one, where swarm reads nothing, clusters nothing and still exits
+## 0, so what is checked is the cluster it should have written
+timeout 10 "${SWARM}" "${NAMED_PIPE}" 2> /dev/null | \
+    grep -qx "s_1" && \
+    success "${DESCRIPTION}" || \
+        failure "${DESCRIPTION}"
+wait "${WRITER_PID}" 2> /dev/null
+rm -rf "${TMP_DIR}"
+unset DESCRIPTION TMP_DIR NAMED_PIPE WRITER_PID
 
 ## swarm reads from a process substitution (anonymous pipe)
 DESCRIPTION="swarm reads from a process substitution (unseekable)"
