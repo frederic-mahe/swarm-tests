@@ -130,7 +130,16 @@ mkfifo "${NAMED_PIPE}"
 ## the redirection has to happen inside the command run_with_timeout
 ## starts, not in this shell, or the shell would block on open() before the
 ## watchdog could arm
-printf ">s_1\nA\n" | run_with_timeout 10 sh -c 'cat > "${1}"' sh "${NAMED_PIPE}" &
+##
+## the fasta data is written by a printf inside that command, not piped
+## into it from here: run_with_timeout backgrounds its command, and a
+## shell without job control may give a backgrounded command /dev/null as
+## its standard input even when that input was a pipe (POSIX allows it;
+## dash and the bash 4.3 of the GCC 4.9 CI container do it, newer bash
+## does not) -- the piped data would be silently dropped, swarm would
+## read an empty input, cluster nothing and exit 0, and the test would
+## fail even though swarm handled the named pipe correctly
+run_with_timeout 10 sh -c 'printf ">s_1\nA\n" > "${1}"' sh "${NAMED_PIPE}" &
 WRITER_PID=$!
 ## the exit status alone would not do: the failure this guards against is a
 ## silent one, where swarm reads nothing, clusters nothing and still exits
